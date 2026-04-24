@@ -7,6 +7,7 @@
 \subsection{Resultados cuantitativos}
 \subsection{Resultados cualitativos}
 \subsection{Discusión}
+
 \section{Resultados en segmentación de isquemia}
 A continuación, se presentan los resultados obtenidos en la tarea de segmentación de las regiones de lesión por isquemia cerebral, la cual, por razones que se describirán en la siguiente sección, supone un problema más complejo que la segmentación del órgano sano. Para ello, al igual que en el modelo de cerebro, se han evaluado varias configuraciones de arquitecturas \textit{U-Net}, utilizando las métricas descritas anteriormente.
 
@@ -54,6 +55,39 @@ Por otro lado, también se han identificado casos en los que el modelo presenta 
 Finalmente, en los casos más complejos, el modelo muestra limitaciones similares a las de la segmentación manual, lo que refuerza la idea de que la dificultad reside en la propia naturaleza de la imagen y no exclusivamente en el enfoque empleado.
 
 En conjunto, el análisis cualitativo respalda los resultados cuantitativos obtenidos, evidenciando que el modelo produce segmentaciones coherentes y clínicamente plausibles, incluso en aquellos casos donde las métricas numéricas no alcanzan valores elevados.
+
+\subsection{Resultados de explicabilidad en la segmentación de isquemia}
+
+Una vez evaluado el rendimiento del modelo de segmentación de isquemia, se analizó la coherencia de sus predicciones mediante técnicas de explicabilidad visual. El objetivo de este análisis no es sustituir la evaluación cuantitativa de segmentación, sino estudiar si las regiones destacadas por los métodos de explicabilidad se corresponden con las zonas que el modelo utiliza para generar la máscara predicha.
+
+El análisis se realizó sobre un subconjunto de 84 cortes pertenecientes a tres casos de prueba. De estos cortes, 22 presentaban lesión en la segmentación manual y 62 no contenían lesión. A nivel de presencia o ausencia de lesión por corte, el modelo obtuvo 21 verdaderos positivos, 60 verdaderos negativos, 2 falsos positivos y 1 falso negativo. Esto supone una sensibilidad del 95,45 \%, una especificidad del 96,77 \% y una puntuación F1 del 93,33 \%. En los cortes con lesión correctamente detectada, el Dice medio fue de 0,784 y la IoU media de 0,672.
+
+Para la interpretación visual se aplicaron Grad-CAM, Grad-CAM++ e Integrated Gradients utilizando como objetivo la máscara predicha por el propio modelo. Esta decisión permite analizar qué regiones de la imagen contribuyen a la predicción generada, independientemente de si esta coincide o no con la segmentación manual. Por tanto, las explicaciones deben interpretarse como una medida de fidelidad respecto al comportamiento del modelo, y no como una validación clínica directa de la lesión.
+
+En los cortes correctamente segmentados, los mapas de Grad-CAM y Grad-CAM++ muestran activaciones localizadas en la región predicha como isquemia, con una correspondencia visual clara con la máscara de referencia en los casos de mayor solapamiento. Integrated Gradients también resalta la zona de interés, aunque con un patrón más disperso y fragmentado, lo que resulta esperable en métodos basados directamente en gradientes a nivel de píxel. Esta diferencia hace que Grad-CAM y Grad-CAM++ sean más interpretables visualmente, mientras que Integrated Gradients aporta una explicación más fina pero menos compacta.
+
+La evaluación cuantitativa mediante perturbación refuerza esta interpretación. En los cortes con lesión correctamente detectada, los valores medios de \textit{Deletion AUC} fueron muy bajos para los tres métodos, con valores de 0,025 para Grad-CAM y Grad-CAM++, y 0,026 para Integrated Gradients. Esto indica que, al eliminar en primer lugar las regiones consideradas más relevantes, el score asociado a la predicción cae de forma abrupta. De forma complementaria, las curvas de \textit{Insertion} muestran que al reconstruir la imagen empezando por las regiones más relevantes el modelo recupera progresivamente su activación, especialmente en Grad-CAM++ e Integrated Gradients, con valores medios de 0,840 y 0,879 respectivamente.
+
+Además, los valores de \textit{LeRF AUC} se mantienen elevados, lo que indica que al eliminar inicialmente las regiones menos relevantes la predicción se conserva durante una parte importante del proceso de perturbación. Del mismo modo, el \textit{AOPC} normalizado se sitúa en valores cercanos a 1 para los tres métodos, reforzando la idea de que las regiones destacadas por los mapas tienen una influencia significativa en la salida del modelo.
+
+No obstante, el análisis también permite identificar limitaciones. En los falsos positivos, las explicaciones muestran activaciones localizadas en las regiones que han originado la predicción errónea. Esto evidencia que la explicabilidad no garantiza que la predicción sea correcta, sino que permite analizar qué información ha utilizado el modelo para producirla. Por tanto, estos casos resultan especialmente útiles para detectar patrones de error y posibles regiones ambiguas en la imagen.
+
+En conjunto, los resultados de explicabilidad sugieren que el modelo de isquemia basa sus predicciones en regiones espacialmente coherentes con las máscaras generadas. Las técnicas Grad-CAM y Grad-CAM++ proporcionan explicaciones visualmente más compactas, mientras que Integrated Gradients ofrece una atribución más detallada pero menos localizada. La combinación de análisis cualitativo y métricas de perturbación permite aportar una capa adicional de interpretación al modelo, aunque sus resultados deben entenderse como apoyo a la evaluación del sistema y no como validación clínica independiente.
+
+\begin{table}[H]
+\centering
+\caption{Resultados cuantitativos de explicabilidad para los cortes de isquemia correctamente detectados.}
+\label{tab:xai_isquemia_resultados}
+\begin{tabular}{lcccc}
+\hline
+\textbf{Método} & \textbf{Deletion AUC} & \textbf{Insertion AUC} & \textbf{LeRF AUC} & \textbf{AOPC norm.} \\
+\hline
+Grad-CAM & 0,025 & 0,627 & 0,867 & 1,000 \\
+Grad-CAM++ & 0,025 & 0,840 & 0,840 & 1,000 \\
+Integrated Gradients & 0,026 & 0,879 & 0,882 & 0,999 \\
+\hline
+\end{tabular}
+\end{table}
 
 \subsection{Discusión crítica del modelo de isquemia}
 Es importante destacar que el sistema desarrollado se concibe como una herramienta supervisada en la que el especialista mantiene el control de los datos finales. La herramienta permite la edición de cada una de las máscaras generada así como los valores volumétricos en cada corte de la resonancia analizada. Este enfoque garantiza que cualquier desviación pueda ser corregida de manera sencilla por el experto, integrando la automatización dentro de un \textbf{flujo de trabajo asistido y no sustitutivo}. 

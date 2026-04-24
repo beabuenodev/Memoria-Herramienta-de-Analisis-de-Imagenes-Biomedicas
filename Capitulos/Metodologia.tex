@@ -69,6 +69,7 @@ El procesamiento de las imágenes, desde la MRI en formato RAW (\texttt{.bruker}
 
 \begin{figure}[h]
 \centering
+\selectlanguage{english}
 \begin{tikzpicture}[
     node distance=0.5cm,
     every node/.style={
@@ -96,6 +97,7 @@ El procesamiento de las imágenes, desde la MRI en formato RAW (\texttt{.bruker}
 
 
 \end{tikzpicture}
+\selectlanguage{spanish}
 \caption{Pipeline de procesamiento desde datos RAW hasta el dataset final}
 \end{figure}
 
@@ -352,7 +354,7 @@ En este trabajo, dicha función se obtiene a partir de la activación del modelo
 
 \subsection{Métodos de explicabilidad empleados}
 
-Para el análisis de explicabilidad se han seleccionado técnicas basadas en gradientes, por su facilidad de integración con modelos convolucionales. En concreto, se han implementado los métodos Grad-CAM(\cite{selvaraju2017gradcam}), Grad-CAM++(\cite{chattopadhyay2018gradcampp}) e Integrated Gradients. (\cite{sundararajan2017integrated})
+Para el análisis de explicabilidad se han seleccionado técnicas basadas en gradientes, por su facilidad de integración con modelos convolucionales. En concreto, se han implementado los métodos Grad-CAM(\cite{Selvaraju_2019}), Grad-CAM++(\cite{Chattopadhay_2018}) e Integrated Gradients. (\cite{sundararajan2017axiomaticattributiondeepnetworks})
 
 Grad-CAM permite identificar qué regiones de la imagen tienen mayor influencia en la predicción del modelo. Para ello, utiliza los gradientes de la salida respecto a las activaciones de una capa convolucional, generando un mapa de relevancia espacial. Este mapa se puede superponer sobre la imagen original, facilitando su interpretación. 
 

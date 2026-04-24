@@ -239,8 +239,6 @@ Salida del modelo & Máscara probabilística con activación sigmoidal \\
 
 Tras los primeros experimentos con el modelo de isquemia, se observó que el umbral de binarización influía de forma directa tanto en la calidad espacial de la segmentación como en la precisión de la cuantificación volumétrica. Por ello, se evaluaron distintos valores de umbral entre 0.50 y 0.95, comparando para cada uno de ellos el coeficiente Dice medio, el error absoluto de volumen y el error relativo porcentual.
 
-** CAMBIAR POR EXPLICAR METODOLÓGICAMENTE **
-
 Los resultados mostraron que el mayor valor de Dice medio se obtenía con un umbral de 0.50, con una puntuación de 0.8323. Sin embargo, al aumentar progresivamente el umbral, el error volumétrico disminuía de forma notable, alcanzando su valor mínimo con un umbral de 0.80, donde se obtuvo un error absoluto de 0.0001 ml y un error relativo del 0.86 \%. A partir de ese punto, incrementos adicionales del umbral empeoraban de nuevo tanto el error absoluto como el relativo, además de producir una ligera caída adicional en Dice.
 
 Estos resultados indican que el umbral óptimo depende del criterio que se quiera priorizar. Mientras que un umbral de 0.50 maximiza ligeramente el solapamiento espacial entre la máscara predicha y la manual, un umbral de 0.80 ofrece el mejor compromiso para la cuantificación del volumen de la lesión, que constituye uno de los objetivos principales de la herramienta desarrollada. Por este motivo, se adoptó finalmente un umbral de 0.80 en la fase de inferencia.
@@ -545,7 +543,7 @@ métricas de segmentación.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{Imagenes/XAI/CASE_12_slice_015.png} 
+    \includegraphics[width=\textwidth]{Imagenes/XAI/CASE_20_slice_014.png} 
     \caption{Ejemplo de visualización generada por el procedimiento de
     explicabilidad aplicado al modelo de segmentación cerebral. Se muestran,
     de izquierda a derecha, el corte original de RMN, la máscara de referencia,

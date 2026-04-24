@@ -1,0 +1,19 @@
+\chapter*{Resumen}
+
+\section*{\tituloPortadaVal}
+
+El presente Trabajo Fin de Grado aborda el diseño y desarrollo de una herramienta basada en visión por computador para la segmentación de imágenes de resonancia magnética nuclear (RMN) con el objetivo de medir volúmenes de un órgano y una lesión en un marco científico o clínico.
+
+En el ámbito de la investigación biomédica, la segmentación manual de imágenes preclínicas de resonancia magnética nuclear (RMN) resulta un proceso arduo y repetitivo que además suele carecer de consistencia en el dato, ya que la decisión de los límites de segmentación dependen de criterio personal. 
+
+En colaboración con la ICTS BioImagen Complutense, se ha desarrollado un prototipo funcional que realiza segmentación automática de uno de los casos que el instituto nos presenta: la segmentación de lesión isquémica en cerebro de ratón. Usando dos modelos, la herramienta realiza el proceso de segmentación sobre cada uno de los cortes, primero sobre el cerebro y segundo sobre la lesión. Después calcula los volúmenes y los devuelve al usuario para su procesamiento posterior.
+
+Debido a la escasez de datos anotados, típica en entornos médicos (30 pacientes de estudio), la metodología se ha fundamentado en el uso de \textit{transfer learning} sobre una arquitectura U-Net. Además, para aportar robustez al prototipo y garantizar la interpratibilidad de las predicciones, paralelamente se aplican técnicas de Inteligencia Artificial Explicable (XAI) como Grad-CAM e \textit{Integrated Gradients}.
+
+\section*{Palabras clave}
+   
+\noindent Isquemia cerebral, Segmentación médica, Inteligencia Artificial (IA), Redes Neuronales Convolucionales (CNN), U-Net, Inteligencia Artificial Explicable (XAI), Visión por computadora
+
+   
+
+

@@ -69,6 +69,7 @@ El procesamiento de las imágenes, desde la MRI en formato RAW (\texttt{.bruker}
 
 \begin{figure}[h]
 \centering
+\selectlanguage{english}
 \begin{tikzpicture}[
     node distance=0.5cm,
     every node/.style={
@@ -96,6 +97,7 @@ El procesamiento de las imágenes, desde la MRI en formato RAW (\texttt{.bruker}
 
 
 \end{tikzpicture}
+\selectlanguage{spanish}
 \caption{Pipeline de procesamiento desde datos RAW hasta el dataset final}
 \end{figure}
 
@@ -331,48 +333,224 @@ Desde el punto de vista metodológico, esta cuantificación volumétrica amplía
 
 \section{Integración de explicabilidad}
 
-Desde el inicio de este Trabajo de Fin de Grado, uno de nuestros mayores objetivos (OX) implicaba no sólo el desarrollo del pipeline de segmentación y cálculo de volúmenes, sino la validación y la robustez de los modelos. Si se aplican modelos de Deep Learning a una tarea realizada por expertos investigadores, nos exponemos introducir un proceso de caja negra en un marco en el que se prioriza la transparencia como es el ámbito biomédico.
+Desde el inicio de este Trabajo de Fin de Grado, uno de nuestros mayores objetivos (OX) implicaba no sólo el desarrollo del pipeline de segmentación y cálculo de volúmenes, sino la validación y la robustez de los modelos. Si se aplican modelos de Deep Learning a una tarea realizada por expertos investigadores, nos exponemos a introducir un proceso de caja negra en un marco en el que se prioriza la transparencia como es el ámbito biomédico, donde la interpretabilidad resulta especialmente relevante para generar confianza en los resultados y facilitar su análisis crítico \citep{samek2017explainableartificialintelligenceunderstanding,doshivelez2017rigorousscienceinterpretablemachine}.
 
 Por lo tanto, en este apartado exponemos cómo hemos aplicado Inteligencia Artificial Explicable (XAI) a los dos modelos que forman parte del pipeline de segmentación automática. Dado que las técnicas de explicabilidad se aplican de forma transversal a los modelos desarrollados, se presenta en primer lugar el marco metodológico común para posteriormente detallar su aplicación específica en cada caso.
 
 \subsection{Fundamentos y motivación de la explicabilidad}
 
-Aunque los resultados del modelo pueden evaluarse mediante métricas cuantitativas, estas no permiten por sí solas entender cómo se están generando las predicciones y es necesario analizar también el comportamiento interno de los modelos. Este aspecto resulta especialmente relevante en el caso de la segmentación isquémica, donde los límites de la región afectada no siempre están claramente definidos y dependen del criterio experto.
+Aunque los resultados del modelo pueden evaluarse mediante métricas cuantitativas, estas no permiten por sí solas entender cómo se están generando las predicciones y es necesario analizar también el comportamiento interno de los modelos. Este aspecto resulta especialmente relevante en el caso de la segmentación isquémica, donde los límites de la región afectada no siempre están claramente definidos y dependen del criterio experto \citep{samek2017explainableartificialintelligenceunderstanding}.
 
 Además, el uso de un conjunto de datos reducido incrementa la probabilidad de que el modelo aprenda patrones no deseados o poco generalizables. Por este motivo, resulta necesario complementar el análisis cuantitativo con técnicas que permitan estudiar el comportamiento interno del modelo. 
 
-En este trabajo, esta necesidad se aborda mediante la incorporación de técnicas de Inteligencia Artificial Explicable (XAI). Estas técnicas permiten analizar en qué regiones de la imagen se basa el modelo para generar sus predicciones, aportando un nivel adicional de validación cualitativa.
+En este trabajo, esta necesidad se aborda mediante la incorporación de técnicas de Inteligencia Artificial Explicable (XAI). Estas técnicas permiten analizar en qué regiones de la imagen se basa el modelo para generar sus predicciones, aportando un nivel adicional de validación cualitativa \citep{samek2017explainableartificialintelligenceunderstanding,doshivelez2017rigorousscienceinterpretablemachine}.
 
 \subsection{Adaptación de técnicas de XAI a segmentación}
 
-Una vez decidimos aplicar técnicas de XAI a nuestra herramienta, nos encontramos con el primer bloqueo, la mayoría de técnicas de explicabilidad que han sido diseñadas originalmente lo fueron con tareas de clasificación como objetivo principal. Las tareas de clasificación tienen como salida un escalar asociado a un enumerado, y nuestros modelos, al ser modelos diseñados para la tarea de segmentación, tienen como salida una máscara de segmentación a nivel de píxel.
+Una vez decidimos aplicar técnicas de XAI a nuestra herramienta, nos encontramos con el primer bloqueo: la mayoría de técnicas de explicabilidad que han sido diseñadas originalmente lo fueron con tareas de clasificación como objetivo principal. Las tareas de clasificación tienen como salida un escalar asociado a un enumerado, y nuestros modelos, al ser modelos diseñados para la tarea de segmentación, tienen como salida una máscara de segmentación a nivel de píxel.
 
 Esto implica que no es posible aplicar directamente estos métodos sin realizar una adaptación previa. Para ello se define una función de score escalar a partir de la salida del modelo, que permite resumir la predicción en un único valor.
 En este trabajo, dicha función se obtiene a partir de la activación del modelo en la región segmentada, lo que permite aplicar técnicas basadas en gradientes de forma consistente.
 
 \subsection{Métodos de explicabilidad empleados}
 
-Para el análisis de explicabilidad se han seleccionado técnicas basadas en gradientes, por su facilidad de integración con modelos convolucionales. En concreto, se han implementado los métodos Grad-CAM(\cite{selvaraju2017gradcam}), Grad-CAM++(\cite{chattopadhyay2018gradcampp}) e Integrated Gradients. (\cite{sundararajan2017integrated})
+Para el análisis de explicabilidad se han seleccionado técnicas basadas en gradientes, por su facilidad de integración con modelos convolucionales. En concreto, se han implementado los métodos Grad-CAM \citep{Selvaraju_2019}, Grad-CAM++ \citep{Chattopadhay_2018} e Integrated Gradients \citep{sundararajan2017axiomaticattributiondeepnetworks}.
 
-Grad-CAM permite identificar qué regiones de la imagen tienen mayor influencia en la predicción del modelo. Para ello, utiliza los gradientes de la salida respecto a las activaciones de una capa convolucional, generando un mapa de relevancia espacial. Este mapa se puede superponer sobre la imagen original, facilitando su interpretación. 
+Grad-CAM permite identificar qué regiones de la imagen tienen mayor influencia en la predicción del modelo. Para ello, utiliza los gradientes de la salida respecto a las activaciones de una capa convolucional, generando un mapa de relevancia espacial. Este mapa se puede superponer sobre la imagen original, facilitando su interpretación \citep{Selvaraju_2019}. 
 
-Además, se ha considerado la variante Grad-CAM++, que introduce mejoras en la localización de múltiples regiones relevantes dentro de una misma imagen. Esta extensión resulta especialmente útil en el contexto de la segmentación de lesiones, donde pueden existir varias zonas de activación dentro de la región afectada.
+Además, se ha considerado la variante Grad-CAM++, que introduce mejoras en la localización de múltiples regiones relevantes dentro de una misma imagen. Esta extensión resulta especialmente útil en el contexto de la segmentación de lesiones, donde pueden existir varias zonas de activación dentro de la región afectada \citep{Chattopadhay_2018}.
 
-Por su parte, Integrated Gradients, permite estimar la contribución de cada píxel a la predicción del modelo. Este método se basa en integrar los gradientes a lo largo de un camino entre una imagen base y la imagen original. En este trabajo, se ha utilizado como referencia una imagen completamente negra.
+Por su parte, Integrated Gradients, permite estimar la contribución de cada píxel a la predicción del modelo. Este método se basa en integrar los gradientes a lo largo de un camino entre una imagen base y la imagen original. En este trabajo, se ha utilizado como referencia una imagen completamente negra \citep{sundararajan2017axiomaticattributiondeepnetworks}.
 
 Además del análisis visual mediante mapas de relevancia, se han considerado métricas cuantitativas de explicabilidad basadas en perturbación de la entrada.
 
 En concreto, se han utilizado métricas de inserción y eliminación, así como variantes derivadas como AOPC y métricas normalizadas, que permiten evaluar hasta qué punto las regiones identificadas como relevantes influyen realmente en la predicción del modelo.
 
-Estas métricas se basan en modificar progresivamente la imagen de entrada, eliminando o incorporando información en las zonas destacadas por los métodos de explicabilidad, y observando cómo varía la salida del modelo. Este tipo de análisis resulta especialmente útil para diferenciar entre regiones que tienen un impacto real en la predicción y aquellas que únicamente presentan activaciones de baja intensidad sin relevancia significativa.
+Estas métricas se basan en modificar progresivamente la imagen de entrada, eliminando o incorporando información en las zonas destacadas por los métodos de explicabilidad, y observando cómo varía la salida del modelo. Este tipo de análisis resulta especialmente útil para diferenciar entre regiones que tienen un impacto real en la predicción y aquellas que únicamente presentan activaciones de baja intensidad sin relevancia significativa \citep{samek2017explainableartificialintelligenceunderstanding}.
 
 Cabe destacar que, aunque estas técnicas permiten analizar el comportamiento del modelo, su interpretación en tareas de segmentación debe hacerse con cautela. Los mapas de relevancia no son una segmentación como tal, sino una aproximación.
 
-En la Figura X se muestra un ejemplo de los mapas de explicabilidad obtenidos mediante estas técnicas. 
+En la Figura~\ref{fig:xai_ejemplo} se muestra un ejemplo de los mapas de explicabilidad obtenidos mediante estas técnicas. 
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.9\textwidth]{Imagenes/XAI/CASE_1_slice_016.png}
 \caption{Ejemplo de mapas de explicabilidad generados sobre una imagen de entrada. Se muestra la imagen original, la máscara predicha y el mapa de relevancia superpuesto.}
 \label{fig:xai_ejemplo}
+\end{figure}
+
+\subsection{Aplicación al modelo de segmentación de isquemia}
+
+A continuación, se describe cómo se han aplicado las técnicas de explicabilidad al
+modelo de segmentación de lesiones isquémicas. En este caso, la explicación se
+centra en una región patológica localizada, de tamaño reducido y con límites
+potencialmente difusos, por lo que resulta especialmente importante analizar qué
+zonas de la imagen contribuyen a la predicción generada por el modelo.
+
+El análisis se implementó en un notebook de Python desarrollado específicamente
+para evaluar el comportamiento del modelo de isquemia. Este notebook carga el
+modelo entrenado, procesa los volúmenes de resonancia magnética corte a corte y
+reproduce el mismo flujo seguido durante la inferencia. En primer lugar, se obtiene
+la máscara predicha por el modelo de segmentación cerebral. A continuación, dicha
+máscara se combina con la imagen original para restringir la entrada del modelo de
+isquemia al tejido cerebral. Finalmente, a partir de la predicción de lesión generada
+por este segundo modelo, se calculan distintos mapas de relevancia asociados a la
+salida obtenida.
+
+Para generar los mapas de Grad-CAM, se selecciona la última capa convolucional
+del decoder, al tratarse de una capa próxima a la generación de la máscara final y
+que todavía conserva información espacial relevante. Aunque Grad-CAM fue
+propuesto originalmente para tareas de clasificación, puede adaptarse a problemas
+de segmentación siempre que se defina una puntuación escalar sobre la salida densa
+del modelo \citep{selvaraju2017gradcam}. En este trabajo, dicha puntuación se
+define a partir de la activación del modelo en la región segmentada como lesión,
+agregando la contribución de los píxeles predichos como pertenecientes a la clase
+isquemia. De este modo, la salida del modelo se reduce a un único valor sobre el que
+es posible calcular gradientes de forma coherente con la tarea de segmentación.
+
+Además de Grad-CAM, se emplean Grad-CAM++ e \textit{Integrated Gradients}
+como métodos complementarios de explicación. Grad-CAM++ se incorpora como una
+variante orientada a mejorar la localización espacial de las regiones relevantes
+\citep{chattopadhay2018gradcamplusplus}, mientras que \textit{Integrated Gradients}
+permite estimar la contribución de cada píxel a partir de la comparación progresiva
+entre una imagen de referencia y la imagen original
+\citep{sundararajan2017axiomatic}. La combinación de estos métodos permite
+analizar la predicción desde enfoques distintos, evitando depender de una única
+técnica de explicación.
+
+Los mapas de relevancia obtenidos se normalizan y se superponen sobre la imagen
+original, junto con la máscara de referencia y la máscara predicha por el modelo.
+Esta representación permite estudiar de forma cualitativa si las regiones señaladas
+por los métodos de explicabilidad se corresponden con zonas anatómicamente
+compatibles con la lesión isquémica o si, por el contrario, aparecen activaciones en
+áreas no relevantes.
+
+Este análisis resulta especialmente importante en el modelo de isquemia, ya que
+durante el desarrollo se observaron problemas de sobresegmentación, principalmente
+en los bordes de la lesión. En estas zonas pueden aparecer activaciones de baja
+intensidad que, al aplicar un umbral de binarización poco restrictivo, acaban
+incorporándose a la máscara final como falsos positivos. Por ello, la explicabilidad
+se utiliza como una herramienta adicional para analizar si esas regiones están siendo
+realmente relevantes para la predicción del modelo o si corresponden a ruido en la
+salida probabilística.
+
+De esta forma, el análisis de explicabilidad también permite apoyar la justificación
+metodológica del umbral aplicado durante la inferencia. Si las zonas eliminadas por
+el umbral presentan baja relevancia en los mapas de explicación, el umbral puede
+interpretarse como un mecanismo de filtrado de activaciones poco informativas. No
+obstante, esta interpretación debe entenderse como un apoyo cualitativo al análisis
+del modelo, y no como una sustitución de las métricas cuantitativas de
+segmentación.
+
+Además del análisis visual, se incorporan métricas basadas en perturbación para
+evaluar la fidelidad de las explicaciones generadas. En concreto, se analiza cómo
+varía la salida del modelo al modificar progresivamente las regiones consideradas
+más relevantes por cada método de explicación, utilizando métricas como
+\textit{Deletion}, \textit{Insertion} y AOPC. Estas métricas permiten comprobar si
+las zonas destacadas por los mapas de relevancia tienen un impacto real sobre la
+predicción del modelo \citep{samek2017evaluating,petsiuk2018rise}.
+
+En conjunto, la integración de explicabilidad en el modelo de isquemia se plantea
+como un mecanismo complementario de análisis del comportamiento de la red. Su
+objetivo no es únicamente generar visualizaciones interpretables, sino también
+estudiar la relación entre las activaciones del modelo, la localización de la lesión y
+las decisiones de postprocesado aplicadas durante la inferencia.
+
+Como se observa en la Figura~\ref{fig:xai_ejemplo_isquemia}, las técnicas de explicabilidad 
+concentran la activación en la región correspondiente a la lesión isquémica, lo que 
+sugiere que el modelo basa su predicción en características espacialmente coherentes 
+con la anotación de referencia.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Imagenes/XAI/CASE_12_slice_015.png}
+    \caption{Ejemplo de visualización generada por el procedimiento de
+    explicabilidad aplicado al modelo de segmentación de isquemia. Se muestran
+    el corte original de RMN, la máscara de referencia, la predicción del modelo
+    y los mapas de relevancia obtenidos mediante distintos métodos de
+    explicabilidad. La figura ilustra el tipo de salida utilizada para el análisis
+    cualitativo del comportamiento del modelo.}
+    \label{fig:xai_ejemplo_isquemia}
+\end{figure}
+
+Una vez descrito el procedimiento aplicado al modelo de isquemia, se presenta a
+continuación su adaptación al modelo de segmentación cerebral, donde la región
+objetivo deja de ser una lesión localizada y pasa a corresponderse con una estructura
+anatómica completa.
+
+\subsubsection{Aplicación de explicabilidad al modelo de segmentación cerebral}
+
+A continuación, se describe cómo se han aplicado las técnicas de explicabilidad al
+modelo encargado de segmentar el cerebro. A diferencia del modelo de isquemia,
+donde la región objetivo corresponde a una lesión localizada, en este caso la
+explicación se orienta a analizar el comportamiento del modelo ante una estructura
+anatómica extensa y de contorno relativamente continuo.
+
+El análisis se implementó en un notebook de Python, desarrollado específicamente para
+evaluar el modelo de segmentación cerebral. Este notebook carga el modelo
+entrenado, procesa los volúmenes de resonancia magnética corte a corte, obtiene la
+máscara predicha por el modelo y genera distintos mapas de relevancia asociados a
+la predicción.
+
+Para el cálculo de Grad-CAM, se selecciona la última capa convolucional del
+decoder previa a la convolución final \(1 \times 1\), al tratarse de una capa cercana
+a la generación de la máscara de salida y que todavía conserva información espacial
+relevante. Aunque Grad-CAM fue propuesto originalmente para problemas de
+clasificación, puede adaptarse a segmentación siempre que se defina una puntuación
+escalar sobre la salida del modelo \citep{Selvaraju_2019}.
+
+En este caso, dicha puntuación se define como la probabilidad media de
+pertenencia a la clase cerebro dentro de la máscara cerebral predicha por el propio
+modelo. Esta formulación permite transformar la salida densa de segmentación en
+un valor escalar sobre el que calcular gradientes, manteniendo la explicación
+centrada en la región que el modelo ha considerado como cerebro. Es importante
+destacar que el cálculo se realiza sobre la predicción del modelo y no sobre la
+máscara de referencia, ya que el objetivo de la explicabilidad es analizar el criterio
+seguido por la red al generar su propia salida.
+
+Además de Grad-CAM, se incorporan Grad-CAM++ e \textit{Integrated Gradients}
+como métodos complementarios de explicación. Grad-CAM++ se incluye como una
+variante orientada a mejorar la localización espacial de las regiones relevantes
+\citep{Chattopadhay_2018}, mientras que \textit{Integrated
+Gradients} permite estimar la contribución de cada píxel a partir de la comparación
+progresiva entre una imagen de referencia o \textit{baseline} y la imagen original
+\citep{sundararajan2017axiomaticattributiondeepnetworks}. En el caso de las imágenes de RMN, la elección
+del \textit{baseline} debe realizarse con cautela, ya que una imagen completamente
+negra puede introducir una referencia artificial alejada de la distribución real de
+intensidades.
+
+Los mapas de relevancia generados se redimensionan al tamaño de la imagen de
+entrada y se normalizan para facilitar su visualización conjunta. Posteriormente, se
+superponen sobre el corte original de RMN, junto con la máscara de referencia y la
+máscara predicha. Esta representación permite analizar de forma cualitativa si las
+regiones destacadas por los métodos de explicabilidad se sitúan sobre zonas
+anatómicamente relacionadas con el tejido cerebral o si aparecen activaciones en
+regiones externas a la estructura de interés.
+
+El procedimiento también contempla el uso de técnicas basadas en perturbación,
+como la oclusión progresiva de regiones de la imagen. Estas técnicas permiten
+estudiar cómo cambia la salida del modelo cuando se modifican zonas concretas del
+corte, proporcionando una perspectiva complementaria a los métodos basados en
+gradientes. En este contexto, las métricas de inserción, eliminación y AOPC se
+plantean como herramientas para evaluar la fidelidad de las explicaciones, es decir,
+si las regiones identificadas como relevantes tienen realmente influencia sobre la
+predicción del modelo \citep{samek2017evaluating,petsiuk2018rise}.
+
+En conjunto, la integración de explicabilidad en el modelo de segmentación
+cerebral no se plantea como una métrica de rendimiento adicional, sino como un
+mecanismo de análisis metodológico. Su objetivo es comprobar la coherencia espacial
+del comportamiento del modelo, detectar posibles dependencias no deseadas de
+regiones externas al cerebro y complementar la evaluación cuantitativa basada en
+métricas de segmentación.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Imagenes/XAI/CASE_12_slice_015.png} 
+    \caption{Ejemplo de visualización generada por el procedimiento de
+    explicabilidad aplicado al modelo de segmentación cerebral. Se muestran,
+    de izquierda a derecha, el corte original de RMN, la máscara de referencia,
+    la máscara predicha por el modelo y los mapas de relevancia obtenidos
+    mediante distintos métodos de explicabilidad. Esta figura ilustra el tipo de
+    salida utilizada para el análisis cualitativo del comportamiento del modelo.}
+    \label{fig:xai_ejemplo_cerebro}
 \end{figure}

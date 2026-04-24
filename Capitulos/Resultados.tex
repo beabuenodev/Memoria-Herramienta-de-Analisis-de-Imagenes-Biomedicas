@@ -1,0 +1,64 @@
+\chapter{Resultados y Discusión}
+\label{cap:Resultados}
+
+
+\section{Configuración experimental}
+\section{Resultados en segmentación cerebral}
+\subsection{Resultados cuantitativos}
+\subsection{Resultados cualitativos}
+\subsection{Discusión}
+\section{Resultados en segmentación de isquemia}
+A continuación, se presentan los resultados obtenidos en la tarea de segmentación de las regiones de lesión por isquemia cerebral, la cual, por razones que se describirán en la siguiente sección, supone un problema más complejo que la segmentación del órgano sano. Para ello, al igual que en el modelo de cerebro, se han evaluado varias configuraciones de arquitecturas \textit{U-Net}, utilizando las métricas descritas anteriormente.
+
+\subsection{Resultados cuantitativos} 
+De manera general, los resultados obtenidos muestran un valor de \textit{coeficiente Dice} inferiores y con mayor variabilidad frente al modelo de cerebro. El error relativo también presenta una ligera degradación respecto al caso base.
+
+Estas diferencias son notables a lo largo de todas las configuraciones y casos analizados, lo que sugiere que la limitación no reside únicamente en el modelo, sino en la naturaleza del problema abordado.
+
+\subsection{Naturaleza del problema y subjetividad}
+A diferencia de la segmentación del cerebro, el cual está claramente delimitado por el cráneo y el espacio subcranoideo, debido a las características anatómicas propias de las lesiones de isquemia cerebral, el proceso de segmentación constituye un problema complejo y altamente subjetivo, cuya interpretación puede variar significativamente entre distintos profesionales, tal y como respalda el\textit{ ICTS BioImagen Complutense}.
+
+Concretamente, las lesiones presentan las siguientes características visibles en cada corte de MRI afectado:
+ \begin{itemize}
+    \item Borde difuminado.
+    \item Gradientes de intensidad entre tejido sano y afectado.
+    \item Zonas intermedias en las que la clasificación no es clara.
+    \item Ruido y artefactos propios de la resonancia magnética nuclear.
+\end{itemize}
+Como consecuencia, la delimitación manual de estas regiones depende del criterio del experto que realiza la medición, lo que introduce una alta variabilidad en los datos recogidos entre observadores y estudios.
+La anotación manual está afectada por incertidumbre en la frontera de la lesión, y penaliza las métricas de solapamiento, por lo que el\textbf{ \textit{ground truth}} utilizado durante el entrenamiento y la evaluación del modelo debe analizarse con concordancia a una referencia experta operativa.
+
+\subsection{Interpretación de métricas}
+Teniendo en cuenta esta problemática, los valores obtenidos en las métricas deben interpretarse con cautela. Por este motivo, ha sido necesaria una validación adicional por parte de profesionales del \textit{ ICTS BioImagen Complutense}, con el fin de obtener un veredicto más fiable y ajustado a la realidad clínica. Un \textit{valor Dice} inferior en comparación al modelo de segmentación cerebral no implica necesariamente un menor rendimiento del modelo, sino que refleja la variabilidad técnica del proceso.
+
+Pequeñas variaciones en la delimitación de la zona afectada, producen cambios significativos en el \textit{valor Dice}, por lo que el modelo puede estar generando segmentaciones coherentes desde el punto de vista clínico aún cuando la métrica no alcance los valores óptimos.
+
+En este punto, resulta especialmente relevante considerar el criterio aportado por los profesionales del\textit{  ICTS BioImagen Complutense}, quienes señalan que la validez de las segmentaciones no dependen únicamente de precisión absoluta sino de la robustez en el comportamiento del modelo. Es decir, una ligera sobreestimación o subestimación sistemática en los volúmenes segmentados puede considerarse válida siempre que la desviación sea consistente entre casos y no introduzca artefactos incoherentes, como cortes intermedios vacíos o la detección de regiones incompatibles con la morfología de la isquemia.
+
+\subsection{Impacto del threshold}
+Uno de los factores clave en la calidad de la segmentación es el umbral de decisión aplicado sobre la salida del modelo:
+Valores de umbral bajos tienden a producir segmentaciones más extensas, incrementando la detección de posibles zonas afectadas, pero también introduciendo falsos positivos. 
+Por lo contrario, umbrales altos generan segmentaciones más conservadoras, generando posibles omisiones de zonas de baja hiperintensidad.
+
+Este comportamiento es especialmente crítico en el caso de la isquemia, donde las regiones ambiguas son frecuentes. Por ello, la elección del umbral óptimo depende en gran medida del criterio clínico y del uso final de la herramienta.
+
+\subsection{Análisis cualitativo}
+Con el objetivo de complementar el análisis cuantitativo presentado anteriormente, se ha realizado una evaluación cualitativa de las segmentaciones obtenidas en los casos de isquemia cerebral, prestando especial atención al comportamiento del modelo en regiones de alta ambigüedad.
+
+Se ha observado que, debido a la mayor sensibilidad del modelo, en ocasiones se ha conseguido analizar regiones desapercibidas a criterio manual, así como de segmentar de forma más homogénea ciertas zonas de transición. Estos resultados sugieren que el modelo no solo reproduce el comportamiento humano, sino que, en determinados escenarios, puede ser una herramienta útil para mejorar la consistencia del proceso.
+
+En segundo lugar, en las zonas de transición entre tejido sano y tejido afectado, el modelo muestra una mayor estabilidad en la delimitación de los bordes, proporcionando segmentaciones más suaves y menos fragmentadas. Este aspecto resulta especialmente relevante en el contexto de la isquemia, donde los gradientes de intensidad dificultan la definición de un límite claro.
+
+Por otro lado, también se han identificado casos en los que el modelo presenta una ligera sobreestimación de las regiones afectadas, especialmente en áreas con intensidades intermedias. No obstante, tal y como se ha discutido previamente, este comportamiento puede considerarse aceptable siempre que se mantenga de forma consistente y no introduzca estructuras incompatibles con la morfología esperada de la lesión.
+
+Finalmente, en los casos más complejos, el modelo muestra limitaciones similares a las de la segmentación manual, lo que refuerza la idea de que la dificultad reside en la propia naturaleza de la imagen y no exclusivamente en el enfoque empleado.
+
+En conjunto, el análisis cualitativo respalda los resultados cuantitativos obtenidos, evidenciando que el modelo produce segmentaciones coherentes y clínicamente plausibles, incluso en aquellos casos donde las métricas numéricas no alcanzan valores elevados.
+
+\subsection{Discusión crítica del modelo de isquemia}
+Es importante destacar que el sistema desarrollado se concibe como una herramienta supervisada en la que el especialista mantiene el control de los datos finales. La herramienta permite la edición de cada una de las máscaras generada así como los valores volumétricos en cada corte de la resonancia analizada. Este enfoque garantiza que cualquier desviación pueda ser corregida de manera sencilla por el experto, integrando la automatización dentro de un \textbf{flujo de trabajo asistido y no sustitutivo}. 
+
+\section{Análisis comparativo global}
+\section{Relación con el objetivo del TFG}
+\section{Limitaciones}
+\section{Conclusiones del capítulo}

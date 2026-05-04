@@ -60,4 +60,34 @@ donde \(\operatorname{Up}(\cdot)\) representa la operación de sobremuestreo y \
 
 \section{Aprendizaje por transferencia (Transfer Learning)}
 
+El aprendizaje por transferencia consiste en partir de un modelo previamente entrenado y adaptarlo a una tarea nueva. En lugar de entrenar una red desde cero, se aprovechan pesos que ya han aprendido a extraer información útil de otras imágenes.
+
+Esta técnica resulta especialmente útil cuando hay pocos datos disponibles, algo frecuente en imagen médica. Conseguir imágenes anotadas no es sencillo y, en el caso de la segmentación, el proceso es todavía más costoso, ya que no basta con asignar una etiqueta a cada imagen. También es necesario delimitar manualmente la región de interés, y esa máscara debe estar bien alineada si después se va a utilizar para calcular volúmenes.
+
+Cuando una red profunda se entrena desde cero con pocos ejemplos, puede aparecer sobreajuste. En ese caso, el modelo aprende demasiado bien los ejemplos de entrenamiento, pero no generaliza correctamente ante imágenes nuevas. El aprendizaje por transferencia ayuda a reducir este riesgo, ya que el modelo parte de características visuales aprendidas previamente.
+
+En visión por computador se ha utilizado tradicionalmente ImageNet como conjunto de preentrenamiento. Sin embargo, ImageNet está formado por imágenes naturales, como animales, objetos o escenas cotidianas, que son bastante distintas de las imágenes biomédicas. Por este motivo, en aplicaciones biomédicas puede resultar más adecuado utilizar modelos preentrenados con datos radiológicos.
+
+RadImageNet es un ejemplo de este tipo de recurso, ya que incluye imágenes médicas de distintas modalidades, como resonancia magnética, tomografía computarizada y ecografía \citep{mei2022radimagenet}. El uso de pesos preentrenados en un dominio más cercano al de la imagen médica puede aportar una base más adecuada que la obtenida únicamente a partir de imágenes naturales.
+
+En arquitecturas como U-Net, el aprendizaje por transferencia puede aplicarse utilizando un encoder preentrenado. De esta forma, el encoder actúa como extractor de características, mientras que el decoder aprende a generar la máscara de segmentación correspondiente. Así se aprovecha una base visual ya entrenada, pero el modelo sigue adaptándose a la tarea concreta.
+
+En este tipo de trabajos, el \textit{Transfer Learning} no se utiliza solo como una mejora adicional, sino como una respuesta a una limitación práctica del problema: la escasez de datos anotados. Partir de un modelo previamente entrenado permite trabajar con redes de mayor capacidad sin depender completamente de disponer de un conjunto de datos grande.
+
 \section{Explicabilidad en Inteligencia Artificial (XAI)}
+
+La Inteligencia Artificial Explicable, o XAI, agrupa técnicas que permiten entender mejor por qué un modelo produce una salida determinada. Esta cuestión es especialmente relevante en redes neuronales profundas, donde no resulta sencillo interpretar directamente qué ocurre dentro del modelo.
+
+En imagen médica, la explicabilidad tiene un papel importante porque el resultado del modelo no debería analizarse solo mediante métricas. También interesa comprobar si la red está utilizando zonas relevantes de la imagen. Por ejemplo, si el modelo segmenta una lesión, lo esperable es que la información más influyente esté cerca de esa lesión y no en el fondo, en los bordes de la imagen o en ruido.
+
+Una forma habitual de estudiar este comportamiento es generar mapas de calor. Estos mapas muestran qué zonas de la imagen han influido más en la salida del modelo, de manera que permiten revisar visualmente si la predicción se apoya en regiones coherentes. No demuestran por sí solos que el modelo sea correcto, pero sí aportan información útil sobre su comportamiento.
+
+Entre los métodos más utilizados se encuentran los mapas de saliencia, Integrated Gradients y Grad-CAM. Los mapas de saliencia estudian cómo cambia la salida del modelo cuando varían los píxeles de entrada. Integrated Gradients compara la imagen con una referencia y calcula la contribución de cada píxel a la predicción \citep{sundararajan2017axiomaticattributiondeepnetworks}. Grad-CAM, por su parte, utiliza los gradientes de una salida concreta sobre una capa convolucional para generar un mapa de relevancia \citep{Selvaraju_2019}.
+
+Muchos de estos métodos se plantearon inicialmente para clasificación, donde suele explicarse la probabilidad asociada a una clase. En segmentación, el caso es distinto, ya que la salida del modelo no es un único valor, sino un mapa de probabilidades por píxel. Por esta razón, antes de aplicar estas técnicas es necesario definir qué parte de la salida se quiere explicar.
+
+Esta decisión cambia la interpretación de la explicación. No es lo mismo explicar toda la activación de la clase lesión que explicar únicamente la región segmentada por el modelo. Por ello, cuando se utilizan técnicas de XAI en segmentación, conviene indicar con claridad qué salida se explica y cómo se ha generado el mapa resultante.
+
+La explicabilidad no sustituye a métricas como Dice o IoU, ya que estas siguen siendo necesarias para medir el parecido entre la máscara predicha y la máscara manual. Sin embargo, dichas métricas no indican por qué el modelo ha producido una predicción concreta. Los métodos de XAI añaden otra forma de revisar el resultado, centrada en analizar qué zonas de la imagen han influido en la decisión del modelo.
+
+En este trabajo, la explicabilidad se utiliza como apoyo al análisis del modelo, con el objetivo de comprobar si las predicciones se basan en regiones coherentes con el problema biomédico estudiado.

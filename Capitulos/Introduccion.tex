@@ -1,13 +1,68 @@
 \chapter{Introducción}
 \label{cap:introduccion}
 
-\section{Motivación}
-Introducción al tema del TFG.
+\section{Contexto, antecedentes y motivación}
+En el ámbito de la investigación biomédica, el análisis de imágenes de resonancia magnética nuclear (RMN) constituye una herramienta fundamental para el estudio de estructuras anatómicas y el análisis de su evolución. En particular, en estudios preclínicos sobre modelos animales, como el cerebro de ratón, la RMN permite observar la evolución de distintas patologías, proporcionando información relevante para la investigación en neurociencia y el análisis de biomarcadores.
 
+El procesamiento de este tipo de imágenes, conocido como\textbf{segmentación}, consiste en delimitar la zona de estudio, denominada \textbf{región de interés}, con el objetivo de cuantificar las características del órgano o de la lesión, así como estimar su volumen. Estas tareas resultan esenciales para garantizar la reproducibilidad de los experimentos y la comparabilidad de los resultados entre distintos estudios y sujetos, especialmente en aquellos casos en los que se analiza la evolución temporal de una patología.
+
+Tradicionalmente, como se pudo observar durante las visitas al centro \textbf{ICTS BioImagen Complutense}, estas tareas se han realizado de forma manual: El flujo de trabajo habitual consiste en analizar cada uno de los cortes de la resonancia (aproximadamente entre 20 y 50 cortes por sujeto), identificar las regiones de interés y delimitarlas manualmente mediante herramientas de selección específicas, a partir de las cuales se procede posteriormente al cálculo de magnitudes de interés.
+
+Aunque este procedimiento permite obtener resultados experimentales válidos, presenta diversas limitaciones.
+Por un lado, se trata de un proceso laborioso que consume una gran cantidad de tiempo, especialmente en estudios con un elevado número de sujetos. Esta carga de trabajo supone una inversión significativa de tiempo por parte de los investigadores, lo que puede repercutir en los tiempos de desarrollo de la investigación.
+Por otro lado, la delimitación manual de ciertas regiones, como las lesiones isquémicas, presenta un grado de ambigüedad, ya que sus fronteras no siempre están claramente definidas. Esto puede introducir variabilidad entre anotaciones en función del criterio del profesional.
+
+A estas limitaciones se suma el crecimiento progresivo de la cantidad de datos generados en los estudios de bioimagen, así como la demanda de análisis detallados y precisos, lo que dificulta la escalabilidad de los procesos manuales.
+
+
+En este contexto, surge la necesidad de desarrollar herramientas que permitan agilizar y automatizar de manera supervisada estas tareas, mejorando la eficiencia del proceso y aumentando la consistencia y reproducibilidad de los resultados.
+
+El avance reciente de las técnicas de inteligencia artificial aplicadas a imagen ha demostrado su capacidad para identificar patrones complejos en datos visuales, abriendo la puerta a su aplicación en entornos biomédicos. No obstante, la integración de este tipo de soluciones en contextos reales de trabajo requiere no solo obtener resultados precisos, sino también garantizar que dichos resultados sean interpretables y coherentes desde el punto de vista del dominio de aplicación.
+Por ello, la motivación de este trabajo no se limita únicamente a la implementación de un modelo automático, sino que se centra en el desarrollo de una herramienta que pueda integrarse dentro del flujo de trabajo existente, aportando valor como sistema de apoyo a la decisión. El objetivo es combinar la automatización con la supervisión por parte del experto, manteniendo el control sobre los resultados finales.
+
+Este Trabajo de Fin de Grado, en colaboración con el centro \textbf{ICTS BioImagen Complutense}, prentende dar respuesta a una necesidad real observada en el entorno de investigación. A partir del conocimiento adquirido durante las visitas al centro, el análisis del estado del arte y la revisión de la bibliografía, se plantea el desarrollo de una herramienta basada en modelos supervisados que permita contribuir a la mejora del proceso de análisis de imágenes de resonancia magnética en investigación preclínica, proponiendo una solución que reduzca la carga de trabajo manual y mejore la consistencia de los resultados.
 
 \section{Objetivos}
-Descripción de los objetivos del trabajo.
+ESBOZO
+\begin{itemize}
+    \item Comprender el flujo de adquisición, procesado y análisis de imágenes de RMN preclínica empleado en ICTS BioImagen Complutense.
+    \item Construir un conjunto de datos a partir de imágenes reales, anotaciones ROI y máscaras binarias de segmentación.
+    \item Diseñar un pipeline de preprocesamiento que permita convertir, normalizar y adaptar las imágenes al entrenamiento de modelos supervisados.
+    \item Entrenar modelos de segmentación automática para cerebro e isquemia cerebral empleando una arquitectura U-Net con aprendizaje por transferencia.
+    \item Calcular métricas cuantitativas de interés biomédico, especialmente el volumen de las regiones segmentadas.
+    \item Incorporar técnicas de inteligencia artificial explicable para analizar la coherencia espacial de las predicciones.
+    \item Evaluar el comportamiento del sistema mediante métricas cuantitativas, análisis cualitativo y discusión crítica de sus limitaciones.
+\end{itemize}
 
+\subsection{Objetivo general}
+
+\subsection{Objetivos específicos}
 
 \section{Plan de trabajo}
-Aquí se describe el plan de trabajo a seguir para la consecución de los objetivos descritos en el apartado anterior.
+El desarrollo de este Trabajo de Fin de Grado se ha organizado de forma progresiva, partiendo de una fase inicial de comprensión del problema biomédico hasta la implementación y evaluación del sistema propuesto. Dado que el proyecto combina aspectos de ingeniería del software, procesamiento de imagen médica, aprendizaje automático y validación experimental, resultó necesario estructurar el trabajo en distintas fases claramente diferenciadas.
+
+Además, al tratarse de un proyecto desarrollado en colaboración con el centro ICTS BioImagen Complutense, el plan de trabajo estuvo condicionado por las necesidades detectadas durante las reuniones de seguimiento y las visitas realizadas al centro. Estas sesiones permitieron orientar las decisiones técnicas hacia un caso de uso real, definir los requisitos funcionales de la herramienta y adaptar el desarrollo a las características del conjunto de datos disponible.
+
+En los siguientes apartados se describe, en primer lugar, el proceso de seguimiento llevado a cabo mediante actas de reunión y, posteriormente, las principales fases de desarrollo seguidas hasta la obtención del prototipo final.
+
+\subsection{Seguimiento del proyecto y reuniones con los tutores}
+A lo largo del desarrollo del proyecto se mantuvo un proceso de seguimiento continuado mediante reuniones periódicas con los tutores, tanto de manera presencial como telemática. Con el objetivo de tener registro de la evolución del desarrollo y las decisiones tomadas, se realizaron actas de reunión después de cada encuentro.
+
+Estas actas tuvieron un papel especialmente importante durante las primeras fases del proyecto, ya que permitieron documentar la definición inicial del problema, el contexto de la aplicación y las necesidades del usuario final. Además, en las actas se recogieron los aspectos teóricos y técnicos guiados por los profesores, tanto en el ámbito de la inteligencia artificial como en el de la aplicación biomédica, donde los alumnos también tuvieron una formación básica. 
+
+Durante las visitas al centro \textbf{ICTS BioImagen Complutense}, las actas permitieron recoger información esencial sobre el flujo de trabajo seguido por los investigadores. Se analizaron ejemplos reales de imágenes y se estudiaron diversas aplicaciones de las RMN tratadas en el centro. Además, se aquirieron nociones básicas sobre el funcionamiento físico de las resonancias magnéticas nucleares, aprendiendo a diferenciar zonas de hiperintensidad e hipointensidad, claves para la elaboración posterior del dataset.
+
+Las actas también reflejan la evolución técnica del proyecto. A medida que avanzó el desarrollo, se tomaron decisiones relacionadas con la estructura del conjunto de datos, la eliminación de cortes poco informativos, la preparación de los notebooks de entrenamiento y la mejora del modelo de segmentación de isquemia. En particular, se decidió utilizar la segmentación cerebral como paso previo para restringir el área de análisis del modelo de isquemia al tejido cerebral, con el objetivo de reducir falsos positivos y mejorar la coherencia anatómica de las predicciones.
+
+Por último, el seguimiento de las actas permitió incorporar nuevas necesidades detectadas durante el desarrollo, como el uso de notebooks a través de Google Collab para facilitar el acceso a la herramienta por parte de los investigadores, eliminando la necesidad de instalar software adicional y permitiendo un acceso más directo a los resultados.
+
+\subsection{Fases de desarrollo}
+El desarrollo del trabajo se ha organizado en varias fases. 
+En primer lugar, se realizó una fase de toma de contacto con el problema biomédico mediante reuniones con los directores del trabajo y visitas al centro ICTS BioImagen Complutense. En esta fase se estudió el proceso de adquisición de imágenes de RMN, la generación de regiones de interés y la forma en la que los investigadores obtienen actualmente medidas cuantitativas a partir de las segmentaciones manuales.
+
+Posteriormente, se abordó la preparación del conjunto de datos. Se seleccionó como caso de estudio la segmentación de lesiones de isquemia cerebral, debido tanto a la disponibilidad de datos proporcionados por el ICTS BioImagen Complutense como a su relevancia dentro de las líneas de investigación actuales del centro. En esta etapa se llevó a cabo la adaptación de las imágenes al formato requerido por los modelos de aprendizaje automático.
+
+A continuación, se diseñó e implementó el pipeline de segmentación automática, compuesto por dos modelos: uno orientado a la segmentación del cerebro y otro a la segmentación de la lesión isquémica. Finalmente, se realizó la evaluación de los resultados obtenidos mediante métricas de segmentación y cuantificación volumétrica, complementando este análisis con técnicas de explicabilidad que permiten estudiar el comportamiento interno de los modelos.
+
+\section{Estructura de la memoria}
+La memoria se organiza de la siguiente forma. En el Capítulo 2 se presenta el estado de la cuestión, incluyendo los conceptos biomédicos necesarios, la visión por computador aplicada a imagen médica, las arquitecturas de segmentación, el aprendizaje por transferencia y la inteligencia artificial explicable. En el Capítulo 3 se describe la metodología seguida, desde la construcción del dataset y el preprocesamiento de imágenes hasta la arquitectura de los modelos, la cuantificación volumétrica y la integración de explicabilidad. En el Capítulo 4 se presentan y discuten los resultados obtenidos para la segmentación cerebral y la segmentación de isquemia. Finalmente, el Capítulo 5 recoge las conclusiones del trabajo y las principales líneas de trabajo futuro.

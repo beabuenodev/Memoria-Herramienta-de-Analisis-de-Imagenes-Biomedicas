@@ -2,6 +2,19 @@
 \label{cap:estadoDeLaCuestion}
 
 \section{Conceptos biomédicos: RMN preclínica y lesiones cerebrales}
+\section{Conceptos biomédicos: RMN preclínica y lesiones cerebrales}
+
+La resonancia magnética nuclear (RMN) es una técnica de adquisición de imagen ampliamente utilizada en el ámbito biomédico, ya que permite obtener información anatómica y funcional de tejidos internos sin necesidad de procedimientos invasivos. En el contexto preclínico, esta técnica se emplea habitualmente sobre modelos animales, como el ratón, con el objetivo de estudiar la evolución de distintas patologías y evaluar su impacto sobre estructuras concretas.
+
+Las imágenes de RMN están formadas por cortes bidimensionales que, en conjunto, representan un volumen tridimensional del órgano estudiado. Cada píxel o vóxel de la imagen contiene un valor de intensidad asociado a la señal registrada. Dependiendo de la técnica usada y de las características del tejido, determinadas regiones pueden aparecer con mayor o menor intensidad. En este trabajo resultan especialmente relevantes las zonas de hiperintensidad, visualizadas como zonas de color blanco brillante, que corresponden a regiones con una señal más elevada que el tejido circundante y que pueden estar asociadas a alteraciones patológicas, como lesiones isquémicas.
+
+Para analizar estas imágenes es habitual delimitar regiones de interés, conocidas como ROI (\textit{Regions of Interest}). Una ROI representa una zona concreta de la imagen que se desea estudiar, como puede ser el cerebro completo o una región lesionada. A partir de estas regiones es posible generar máscaras de segmentación, es decir, imágenes binarias en las que se separa la estructura de interés del fondo. Este proceso permite cuantificar de forma objetiva propiedades como el área o el volumen de una región anatómica o patológica.
+
+En el caso abordado en este trabajo, la lesión de interés es la isquemia cerebral. Esta se produce cuando existe una reducción o interrupción del flujo sanguíneo en una zona del cerebro, lo que puede provocar daño en el tejido afectado. En imágenes de RMN, estas lesiones pueden presentar bordes difusos y gradientes de intensidad, lo que dificulta su delimitación manual y hace que la segmentación dependa en parte del criterio del experto.
+
+En este TFG se analiza la segmentación del cerebro y la lesión conocida como isquemia cerebral. La isquemia cerebral se entiende, de forma general, como una afección producida por la reducción o interrupción del flujo sanguíneo en una región del cerebro, lo que puede provocar daño en el tejido afectado. En imágenes de RMN, estas lesiones se visualizan como zonas de hiperintensidad debido a que presentan una mayor concentración de agua, lo que sse visualiza en las resonancias como áreas brillantes.
+
+Estos conceptos constituyen la base biomédica necesaria para comprender el problema tratado en este TFG: la segmentación automática de imágenes de RMN preclínica para delimitar el cerebro y la lesión isquémica.
 
 \section{Visión por computador en imagen biomédica}
 

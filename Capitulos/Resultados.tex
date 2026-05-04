@@ -1,10 +1,35 @@
 \chapter{Resultados y Discusión}
 \label{cap:Resultados}
-La evaluación de los modelos se ha realizado sobre un subconjunto de test compuesto por tres casos representativos: un sujeto de control sin presencia de lesión y dos sujetos con lesión isquémica, correspondientes a los escenarios de isquemia transitoria y permanente. En el caso del modelo de segmentación de isquemia, se ha aplicado un umbral de binarización de 0.8 sobre la salida probabilística, seleccionado previamente por ofrecer el mejor compromiso entre precisión espacial y error en la estimación volumétrica. Este análisis se plantea como una validación exploratoria orientada a estudiar el comportamiento del modelo en distintos tipos de casos clínicos.
+
+En este capítulo se presentan y discuten los resultados obtenidos por los modelos de segmentación cerebral y de segmentación de isquemia cerebral desarrollados en este trabajo. La evaluación se ha realizado sobre un subconjunto de test compuesto por tres casos representativos: un sujeto de control sin presencia de lesión y dos sujetos con lesión isquémica, correspondientes a los escenarios de isquemia transitoria e isquemia permanente. 
+
+Cada caso dispone de 28 cortes axiales para la evaluación de la segmentación cerebral. En los casos patológicos se dispone, además, de 9 cortes con anotación específica de la región isquémica, lo que da lugar a un total de 84 cortes empleados en la evaluación cerebral y 18 cortes adicionales de lesión para la evaluación específica de isquemia. En conjunto, el análisis considera 102 imágenes de test.
+
+Es importante precisar que la unidad principal de análisis en este capítulo es el caso completo, no el corte individual. Por este motivo, las gráficas comparativas por paciente muestran valores agregados, calculados como la media de los resultados obtenidos en todos los cortes correspondientes a cada caso. Esta decisión evita interpretar cada slice como una muestra independiente, ya que los cortes de un mismo volumen pertenecen al mismo sujeto y están anatómicamente correlacionados. No obstante, cuando resulta relevante para estudiar la variabilidad interna de cada volumen, el análisis se complementa con métricas calculadas a nivel de corte, especialmente en los apartados de explicabilidad y en la discusión de los cortes extremos.
+
+En el caso del modelo de segmentación de isquemia, se ha aplicado un umbral de binarización de 0.8 sobre la salida probabilística del modelo. Este valor fue seleccionado previamente por ofrecer el mejor compromiso entre precisión espacial, estabilidad volumétrica y reducción de falsos positivos, tal como se observa en la Tabla~\ref{tab:comparacion_threshold}. Aunque umbrales inferiores obtienen valores de Dice ligeramente superiores, el umbral 0.8 presenta el menor error absoluto y relativo de volumen, con un error absoluto de 0.0001 ml y un error relativo del 0.86\%. Por este motivo, se priorizó este valor como punto de equilibrio entre solapamiento espacial y precisión volumétrica. La evaluación debe interpretarse como una validación exploratoria orientada a analizar el comportamiento del sistema ante distintos escenarios representativos, y no como una validación clínica definitiva sobre una cohorte amplia.
 
 \section{Configuración experimental}
+La evaluación experimental se ha diseñado con el objetivo de analizar el comportamiento de los modelos desarrollados en condiciones representativas del uso previsto de la herramienta. Para ello, se han considerado dos tareas principales: la segmentación del cerebro completo y la segmentación de regiones de isquemia cerebral. Aunque ambas tareas se abordan mediante arquitecturas basadas en U-Net, presentan niveles de dificultad distintos. La segmentación cerebral corresponde a una estructura anatómica amplia y relativamente bien delimitada, mientras que la segmentación de isquemia implica regiones más pequeñas, de borde difuso y con mayor variabilidad visual.
+
+El conjunto de test está formado por tres casos completos. El primero corresponde a un caso de control, sin presencia de lesión, y permite evaluar la capacidad del sistema para no generar detecciones patológicas incorrectas. Los otros dos casos corresponden a sujetos con lesión isquémica, incluyendo un escenario de isquemia transitoria y otro de isquemia permanente. Esta selección permite cubrir tres situaciones relevantes para el análisis: ausencia de lesión, lesión de menor definición e intensidad, y lesión más estable y claramente visible.
+
+Para cada caso se han evaluado las máscaras generadas por el modelo frente a las segmentaciones manuales disponibles. En la tarea de segmentación cerebral se han utilizado los 28 cortes de cada volumen, dando lugar a 84 cortes evaluados. En la tarea de segmentación de isquemia se han analizado los cortes anotados con información específica de lesión, correspondientes a los casos patológicos. Además, el caso de control se ha incluido en la evaluación de isquemia para comprobar que el modelo mantiene un comportamiento conservador en ausencia de patología.
+
+Las métricas cuantitativas empleadas han sido el coeficiente Dice, la intersección sobre la unión o IoU, el error absoluto de volumen, el error relativo y el porcentaje de acierto volumétrico. Dice e IoU permiten medir el solapamiento espacial entre la máscara predicha y la máscara de referencia, mientras que las métricas volumétricas permiten valorar si la herramienta estima de forma adecuada la magnitud de la estructura segmentada. Esta segunda dimensión resulta especialmente relevante para el objetivo del proyecto, ya que la herramienta no solo busca generar máscaras visuales, sino también cuantificar automáticamente regiones anatómicas o patológicas.
+
+Las gráficas por paciente representan la media de los valores obtenidos en los slices de cada sujeto. Esta forma de presentación permite comparar de manera clara el comportamiento del modelo entre casos.
+
+Además del análisis cuantitativo, se ha realizado una evaluación cualitativa de las segmentaciones generadas. Este análisis visual resulta necesario en el contexto de la imagen biomédica, ya que las métricas de solapamiento pueden penalizar de forma intensa pequeñas diferencias en los bordes, especialmente cuando las regiones segmentadas son pequeñas o presentan límites ambiguos. Por este motivo, la interpretación de los resultados combina métricas numéricas, comparación visual de máscaras y análisis de coherencia espacial mediante técnicas de explicabilidad.
+
+Finalmente, para el modelo de isquemia se ha estudiado el impacto del umbral de binarización aplicado sobre la salida probabilística. En este capítulo se presentan los resultados correspondientes al umbral 0.8, seleccionado por ofrecer un equilibrio adecuado entre detección de lesión y reducción de falsos positivos. Esta decisión es especialmente importante en la segmentación de isquemia, donde valores de umbral más bajos pueden aumentar la sensibilidad, pero también producir sobresegmentaciones en regiones de intensidad intermedia.
+
 \section{Resultados en segmentación cerebral}
+La primera tarea evaluada corresponde a la segmentación del cerebro completo. Esta tarea constituye una etapa fundamental dentro del flujo de análisis, ya que permite aislar la región anatómica de interés y proporciona una base sobre la que posteriormente pueden calcularse medidas volumétricas o aplicarse procedimientos específicos de análisis de lesión.
+
 \subsection{Resultados cuantitativos}
+La Tabla~\ref{tab:metricas_cerebro} resume las métricas obtenidas por el modelo de segmentación cerebral sobre los casos de test. Los resultados muestran un rendimiento elevado y estable, con un coeficiente Dice 3D medio de $0.973 \pm 0.001$ y una IoU 3D media de $0.947 \pm 0.002$. Estos valores indican un alto grado de solapamiento entre las máscaras predichas y las segmentaciones de referencia.
+
 
 \begin{table}[h]
 \centering
@@ -23,7 +48,9 @@ IoU 3D & $0.947 \pm 0.002$ \\
 \label{tab:metricas_cerebro}
 \end{table}
 
-En la Figura \ref{fig:dice_paciente_cerebro} se representan los valores del coeficiente Dice obtenidos para cada uno de los casos evaluados en la tarea de segmentación de isquemia.
+Desde el punto de vista volumétrico, el modelo obtiene un error absoluto medio de $0.007$ ml y un error relativo medio del $1.56\%$. Estos valores muestran que la segmentación automática no solo reproduce adecuadamente la forma espacial del cerebro, sino que también conserva de manera precisa su volumen total. Este aspecto resulta relevante para la herramienta desarrollada, ya que una estimación volumétrica estable es necesaria para que los resultados puedan ser utilizados posteriormente en tareas de cuantificación biomédica.
+
+En la Figura~\ref{fig:dice_paciente_cerebro} se representan los valores medios del coeficiente Dice obtenidos para cada caso. Cada punto corresponde a la media de los valores calculados sobre los cortes del volumen correspondiente. Como se observa, el rendimiento se mantiene estable entre los tres casos evaluados, sin caídas relevantes asociadas a la presencia o ausencia de lesión isquémica. Este comportamiento sugiere que el modelo de cerebro aprende una representación anatómica robusta y no depende de forma significativa del estado patológico del sujeto.
 
 \begin{figure}[h]
     \centering
@@ -32,6 +59,8 @@ En la Figura \ref{fig:dice_paciente_cerebro} se representan los valores del coef
     \label{fig:dice_paciente_cerebro}
 \end{figure}
 
+La Figura~\ref{fig:volumen_cerebro} compara el volumen cerebral estimado por el modelo con el volumen obtenido a partir de la segmentación manual. La proximidad entre ambos valores confirma que las diferencias observadas son reducidas y que el modelo mantiene una estimación volumétrica coherente en los tres casos. Esta estabilidad es especialmente importante porque pequeñas desviaciones sistemáticas en la segmentación del cerebro podrían propagarse a etapas posteriores del análisis.
+
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/volumen_cerebro.png}
@@ -39,8 +68,12 @@ En la Figura \ref{fig:dice_paciente_cerebro} se representan los valores del coef
     \label{fig:volumen_cerebro}
 \end{figure}
 
+En conjunto, los resultados cuantitativos muestran que el modelo de segmentación cerebral alcanza un comportamiento preciso, estable y adecuado para su integración en la herramienta desarrollada. La baja variabilidad entre casos indica que el modelo generaliza correctamente dentro del subconjunto de evaluación utilizado, al menos para los escenarios representativos considerados en este trabajo.
+
 
 \subsection{Análisis cualitativo}
+Con el objetivo de complementar la evaluación cuantitativa, se ha realizado un análisis visual de las máscaras generadas por el modelo. La Figura~\ref{fig:cualitativo_cerebro} muestra ejemplos representativos de la segmentación cerebral obtenida en los distintos casos evaluados. En cada ejemplo se compara la imagen original, la máscara de referencia y la máscara predicha por el modelo.
+
 
 \begin{figure}[h]
     \centering
@@ -49,8 +82,11 @@ En la Figura \ref{fig:dice_paciente_cerebro} se representan los valores del coef
     \label{fig:cualitativo_cerebro}
 \end{figure}
 
-Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+A nivel visual, las máscaras generadas presentan una delimitación coherente del contorno cerebral. El modelo conserva forma de la estructura y no presenta artefactos fuera del área esperada. Este comportamiento es consistente con los valores elevados de Dice e IoU observados en el análisis cuantitativo.
+
+Las principales  se concentrdiscrepanciasan en los cortes extremos de los casos, donde las slices contienen ruido y son menos definida. Estos cortes no se han tenido en cuenta, ya que en un entorno de investigación son descartados por su baja calidad e interés, ya que no forman parte de la anatomía cerebral relevante para el análisis de la isquemia cerebral.
+
+En los cortes centrales, la segmentación es precisa y la estructura está bien definida, presentando bordes incluso más ajustados que la segmentación manual. Esto indica que el modelo es capaz de identificar de manera estable la región cerebral principal, incluso en presencia de variaciones de intensidad propias de la resonancia magnética.
 
 \subsection{Resultados de explicabilidad en la segmentación de cerebro}
 Además de evaluar la calidad de las máscaras generadas, se aplicaron técnicas de explicabilidad con el objetivo de analizar la coherencia espacial de las regiones utilizadas por el modelo durante la predicción. Este análisis no pretende sustituir a las métricas clásicas de segmentación, sino complementarlas mediante una evaluación del comportamiento interno del modelo. Esto es especialmente importante en un pipeline aplicado a la investigación biomédica. 
@@ -124,7 +160,6 @@ El comportamiento de las curvas de perturbación refuerza esta interpretación. 
 
 En conjunto, los resultados de explicabilidad no deben interpretarse como una validación clínica independiente del modelo, sino como una herramienta complementaria para analizar su comportamiento. Las métricas cuantitativas indican que las regiones destacadas por los métodos XAI influyen de forma significativa en la predicción, especialmente en el caso de Integrated Gradients. Asimismo, Grad-CAM++ aporta una visualización útil para interpretar la reconstrucción progresiva de la evidencia visual. Por tanto, la combinación de estos métodos permite obtener una visión más completa del proceso de segmentación realizado por el modelo.
 
-\subsection{Discusión}
 \section{Resultados en segmentación de isquemia}
 A continuación, se presentan los resultados obtenidos en la tarea de segmentación de las regiones de lesión por isquemia cerebral, la cual, por razones que se describirán en la siguiente sección, supone un problema más complejo que la segmentación del órgano sano. Para ello, al igual que en el modelo de cerebro, se han evaluado varias configuraciones de arquitecturas \textit{U-Net}, utilizando las métricas descritas anteriormente.
 
@@ -276,30 +311,31 @@ En conjunto, los resultados de explicabilidad sugieren que el modelo de isquemia
 \subsection{Discusión crítica del modelo de isquemia}
 Es importante destacar que el sistema desarrollado se concibe como una herramienta supervisada en la que el especialista mantiene el control de los datos finales. La herramienta permite la edición de cada una de las máscaras generada así como los valores volumétricos en cada corte de la resonancia analizada. Este enfoque garantiza que cualquier desviación pueda ser corregida de manera sencilla por el experto, integrando la automatización dentro de un \textbf{flujo de trabajo asistido y no sustitutivo}. 
 
-\section{Análisis comparativo global}
+\section{Conclusiones del capítulo}
+
+De forma global, los resultados obtenidos muestran un comportamiento diferenciado entre las dos tareas abordadas. La segmentación cerebral presenta un rendimiento más estable y preciso, con métricas de solapamiento elevadas y errores volumétricos reducidos en todos los casos evaluados. Este resultado era esperable, ya que el cerebro constituye una estructura anatómica de mayor tamaño, con límites más definidos y menor variabilidad relativa entre sujetos.
+
+Por el contrario, la segmentación de isquemia representa una tarea más compleja. Las regiones lesionadas son de menor tamaño, presentan bordes menos definidos y pueden mostrar una intensidad más variable en la imagen de resonancia magnética. Por ello, pequeñas discrepancias espaciales entre la predicción y la referencia manual tienen un impacto mayor sobre métricas como Dice o IoU. Aun así, el modelo permite localizar de forma coherente las zonas patológicas principales y proporciona estimaciones volumétricas útiles para una primera aproximación automatizada.
+
+El análisis conjunto de métricas cuantitativas, resultados visuales y mapas de explicabilidad indica que la herramienta desarrollada cumple el objetivo de ofrecer apoyo al análisis de imágenes biomédicas, especialmente como sistema de asistencia y cuantificación preliminar. No obstante, los resultados también muestran que la segmentación de lesiones requiere una validación más amplia y un refinamiento adicional antes de su uso en contextos de análisis clínico o experimental más exigentes.
+
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/bland_altman.png}
-    \caption{bland altman}
+    \caption{Gráfico de Bland-Altman para analizar la concordancia entre el volumen real y el volumen estimado por el modelo.}
     \label{fig:bland_altman}
 \end{figure}
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/boxplots_metricas.png}
-    \caption{bland altman}
+    \caption{Distribución de las principales métricas de evaluación obtenidas en los casos analizados.}
     \label{fig:boxplots_metricas}
 \end{figure}
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/dice_pacientes.png}
-    \caption{bland altman}
+    \caption{Comparación del coeficiente Dice medio obtenido para cada paciente evaluado.}
     \label{fig:dice_pacientes}
 \end{figure}
-
-
-
-\section{Relación con el objetivo del TFG}
-\section{Limitaciones}
-\section{Conclusiones del capítulo}

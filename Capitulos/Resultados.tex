@@ -51,6 +51,12 @@ En la Figura \ref{fig:dice_paciente_cerebro} se representan los valores del coef
 
 Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
 Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+\subsection{Resultados de explicabilidad en la segmentación de cerebro}
+Además de evaluar la calidad de las máscaras generadas, se aplicaron técnicas de explicabilidad con el objetivo de analizar la coherencia espacial de las regiones utilizadas por el modelo durante la predicción. Este análisis no pretende sustituir a las métricas clásicas de segmentación, sino complementarlas mediante una evaluación del comportamiento interno del modelo. Esto es especialmente importante en un pipeline aplicado a la investigación biomédica. 
+
+El análisis se realizó sobre 
+
 \subsection{Discusión}
 \section{Resultados en segmentación de isquemia}
 A continuación, se presentan los resultados obtenidos en la tarea de segmentación de las regiones de lesión por isquemia cerebral, la cual, por razones que se describirán en la siguiente sección, supone un problema más complejo que la segmentación del órgano sano. Para ello, al igual que en el modelo de cerebro, se han evaluado varias configuraciones de arquitecturas \textit{U-Net}, utilizando las métricas descritas anteriormente.
@@ -162,7 +168,7 @@ Para la interpretación visual se aplicaron Grad-CAM, Grad-CAM++ e Integrated Gr
 
 En los cortes correctamente segmentados, los mapas de Grad-CAM y Grad-CAM++ muestran activaciones localizadas en la región predicha como isquemia, con una correspondencia visual clara con la máscara de referencia en los casos de mayor solapamiento. Integrated Gradients también resalta la zona de interés, aunque con un patrón más disperso y fragmentado, lo que resulta esperable en métodos basados directamente en gradientes a nivel de píxel. Esta diferencia hace que Grad-CAM y Grad-CAM++ sean más interpretables visualmente, mientras que Integrated Gradients aporta una explicación más fina pero menos compacta.
 
-La evaluación cuantitativa mediante perturbación refuerza esta interpretación. En los cortes con lesión correctamente detectada, los valores medios de \textit{Deletion AUC} fueron muy bajos para los tres métodos, con valores de 0,025 para Grad-CAM y Grad-CAM++, y 0,026 para Integrated Gradients. Esto indica que, al eliminar en primer lugar las regiones consideradas más relevantes, el score asociado a la predicción cae de forma abrupta. De forma complementaria, las curvas de \textit{Insertion} muestran que al reconstruir la imagen empezando por las regiones más relevantes el modelo recupera progresivamente su activación, especialmente en Grad-CAM++ e Integrated Gradients, con valores medios de 0,840 y 0,879 respectivamente.
+La evaluación cuantitativa mediante perturbación, resumida en la Tabla~\ref{tab:xai_isquemia_resultados}, refuerza esta interpretación. En los cortes con lesión correctamente detectada, los valores medios de \textit{Deletion AUC} fueron muy bajos para los tres métodos, con valores de 0,025 para Grad-CAM y Grad-CAM++, y 0,026 para Integrated Gradients. Esto indica que, al eliminar en primer lugar las regiones consideradas más relevantes, el score asociado a la predicción cae de forma abrupta. De forma complementaria, las curvas de \textit{Insertion} muestran que al reconstruir la imagen empezando por las regiones más relevantes el modelo recupera progresivamente su activación, especialmente en Grad-CAM++ e Integrated Gradients, con valores medios de 0,840 y 0,879 respectivamente.
 
 Además, los valores de \textit{LeRF AUC} se mantienen elevados, lo que indica que al eliminar inicialmente las regiones menos relevantes la predicción se conserva durante una parte importante del proceso de perturbación. Del mismo modo, el \textit{AOPC} normalizado se sitúa en valores cercanos a 1 para los tres métodos, reforzando la idea de que las regiones destacadas por los mapas tienen una influencia significativa en la salida del modelo.
 
@@ -174,9 +180,15 @@ En conjunto, los resultados de explicabilidad sugieren que el modelo de isquemia
 \centering
 \caption{Resultados cuantitativos de explicabilidad para los cortes de isquemia correctamente detectados.}
 \label{tab:xai_isquemia_resultados}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
 \begin{tabular}{lcccc}
 \hline
-\textbf{Método} & \textbf{Deletion AUC} & \textbf{Insertion AUC} & \textbf{LeRF AUC} & \textbf{AOPC norm.} \\
+\textbf{Método} &
+\makecell{\textbf{Deletion}\\\textbf{AUC}} &
+\makecell{\textbf{Insertion}\\\textbf{AUC}} &
+\makecell{\textbf{LeRF}\\\textbf{AUC}} &
+\makecell{\textbf{AOPC}\\\textbf{normalizado}} \\
 \hline
 Grad-CAM & 0,025 & 0,627 & 0,867 & 1,000 \\
 Grad-CAM++ & 0,025 & 0,840 & 0,840 & 1,000 \\

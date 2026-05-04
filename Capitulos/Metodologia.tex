@@ -400,7 +400,7 @@ del decoder, al tratarse de una capa próxima a la generación de la máscara fi
 que todavía conserva información espacial relevante. Aunque Grad-CAM fue
 propuesto originalmente para tareas de clasificación, puede adaptarse a problemas
 de segmentación siempre que se defina una puntuación escalar sobre la salida densa
-del modelo \citep{selvaraju2017gradcam}. En este trabajo, dicha puntuación se
+del modelo \citep{Selvaraju_2019}. En este trabajo, dicha puntuación se
 define a partir de la activación del modelo en la región segmentada como lesión,
 agregando la contribución de los píxeles predichos como pertenecientes a la clase
 isquemia. De este modo, la salida del modelo se reduce a un único valor sobre el que
@@ -409,10 +409,10 @@ es posible calcular gradientes de forma coherente con la tarea de segmentación.
 Además de Grad-CAM, se emplean Grad-CAM++ e \textit{Integrated Gradients}
 como métodos complementarios de explicación. Grad-CAM++ se incorpora como una
 variante orientada a mejorar la localización espacial de las regiones relevantes
-\citep{chattopadhay2018gradcamplusplus}, mientras que \textit{Integrated Gradients}
+\citep{Chattopadhay_2018}, mientras que \textit{Integrated Gradients}
 permite estimar la contribución de cada píxel a partir de la comparación progresiva
 entre una imagen de referencia y la imagen original
-\citep{sundararajan2017axiomatic}. La combinación de estos métodos permite
+\citep{sundararajan2017axiomaticattributiondeepnetworks}. La combinación de estos métodos permite
 analizar la predicción desde enfoques distintos, evitando depender de una única
 técnica de explicación.
 
@@ -446,7 +446,7 @@ varía la salida del modelo al modificar progresivamente las regiones considerad
 más relevantes por cada método de explicación, utilizando métricas como
 \textit{Deletion}, \textit{Insertion} y AOPC. Estas métricas permiten comprobar si
 las zonas destacadas por los mapas de relevancia tienen un impacto real sobre la
-predicción del modelo \citep{samek2017evaluating,petsiuk2018rise}.
+predicción del modelo \citep{samek2017explainableartificialintelligenceunderstanding}.
 
 En conjunto, la integración de explicabilidad en el modelo de isquemia se plantea
 como un mecanismo complementario de análisis del comportamiento de la red. Su
@@ -476,7 +476,7 @@ continuación su adaptación al modelo de segmentación cerebral, donde la regi�
 objetivo deja de ser una lesión localizada y pasa a corresponderse con una estructura
 anatómica completa.
 
-\subsubsection{Aplicación de explicabilidad al modelo de segmentación cerebral}
+\subsection{Aplicación de explicabilidad al modelo de segmentación cerebral}
 
 A continuación, se describe cómo se han aplicado las técnicas de explicabilidad al
 modelo encargado de segmentar el cerebro. A diferencia del modelo de isquemia,

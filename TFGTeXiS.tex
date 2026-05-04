@@ -79,7 +79,7 @@ constantes,guionado,Cascaras/bibliografia,config%
 \usepackage{amsmath}
 \usepackage{tikz}
 \usepackage{makecell}
-\usetikzlibrary{positioning}
+\usetikzlibrary{positioning, arrows.meta}
 % Incluimos el fichero con comandos de constantes
 \include{constantes}
 
@@ -101,6 +101,37 @@ constantes,guionado,Cascaras/bibliografia,config%
     \pdfinfo{/CreationDate (\today)}
 \fi
 
+%
+% Tikz estilo para diagramas de flujo
+%
+
+\tikzset{
+    bloque/.style={
+        rectangle,
+        rounded corners,
+        draw=black!60,
+        fill=blue!8,
+        minimum width=8cm,
+        minimum height=1cm,
+        align=center,
+        font=\small
+    },
+    bloquegris/.style={
+        rectangle,
+        rounded corners,
+        draw=black!60,
+        fill=gray!10,
+        minimum width=8cm,
+        minimum height=1cm,
+        align=center,
+        font=\small
+    },
+    flecha/.style={
+        -{Latex[length=3mm]},
+        thick,
+        draw=black!70
+    }
+}
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 %                        Documento

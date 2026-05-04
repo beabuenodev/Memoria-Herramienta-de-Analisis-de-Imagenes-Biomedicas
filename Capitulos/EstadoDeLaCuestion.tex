@@ -33,6 +33,28 @@ comprobar si el resultado tiene sentido y si las medidas que se obtienen son coh
 En este Trabajo de Fin de Grado se aplica visión por computador al análisis de resonancias magnéticas preclínicas. El objetivo es automatizar parte de la
 segmentación del cerebro y de la lesión, y después calcular medidas como el volumen.
 
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[node distance=0.9cm]
+
+        \node[bloque] (img) {Imagen médica};
+        \node[bloquegris, below=of img] (prep) {Preprocesamiento};
+        \node[bloque, below=of prep] (modelo) {Modelo de visión por computador};
+        \node[bloquegris, below=of modelo] (tareas) {Clasificación \quad / \quad Detección \quad / \quad Segmentación};
+        \node[bloque, below=of tareas] (salida) {Resultado visual o cuantitativo};
+        \node[bloquegris, below=of salida] (analisis) {Análisis o revisión experta};
+
+        \draw[flecha] (img) -- (prep);
+        \draw[flecha] (prep) -- (modelo);
+        \draw[flecha] (modelo) -- (tareas);
+        \draw[flecha] (tareas) -- (salida);
+        \draw[flecha] (salida) -- (analisis);
+
+    \end{tikzpicture}
+    \caption{Flujo general de análisis en imagen médica mediante técnicas de visión por computador. A partir de una imagen biomédica pueden aplicarse distintas tareas automáticas, entre ellas la clasificación, la detección y la segmentación, con el objetivo de obtener resultados visuales o cuantitativos que apoyen el análisis posterior. Elaboración propia.}
+    \label{fig:flujo_general_imagen_medica}
+\end{figure}
+
 \section{Arquitecturas de segmentación: U-Net}
 
 La arquitectura U-Net, propuesta originalmente por Ronneberger et al. en 2015, fue diseñada para abordar las particularidades del análisis de imágenes biomédicas, un dominio con necesidades distintas a las de la visión por computador aplicada a imágenes naturales \citep{ronneberger2015unet}. En segmentación médica no basta con clasificar una imagen completa, sino que es necesario asignar una etiqueta a cada píxel o vóxel de la imagen de entrada, con el objetivo de delimitar con precisión estructuras anatómicas o regiones patológicas.
@@ -58,6 +80,15 @@ De manera simplificada, si \(x_l\) representa la salida del nivel \(l\) del \tex
 
 donde \(\operatorname{Up}(\cdot)\) representa la operación de sobremuestreo y \(\operatorname{Concat}(\cdot)\) la concatenación de características. Esta combinación permite recuperar detalle espacial sin renunciar al contexto global aprendido por la red.
 
+Como se muestra en la Figura~\ref{fig:arquitectura_unet_cuestion}, U-Net sigue una estructura encoder--decoder en la que las conexiones de salto permiten combinar información profunda con detalles espaciales de mayor resolución.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{Imagenes/EstadoCuestion/unet_wikipedia.png}
+    \caption{Ejemplo de arquitectura U-Net para segmentación de imágenes. La red sigue una estructura encoder--decoder con conexiones de salto entre niveles de resolución equivalentes. Fuente: Mehrdad Yazdani, Wikimedia Commons, licencia CC BY-SA 4.0.}
+    \label{fig:arquitectura_unet_cuestion}
+\end{figure}
+
 \section{Aprendizaje por transferencia (Transfer Learning)}
 
 El aprendizaje por transferencia consiste en partir de un modelo previamente entrenado y adaptarlo a una tarea nueva. En lugar de entrenar una red desde cero, se aprovechan pesos que ya han aprendido a extraer información útil de otras imágenes.
@@ -73,6 +104,26 @@ RadImageNet es un ejemplo de este tipo de recurso, ya que incluye imágenes méd
 En arquitecturas como U-Net, el aprendizaje por transferencia puede aplicarse utilizando un encoder preentrenado. De esta forma, el encoder actúa como extractor de características, mientras que el decoder aprende a generar la máscara de segmentación correspondiente. Así se aprovecha una base visual ya entrenada, pero el modelo sigue adaptándose a la tarea concreta.
 
 En este tipo de trabajos, el \textit{Transfer Learning} no se utiliza solo como una mejora adicional, sino como una respuesta a una limitación práctica del problema: la escasez de datos anotados. Partir de un modelo previamente entrenado permite trabajar con redes de mayor capacidad sin depender completamente de disponer de un conjunto de datos grande.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[node distance=0.9cm]
+
+        \node[bloque] (origen) {Modelo preentrenado};
+        \node[bloquegris, below=of origen] (caract) {Extracción de características};
+        \node[bloque, below=of caract] (integracion) {Integración en una nueva arquitectura};
+        \node[bloquegris, below=of integracion] (ajuste) {Ajuste con el dataset específico};
+        \node[bloque, below=of ajuste] (tarea) {Nueva tarea de imagen médica};
+
+        \draw[flecha] (origen) -- (caract);
+        \draw[flecha] (caract) -- (integracion);
+        \draw[flecha] (integracion) -- (ajuste);
+        \draw[flecha] (ajuste) -- (tarea);
+
+    \end{tikzpicture}
+    \caption{Esquema general del aprendizaje por transferencia. Un modelo previamente entrenado se reutiliza como punto de partida para una nueva tarea, aprovechando representaciones ya aprendidas y adaptándolas posteriormente al problema específico. Elaboración propia.}
+    \label{fig:transfer_learning_general}
+\end{figure}
 
 \section{Explicabilidad en Inteligencia Artificial (XAI)}
 
@@ -91,3 +142,23 @@ Esta decisión cambia la interpretación de la explicación. No es lo mismo expl
 La explicabilidad no sustituye a métricas como Dice o IoU, ya que estas siguen siendo necesarias para medir el parecido entre la máscara predicha y la máscara manual. Sin embargo, dichas métricas no indican por qué el modelo ha producido una predicción concreta. Los métodos de XAI añaden otra forma de revisar el resultado, centrada en analizar qué zonas de la imagen han influido en la decisión del modelo.
 
 En este trabajo, la explicabilidad se utiliza como apoyo al análisis del modelo, con el objetivo de comprobar si las predicciones se basan en regiones coherentes con el problema biomédico estudiado.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[node distance=0.9cm]
+
+        \node[bloque] (entrada) {Imagen de entrada};
+        \node[bloquegris, below=of entrada] (modelo) {Modelo de inteligencia artificial};
+        \node[bloque, below=of modelo] (salida) {Salida del modelo};
+        \node[bloquegris, below=of salida] (xai) {Método de explicabilidad};
+        \node[bloque, below=of xai] (mapa) {Mapa de relevancia};
+
+        \draw[flecha] (entrada) -- (modelo);
+        \draw[flecha] (modelo) -- (salida);
+        \draw[flecha] (salida) -- (xai);
+        \draw[flecha] (xai) -- (mapa);
+
+    \end{tikzpicture}
+    \caption{Esquema general de aplicación de técnicas de explicabilidad visual. A partir de la imagen y de la salida del modelo, un método de XAI genera un mapa de relevancia que permite analizar qué regiones han influido más en la predicción. Elaboración propia.}
+    \label{fig:xai_general}
+\end{figure}

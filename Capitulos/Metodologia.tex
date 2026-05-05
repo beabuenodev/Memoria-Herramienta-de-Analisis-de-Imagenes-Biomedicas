@@ -552,3 +552,56 @@ métricas de segmentación.
     salida utilizada para el análisis cualitativo del comportamiento del modelo.}
     \label{fig:xai_ejemplo_cerebro}
 \end{figure}
+
+\section[Implementación y reproducibilidad]{Implementación, reproducibilidad y código entregado}
+
+El desarrollo práctico del programa se ha organizado en una serie de notebooks de \textit{Python}, que constituyen el código entregado junto con esta memoria. Esta decisión corresponde con el carácter experimental de este proyecto. Durante el desarrollo del TFG se acordó mantener el sistema en formato notebook, sin interfaz gráfica independiente, siempre que estos incluyeran de forma clara el procedimiento de entrenamiento, uso y evaluación de los modelos.
+
+Por lo tanto, se entregan cinco notebooks principales, cada uno de ellos con responsabilidades diferenciadas. En primer lugar, el notebook de entrenamiento: \path{UNET_RadImageNet_unificado.ipynb} contiene la definición de la arquitectura U-Net empleada, la carga del conjunto de datos, el preprocesamiento de las imágenes y máscaras, la configuración de entrenamiento y el guardado final de los modelos. Este notebook permite reproducir el proceso de entrenamiento, pudiéndose entrenar solo un modelo para una tarea concreta o dos modelos (uno de órgano y otro de lesión). En este último caso, se aplica la máscara de \textit{Ground Truth} del órgano en la imagen original, y con esa imagen modificada en la que solo aparece el órgano, se entrena el modelo de lesión. 
+
+Se adjunta además un notebook de testeo: \path{Tester_Pipeline.ipynb}, que permite cargar los modelos entrenados para realizar el pipeline completo. Primero se cargan los modelos y el caso de estudio a analizar, se obtienen las máscaras a través de los modelos, modificando la imagen original de la misma forma que en el entreno, y se usan las máscaras resultantes para el cálculo de los volúmenes de órgano y lesión. Este notebook permite reproducir el proceso de inferencia, obteniendo las máscaras segmentadas y los volúmenes cuantificados a partir de la imagen de entrada.
+
+El notebook \path{GraphTester.ipynb} contiene el código utilizado para generar las métricas de los modelos, expuestas en el apartado de Resultados. En este notebook se implementan las funciones necesarias para calcular el coeficiente Dice, el error absoluto de volumen y el error relativo porcentual, tanto a nivel de corte como a nivel volumétrico. Además, se incluyen funciones para generar gráficos comparativos entre la segmentación automática y la manual, facilitando la visualización de los resultados obtenidos.
+
+Los notebooks de XAI para el cerebro y la lesión isquémica implementan el análisis de explicabilidad de los modelos entrenados. Ambos siguen una estructura común: carga del modelo, selección de la capa objetivo, generación de mapas de relevancia, cálculo de métricas de fidelidad y exportación de resultados. En ellos se aplican técnicas como Grad-CAM, Grad-CAM++, Integrated Gradients y oclusión. Además, se generan curvas de perturbación como deletion, insertion, MoRF y LeRF, junto con métricas derivadas como AOPC. Estos resultados se exportan en formato CSV y como figuras, facilitando su incorporación al análisis cualitativo y cuantitativo de la memoria.
+
+Además se incluyen los dos modelos desarrollados, guardados en formato \texttt{.h5}, que pueden ser cargados directamente para realizar el proceso de inferencia sobre nuevos casos de estudio. Estos modelos corresponden a la arquitectura U-Net entrenada para segmentar el cerebro y la lesión isquémica, respectivamente.
+
+Y por último, también se adjuntan, a modo de reproducibilidad, los archivos resultantes de la ejecución de los notebooks de cálculo de métricas y explicabilidad, con los datos resultantes en formato CSV y las imágenes generadas en formato PNG.
+
+Todo el código desarrollado se encuentra disponible en el repositorio de GitHub del proyecto:
+
+\begin{center}
+\url{https://github.com/beabuenodev/Herramienta-de-Analisis-de-Imagenes-Biomedicas}
+\end{center}
+
+Finalmente, en la tabla \ref{tab:notebooks_entregados} se presenta un resumen de los notebooks entregados, indicando su función principal dentro del proyecto y su relación con los distintos aspectos metodológicos descritos en esta sección. Esta tabla sirve como guía para navegar por el código y comprender la estructura general del desarrollo realizado.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{p{0.30\textwidth} p{0.60\textwidth}}
+\hline
+\textbf{Notebook} & \textbf{Función principal} \\
+\hline
+
+Entrenamiento U-Net &
+Entrenamiento de los modelos U-Net para cerebro e isquemia. Corresponde al archivo \path{UNET_RadImageNet_unificado.ipynb}. \\
+
+Tester gráfico de umbral &
+Ejecución de pruebas visuales sobre segmentaciones generadas con distintos umbrales de binarización. Corresponde al archivo \path{GraphTester_Threshold.ipynb}. \\
+
+Tester del pipeline &
+Ejecución del pipeline completo de segmentación y cálculo de volumen. Corresponde al archivo \path{Tester_Pipeline.ipynb}. \\
+
+XAI cerebro &
+Generación y evaluación de explicaciones para el modelo cerebral. Corresponde al archivo \path{XAI_Cerebro_Explainability.ipynb}. \\
+
+XAI isquemia &
+Generación y evaluación de explicaciones para el modelo de isquemia. Corresponde al archivo \path{XAI_Isquemia_Explainability.ipynb}. \\
+
+\hline
+\end{tabular}
+\caption{Resumen de los notebooks entregados en el repositorio del proyecto.}
+\label{tab:notebooks_entregados}
+\end{table}

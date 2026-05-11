@@ -2,18 +2,17 @@
 
 \section*{\tituloPortadaEngVal}
 
-The present Bachelor's Thesis approaches the design and development of a computer vision based tool focused on the segmentation of Magnetic Resonance Imaging (MRI) with the objective of measuring volumes of organ and lesion in a specific scientific or clinical field.
+The present Bachelor's Thesis addresses the design and development of a computer vision-based tool for the segmentation of magnetic resonance imaging (MRI) images, with the aim of measuring the volumes of an organ and a lesion in a scientific or clinical context.
 
-In the current scope of biomedical research, manual segmentation of preclinical Magnetic Resonance Imaging (MRI) images is an arduous and repetitive process that can lack data consistency, given that the decision for limits of the segmented zone can depend on personal criteria.
+In biomedical research, manual segmentation of MRI images is an arduous and repetitive process that may present variability between experts due to the criteria used to delimit the regions of interest.
 
-In collaboration with ICTS BioImagen Complutense, a functional prototype that achieves automatic segmentation has been developed in one of the cases that the institute presented: segmentation of ischemic lesions in the mouse brain. Using two models based on the U-Net architecture, the tool completes the segmentation process over each of the slices, first with the brain and then over the lesion. Finally, it calculates volumes which are returned to the end user for its posterior processing.
+In collaboration with ICTS BioImagen Complutense, a functional prototype has been developed to perform automatic segmentation for one of the use cases proposed by the centre: the segmentation of ischemic lesions in the mouse brain. Using two models, the tool performs the segmentation process on each slice, first segmenting the brain and then the lesion. Afterwards, it calculates the corresponding volumes and returns them to the user for further processing.
 
-Due to the scarcity of the annotated data, typical in the medical field (30 patients in our dataset), the methodology has been substantiated in the use of transfer learning over the U-Net architecture. Furthermore, to make sure the prototype is robust and predictions' interpretability is guaranteed, eXplainable Artificial Intelligence (XAI) techniques have been implemented, such as Grad-CAM and Integrated Gradients.
-
+Due to the scarcity of annotated data, which is common in medical environments, the methodology is based on the use of transfer learning with a U-Net architecture. In addition, in order to provide robustness to the prototype and support the interpretation of its predictions, Explainable Artificial Intelligence (XAI) techniques such as Grad-CAM and Integrated Gradients are applied.
 
 \section*{Keywords}
 
-\noindent Cerebral ischemia, medical segmentation, Artificial Intelligence (AI), Convolutional Neural Networks (CNN), U-Net, eXplicable Artificial Intelligence (XAI), Computer vision
+\noindent Magnetic Resonance Image (MRI), Cerebral ischemia, medical segmentation, Artificial Intelligence (AI), Convolutional Neural Networks (CNN), U-Net, eXplicable Artificial Intelligence (XAI), Computer vision
 
 
 

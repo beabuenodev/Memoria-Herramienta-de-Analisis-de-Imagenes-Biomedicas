@@ -233,3 +233,109 @@
   pages={60--88},
   year={2017}
 }
+
+@article{shen2017deep,
+  title={Deep learning in medical image analysis},
+  author={Shen, Dinggang and Wu, Guorong and Suk, Heung-Il},
+  journal={Annual Review of Biomedical Engineering},
+  volume={19},
+  pages={221--248},
+  year={2017}
+}
+
+@article{hesamian2019deep,
+  title={Deep learning techniques for medical image segmentation: achievements and challenges},
+  author={Hesamian, Mohammad Havaei and Jia, Wenjing and He, Xiangjian and Kennedy, Paul},
+  journal={Journal of Digital Imaging},
+  volume={32},
+  number={4},
+  pages={582--596},
+  year={2019},
+  publisher={Springer}
+}
+
+@article{tajbakhsh2016cnn,
+author = {Tajbakhsh, Nima and Shin, Jae and Gurudu, Suryakanth and Hurst, R Todd and Kendall, Christopher and Gotway, Michael and Liang, Jianming},
+year = {2016},
+month = {03},
+pages = {1-1},
+title = {Convolutional Neural Networks for Medical Image Analysis: Fine Tuning or Full Training?},
+volume = {35},
+journal = {IEEE Transactions on Medical Imaging},
+doi = {10.1109/TMI.2016.2535302}
+}
+
+@article{zhang2023multipleannotators,
+title = {Learning from multiple annotators for medical image segmentation},
+journal = {Pattern Recognition},
+volume = {138},
+pages = {109400},
+year = {2023},
+issn = {0031-3203},
+doi = {https://doi.org/10.1016/j.patcog.2023.109400},
+url = {https://www.sciencedirect.com/science/article/pii/S0031320323001012},
+author = {Le Zhang and Ryutaro Tanno and Moucheng Xu and Yawen Huang and Kevin Bronik and Chen Jin and Joseph Jacob and Yefeng Zheng and Ling Shao and Olga Ciccarelli and Frederik Barkhof and Daniel C. Alexander},
+keywords = {Multi-Annotator, Label fusion, Segmentation},
+abstract = {Supervised machine learning methods have been widely developed for segmentation tasks in recent years. However, the quality of labels has high impact on the predictive performance of these algorithms. This issue is particularly acute in the medical image domain, where both the cost of annotation and the inter-observer variability are high. Different human experts contribute estimates of the ”actual” segmentation labels in a typical label acquisition process, influenced by their personal biases and competency levels. The performance of automatic segmentation algorithms is limited when these noisy labels are used as the expert consensus label. In this work, we use two coupled CNNs to jointly learn, from purely noisy observations alone, the reliability of individual annotators and the expert consensus label distributions. The separation of the two is achieved by maximally describing the annotator’s “unreliable behavior” (we call it “maximally unreliable”) while achieving high fidelity with the noisy training data. We first create a toy segmentation dataset using MNIST and investigate the properties of the proposed algorithm. We then use three public medical imaging segmentation datasets to demonstrate our method’s efficacy, including both simulated (where necessary) and real-world annotations: 1) ISBI2015 (multiple-sclerosis lesions); 2) BraTS (brain tumors); 3) LIDC-IDRI (lung abnormalities). Finally, we create a real-world multiple sclerosis lesion dataset (QSMSC at UCL: Queen Square Multiple Sclerosis Center at UCL, UK) with manual segmentations from 4 different annotators (3 radiologists with different level skills and 1 expert to generate the expert consensus label). In all datasets, our method consistently outperforms competing methods and relevant baselines, especially when the number of annotations is small and the amount of disagreement is large. The studies also reveal that the system is capable of capturing the complicated spatial characteristics of annotators’ mistakes.}
+}
+
+@ARTICLE{pan2010survey,
+  author={Pan, Sinno Jialin and Yang, Qiang},
+  journal={IEEE Transactions on Knowledge and Data Engineering}, 
+  title={A Survey on Transfer Learning}, 
+  year={2010},
+  volume={22},
+  number={10},
+  pages={1345-1359},
+  keywords={Machine learning;Training data;Data mining;Knowledge transfer;Space technology;Knowledge engineering;Machine learning algorithms;Labeling;Learning systems;Testing;Transfer learning;survey;machine learning;data mining.},
+  doi={10.1109/TKDE.2009.191}}
+
+@misc{yosinski2014transferable,
+  title={How transferable are features in deep neural networks?}, 
+  author={Jason Yosinski and Jeff Clune and Yoshua Bengio and Hod Lipson},
+  year={2014},
+  eprint={1411.1792},
+  archivePrefix={arXiv},
+  primaryClass={cs.LG},
+  url={https://arxiv.org/abs/1411.1792}, 
+}
+
+@article{arrieta2020xai,
+  title = {Explainable Artificial Intelligence (XAI): Concepts, taxonomies, opportunities and challenges toward responsible AI},
+  journal = {Information Fusion},
+  volume = {58},
+  pages = {82-115},
+  year = {2020},
+  issn = {1566-2535},
+  doi = {https://doi.org/10.1016/j.inffus.2019.12.012},
+  url = {https://www.sciencedirect.com/science/article/pii/S1566253519308103},
+  author = {Alejandro {Barredo Arrieta} and Natalia Díaz-Rodríguez and Javier {Del Ser} and Adrien Bennetot and Siham Tabik and Alberto Barbado and Salvador Garcia and Sergio Gil-Lopez and Daniel Molina and Richard Benjamins and Raja Chatila and Francisco Herrera},
+  keywords = {Explainable Artificial Intelligence, Machine Learning, Deep Learning, Data Fusion, Interpretability, Comprehensibility, Transparency, Privacy, Fairness, Accountability, Responsible Artificial Intelligence},
+  abstract = {In the last few years, Artificial Intelligence (AI) has achieved a notable momentum that, if harnessed appropriately, may deliver the best of expectations over many application sectors across the field. For this to occur shortly in Machine Learning, the entire community stands in front of the barrier of explainability, an inherent problem of the latest techniques brought by sub-symbolism (e.g. ensembles or Deep Neural Networks) that were not present in the last hype of AI (namely, expert systems and rule based models). Paradigms underlying this problem fall within the so-called eXplainable AI (XAI) field, which is widely acknowledged as a crucial feature for the practical deployment of AI models. The overview presented in this article examines the existing literature and contributions already done in the field of XAI, including a prospect toward what is yet to be reached. For this purpose we summarize previous efforts made to define explainability in Machine Learning, establishing a novel definition of explainable Machine Learning that covers such prior conceptual propositions with a major focus on the audience for which the explainability is sought. Departing from this definition, we propose and discuss about a taxonomy of recent contributions related to the explainability of different Machine Learning models, including those aimed at explaining Deep Learning methods for which a second dedicated taxonomy is built and examined in detail. This critical literature analysis serves as the motivating background for a series of challenges faced by XAI, such as the interesting crossroads of data fusion and explainability. Our prospects lead toward the concept of Responsible Artificial Intelligence, namely, a methodology for the large-scale implementation of AI methods in real organizations with fairness, model explainability and accountability at its core. Our ultimate goal is to provide newcomers to the field of XAI with a thorough taxonomy that can serve as reference material in order to stimulate future research advances, but also to encourage experts and professionals from other disciplines to embrace the benefits of AI in their activity sectors, without any prior bias for its lack of interpretability.}
+}
+
+@inproceedings{krizhevsky2012imagenet,
+ author = {Krizhevsky, Alex and Sutskever, Ilya and Hinton, Geoffrey E},
+ booktitle = {Advances in Neural Information Processing Systems},
+ editor = {F. Pereira and C.J. Burges and L. Bottou and K. Weinberger},
+ pages = {},
+ publisher = {Curran Associates, Inc.},
+ title = {ImageNet Classification with Deep Convolutional Neural Networks},
+ url = {https://proceedings.neurips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf},
+ volume = {25},
+ year = {2012}
+}
+
+@article{Vinogradova_2020,
+   title={Towards Interpretable Semantic Segmentation via Gradient-Weighted Class Activation Mapping (Student Abstract)},
+   volume={34},
+   ISSN={2159-5399},
+   url={http://dx.doi.org/10.1609/aaai.v34i10.7244},
+   DOI={10.1609/aaai.v34i10.7244},
+   number={10},
+   journal={Proceedings of the AAAI Conference on Artificial Intelligence},
+   publisher={Association for the Advancement of Artificial Intelligence (AAAI)},
+   author={Vinogradova, Kira and Dibrov, Alexandr and Myers, Gene},
+   year={2020},
+   month=Apr, pages={13943–13944} 
+}

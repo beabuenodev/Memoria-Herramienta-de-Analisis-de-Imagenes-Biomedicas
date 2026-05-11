@@ -17,32 +17,25 @@ Estos conceptos constituyen la base biomédica necesaria para comprender el prob
 
 \section{Visión por computador en imagen biomédica}
 
-La visión por computador o visión artificial es un campo de la inteligencia artificial que se centra en desarrollar métodos para transformar las imágenes
-del mundo real en información que pueda ser interpretada por un ordenador. La visión por computador aplicada a imagen biomédica consiste en usar técnicas
-automáticas para analizar imágenes biomédicas. Estas imágenes pueden venir de resonancia magnética, tomografía computarizada, ecografía o radiografía.
-Cada modalidad muestra la información de una forma distinta y eso afecta al tipo de análisis que se puede hacer.
+La visión por computador o visión artificial es un campo de la inteligencia artificial que se centra en desarrollar métodos para transformar información visual en información que pueda ser interpretada por un ordenador. La visión por computador aplicada a imagen biomédica consiste en usar técnicas
+automáticas para analizar imágenes biomédicas. Estas imágenes pueden venir principalmente de resonancia magnética, tomografía computarizada, ecografía o radiografía.
+Cada modalidad muestra la información de una forma distinta y eso afecta al tipo de análisis que se puede hacer sobre ellas \citep{litjens2017survey, shen2017deep}.
 
-En medicina, muchas veces no basta con decir si una imagen tiene o no una lesión. También interesa saber dónde está, cuánto ocupa y qué parte del órgano
-afecta. Por eso se usan tareas como la detección y la segmentación. Aunque la detección es una tarea parecida a la clasificación, la segmentación va un
-paso más allá, ya que separa píxel a píxel la zona que se quiere estudiar del resto de la imagen.
+En imagen médica no siempre resulta suficiente determinar si una imagen contiene una alteración. En muchas aplicaciones también es necesario conocer su localización, extensión y relación con las estructuras anatómicas cercanas. Por este motivo, además de tareas como la clasificación o la detección, la segmentación desempeña un papel fundamental, ya que permite asignar una etiqueta a cada píxel o vóxel de la imagen y delimitar de forma precisa la región de interés \citep{hesamian2019deep}.
 
-Esta máscara de segmentación permite medir, por ejemplo, el área de una lesión en un corte o su volumen total si se trabaja con varios
-cortes de una resonancia. Esto es útil porque convierte una observación visual en un dato numérico, no elimina la revisión experta, pero sí puede hacer
-el proceso más rápido y más fácil de comparar entre casos.
+Las máscaras de segmentación permiten obtener medidas cuantitativas a partir de la imagen, como el área de una lesión en un corte o su volumen total cuando se trabaja con varios cortes de una IRM. De este modo, una observación visual puede transformarse en un dato numérico comparable entre casos, experimentos o momentos temporales. Estas medidas no sustituyen la revisión experta, pero pueden facilitar el análisis y mejorar la reproducibilidad del proceso \citep{litjens2017survey, hesamian2019deep}.
 
-En los últimos años, las redes neuronales convolucionales han tenido un gran uso en imagen biomédica. Estas redes aprenden patrones directamente desde las
-imágenes, sin tener que definir a mano todas las características y pueden detectar bordes, cambios de intensidad o formas más complejas. En revisiones
-como la de \citep{litjens2017survey} se recoge su uso en tareas de clasificación, detección y segmentación médica.
+En los últimos años, las redes neuronales convolucionales han adquirido un papel destacado en imagen biomédica. Estas redes aprenden patrones directamente desde las
+imágenes, sin depender de características diseñadas manualmente todas las características y pueden detectar bordes, cambios de intensidad o formas más complejas. Su uso se ha consolidado en tareas de clasificación, detección y segmentación médica \citep{litjens2017survey, shen2017deep}.
 
-El problema es que en imagen médica es la falta de dato. Anotar imágenes lleva tiempo y suele requerir conocimiento experto. En segmentación,
-además, no se etiqueta solo la imagen completa, sino que se dibuja la región de interés, esto hace que los conjuntos de datos sean más pequeños que en
-otros campos.
+No obstante, el uso de visión por computador en imagen médica presenta limitaciones específicas. Una de las principales es la disponibilidad reducida de datos anotados. Anotar imágenes lleva tiempo y suele requerir conocimiento experto. En segmentación,
+además, no se etiqueta solo la imagen completa, sino que se delimita con precisión la región objetivo, esto hace que los conjuntos de datos sean más pequeños que en
+otros campos \citep{hesamian2019deep, tajbakhsh2016cnn}.
 
-También hay variaciones entre imágenes. Cambia el equipo, cambia el protocolo y cambia la modalidad. Incluso dos personas pueden segmentar de forma algo
-distinta una misma lesión si el borde no se ve claro. Por eso, en este tipo de trabajos no basta con entrenar un modelo y mostrar una predicción. Hay que
-comprobar si el resultado tiene sentido y si las medidas que se obtienen son coherentes.
+A esta dificultad se le suma la variabilidad propia de las imágenes biomédicas, ya que cambia el equipo, el protocolo y/o la modalidad. Incluso dos personas pueden tener un criterio diferente sobre la segmentación de una misma lesión si el borde no se ve claro. Por eso, en este tipo de trabajos no basta con entrenar un modelo y mostrar una predicción. Hay que
+comprobar si el resultado tiene sentido y si las medidas que se obtienen son coherentes \citep{zhang2023multipleannotators}.
 
-En este Trabajo de Fin de Grado se aplica visión por computador al análisis de resonancias magnéticas preclínicas. El objetivo es automatizar parte de la
+En este Trabajo de Fin de Grado se aplica visión por computador al análisis de resonancias magnéticas preclínicas. El objetivo es facilitar la
 segmentación del cerebro y de la lesión, y después calcular medidas como el volumen.
 
 \begin{figure}[htbp]
@@ -63,25 +56,23 @@ segmentación del cerebro y de la lesión, y después calcular medidas como el v
         \draw[flecha] (salida) -- (analisis);
 
     \end{tikzpicture}
-    \caption{Flujo general de análisis en imagen médica mediante técnicas de visión por computador. A partir de una imagen biomédica pueden aplicarse distintas tareas automáticas, entre ellas la clasificación, la detección y la segmentación, con el objetivo de obtener resultados visuales o cuantitativos que apoyen el análisis posterior. Elaboración propia.}
+    \caption{Flujo general de análisis en imagen médica mediante técnicas de visión por computador. A partir de una imagen biomédica pueden aplicarse distintas tareas automáticas, entre ellas la clasificación, la detección y la segmentación, con el objetivo de obtener resultados visuales o cuantitativos que apoyen el análisis posterior. Fuente: elaboración propia.}
     \label{fig:flujo_general_imagen_medica}
 \end{figure}
 
 \section{Arquitecturas de segmentación: U-Net}
 
-La arquitectura U-Net, propuesta originalmente por Ronneberger et al. en 2015, fue diseñada para abordar las particularidades del análisis de imágenes biomédicas, un dominio con necesidades distintas a las de la visión por computador aplicada a imágenes naturales \citep{ronneberger2015unet}. En segmentación médica no basta con clasificar una imagen completa, sino que es necesario asignar una etiqueta a cada píxel o vóxel de la imagen de entrada, con el objetivo de delimitar con precisión estructuras anatómicas o regiones patológicas.
+La arquitectura U-Net, propuesta originalmente por Ronneberger et al. en 2015, fue diseñada para abordar las particularidades del análisis de imágenes biomédicas, un dominio con necesidades distintas a las de la visión por computador aplicada a imágenes naturales. En segmentación médica no basta con clasificar una imagen completa, sino que es necesario asignar una etiqueta a cada píxel o vóxel de la imagen de entrada, con el objetivo de delimitar con precisión estructuras anatómicas o regiones patológicas. Además, los conjuntos de datos biomédicos anotados suelen ser reducidos, principalmente por restricciones de privacidad, disponibilidad limitada de datos y el elevado coste temporal y económico de la anotación experta. Por este motivo, los modelos destinados a este tipo de imágenes requieren arquitecturas eficientes en datos, capaces de aprender a partir de un número limitado de ejemplos \citep{ronneberger2015unet, hesamian2019deep}.
 
-Además, los conjuntos de datos biomédicos anotados suelen ser reducidos, principalmente por restricciones de privacidad, disponibilidad limitada de datos y el elevado coste temporal y económico de la anotación experta. Por este motivo, los modelos destinados a este tipo de imágenes requieren arquitecturas eficientes en datos, capaces de aprender a partir de un número limitado de ejemplos.
+U-Net presenta una estructura simétrica en forma de ``U'', compuesta por un camino contractivo o \textit{encoder} y un camino expansivo o \textit{decoder}. Esta organización responde a un objetivo funcional: procesar la información visual de forma jerárquica, combinando contexto semántico con precisión espacial \citep{ronneberger2015unet}.
 
-U-Net presenta una estructura simétrica en forma de ``U'', compuesta por un camino contractivo o \textit{encoder} y un camino expansivo o \textit{decoder}. Esta organización responde a un objetivo funcional: procesar la información visual de forma jerárquica, combinando contexto semántico con precisión espacial.
+El camino contractivo actúa como extractor jerárquico de características. En la formulación original de U-Net, este bloque aplica de forma repetida dos convoluciones \(3 \times 3\), seguidas de funciones de activación ReLU, y una operación de reducción espacial mediante \textit{max pooling} \(2 \times 2\). A medida que disminuye la resolución espacial de los mapas de características, el número de canales aumenta progresivamente. Por ejemplo, una imagen puede pasar de una resolución de \(128 \times 128\) a \(64 \times 64\), mientras que el número de filtros aumenta de 32 a 64, después a 128 y finalmente a 256 o 512. Este diseño permite ampliar el campo receptivo de la red y aprender representaciones cada vez más abstractas \citep{ronneberger2015unet}.
 
-El camino contractivo actúa como extractor jerárquico de características. En la formulación original de U-Net, este bloque aplica de forma repetida dos convoluciones \(3 \times 3\), seguidas de funciones de activación ReLU, y una operación de reducción espacial mediante \textit{max pooling} \(2 \times 2\). A medida que disminuye la resolución espacial de los mapas de características, el número de canales aumenta progresivamente. Por ejemplo, una imagen puede pasar de una resolución de \(128 \times 128\) a \(64 \times 64\), mientras que el número de filtros aumenta de 32 a 64, después a 128 y finalmente a 256 o 512. Este diseño permite ampliar el campo receptivo de la red y aprender representaciones cada vez más abstractas.
+En las capas iniciales, la red captura detalles locales de alta frecuencia, como bordes, texturas y gradientes de intensidad. Estas características son especialmente relevantes en resonancia magnética, ya que ayudan a definir los límites inmediatos de una región de interés. A medida que la red profundiza y la resolución espacial disminuye, el campo receptivo efectivo aumenta, permitiendo que las capas más profundas representen patrones de mayor nivel. En este punto, el cuello de botella concentra la información semántica de la imagen, es decir, el ``qué'' aparece en ella, aunque a costa de perder parte de la precisión espacial, es decir, el ``dónde'' \citep{ronneberger2015unet, shen2017deep}.
 
-En las primeras capas, la red captura detalles locales de alta frecuencia, como bordes, texturas y gradientes de intensidad. Estas características son especialmente relevantes en resonancia magnética, ya que ayudan a definir los límites inmediatos de una región de interés. A medida que la red profundiza y la resolución espacial disminuye, el campo receptivo efectivo aumenta, permitiendo que las capas más profundas representen patrones de mayor nivel. En este punto, el \textit{bottleneck} concentra la información semántica de la imagen, es decir, el ``qué'' aparece en ella, aunque a costa de perder parte de la precisión espacial, es decir, el ``dónde''.
+El camino expansivo tiene como objetivo recuperar progresivamente la resolución espacial para reconstruir el mapa de segmentación final. Para ello, aumenta progresivamente la resolución de los mapas de características hasta recuperar el tamaño espacial necesario para generar una máscara de salida. Sin embargo, un simple sobremuestreo de las características profundas puede producir contornos imprecisos, ya que parte de la información espacial fina se pierde durante las operaciones de reducción del \textit{encoder}. Esta limitación se aborda mediante uno de los elementos más característicos de U-Net: las conexiones de salto o \textit{skip connections} \citep{ronneberger2015unet}.
 
-El camino expansivo trata de revertir este proceso para reconstruir el mapa de segmentación final. Para ello, aumenta progresivamente la resolución de los mapas de características hasta recuperar el tamaño espacial necesario para generar una máscara de salida. Sin embargo, un simple sobremuestreo de las características profundas puede producir contornos imprecisos, ya que parte de la información espacial fina se pierde durante las operaciones de reducción del \textit{encoder}. Esta limitación se aborda mediante uno de los elementos más característicos de U-Net: las conexiones de salto o \textit{skip connections}.
-
-Las \textit{skip connections}, implementadas habitualmente mediante concatenación, permiten fusionar los mapas de características del \textit{encoder} con los mapas sobremuestreados del \textit{decoder} en niveles de resolución equivalentes. De esta forma, el \textit{decoder} recibe simultáneamente información semántica procedente de las capas profundas e información espacial de alta resolución procedente de las capas iniciales.
+Las \textit{skip connections}, implementadas habitualmente mediante concatenación, permiten fusionar los mapas de características del \textit{encoder} con los mapas sobremuestreados del \textit{decoder} en niveles de resolución equivalentes. De esta forma, el \textit{decoder} recibe simultáneamente información semántica procedente de las capas profundas e información espacial de alta resolución procedente de las capas iniciales \citep{ronneberger2015unet}.
 
 De manera simplificada, si \(x_l\) representa la salida del nivel \(l\) del \textit{encoder} e \(y_{l+1}\) representa la salida del nivel más profundo del \textit{decoder}, la entrada del nivel correspondiente del \textit{decoder} puede expresarse como:
 
@@ -103,19 +94,17 @@ Como se muestra en la Figura~\ref{fig:arquitectura_unet_cuestion}, U-Net sigue u
 
 \section{Aprendizaje por transferencia (Transfer Learning)}
 
-El aprendizaje por transferencia consiste en partir de un modelo previamente entrenado y adaptarlo a una tarea nueva. En lugar de entrenar una red desde cero, se aprovechan pesos que ya han aprendido a extraer información útil de otras imágenes.
+El aprendizaje por transferencia consiste en partir de un modelo previamente entrenado y adaptarlo a una tarea nueva. En lugar de entrenar una red desde cero, se aprovechan pesos que ya han aprendido a extraer información útil de otras imágenes. \citep{pan2010survey, yosinski2014transferable}
 
-Esta técnica resulta especialmente útil cuando hay pocos datos disponibles, algo frecuente en imagen médica. Conseguir imágenes anotadas no es sencillo y, en el caso de la segmentación, el proceso es todavía más costoso, ya que no basta con asignar una etiqueta a cada imagen. También es necesario delimitar manualmente la región de interés, y esa máscara debe estar bien alineada si después se va a utilizar para calcular volúmenes.
+Como ya hemos expueto, la falta de datos anotados es un problema común cuando se entrenan modelos de deep learning con objetivos biomédicos. Cuando una red profunda se entrena desde cero con pocos ejemplos, puede aparecer sobreajuste. En ese caso, el modelo aprende demasiado bien los ejemplos de entrenamiento, pero no generaliza correctamente ante imágenes nuevas. El aprendizaje por transferencia ayuda a reducir este riesgo, ya que el modelo parte de características visuales aprendidas previamente \citep{tajbakhsh2016cnn, hesamian2019deep}.
 
-Cuando una red profunda se entrena desde cero con pocos ejemplos, puede aparecer sobreajuste. En ese caso, el modelo aprende demasiado bien los ejemplos de entrenamiento, pero no generaliza correctamente ante imágenes nuevas. El aprendizaje por transferencia ayuda a reducir este riesgo, ya que el modelo parte de características visuales aprendidas previamente.
+En visión por computador se ha utilizado tradicionalmente ImageNet como conjunto de preentrenamiento. Sin embargo, ImageNet está formado por imágenes naturales, como animales, objetos o escenas cotidianas, que son bastante distintas de las imágenes biomédicas. Por este motivo, en aplicaciones biomédicas puede resultar más adecuado utilizar modelos preentrenados con datos radiológicos \citep{krizhevsky2012imagenet, yosinski2014transferable}.
 
-En visión por computador se ha utilizado tradicionalmente ImageNet como conjunto de preentrenamiento. Sin embargo, ImageNet está formado por imágenes naturales, como animales, objetos o escenas cotidianas, que son bastante distintas de las imágenes biomédicas. Por este motivo, en aplicaciones biomédicas puede resultar más adecuado utilizar modelos preentrenados con datos radiológicos.
+RadImageNet es un ejemplo de este tipo de recurso, ya que incluye imágenes médicas de IRM, TC y ecografía \citep{mei2022radimagenet}. El uso de pesos preentrenados en un dominio más cercano al de la imagen médica puede aportar una base más adecuada que la obtenida únicamente a partir de imágenes naturales.
 
-RadImageNet es un ejemplo de este tipo de recurso, ya que incluye imágenes médicas de distintas modalidades, como resonancia magnética, tomografía computarizada y ecografía \citep{mei2022radimagenet}. El uso de pesos preentrenados en un dominio más cercano al de la imagen médica puede aportar una base más adecuada que la obtenida únicamente a partir de imágenes naturales.
+En arquitecturas como U-Net, el aprendizaje por transferencia puede aplicarse utilizando un encoder preentrenado. De esta forma, el encoder actúa como extractor de características, mientras que el decoder aprende a generar la máscara de segmentación correspondiente. Así se aprovecha una base visual ya entrenada, pero el modelo sigue adaptándose a la tarea concreta \citep{ronneberger2015unet, tajbakhsh2016cnn, mei2022radimagenet}.
 
-En arquitecturas como U-Net, el aprendizaje por transferencia puede aplicarse utilizando un encoder preentrenado. De esta forma, el encoder actúa como extractor de características, mientras que el decoder aprende a generar la máscara de segmentación correspondiente. Así se aprovecha una base visual ya entrenada, pero el modelo sigue adaptándose a la tarea concreta.
-
-En este tipo de trabajos, el \textit{Transfer Learning} no se utiliza solo como una mejora adicional, sino como una respuesta a una limitación práctica del problema: la escasez de datos anotados. Partir de un modelo previamente entrenado permite trabajar con redes de mayor capacidad sin depender completamente de disponer de un conjunto de datos grande.
+En contextos con pocos datos anotados, el aprendizaje por transferencia se plantea como una estrategia para reducir la dependencia de grandes conjuntos de entrenamiento. Partir de un modelo previamente entrenado permite trabajar con redes de mayor capacidad sin depender completamente de disponer de un conjunto de datos grande.
 
 \begin{figure}[htbp]
     \centering
@@ -133,27 +122,27 @@ En este tipo de trabajos, el \textit{Transfer Learning} no se utiliza solo como 
         \draw[flecha] (ajuste) -- (tarea);
 
     \end{tikzpicture}
-    \caption{Esquema general del aprendizaje por transferencia. Un modelo previamente entrenado se reutiliza como punto de partida para una nueva tarea, aprovechando representaciones ya aprendidas y adaptándolas posteriormente al problema específico. Elaboración propia.}
+    \caption{Esquema general del aprendizaje por transferencia. Un modelo previamente entrenado se reutiliza como punto de partida para una nueva tarea, aprovechando representaciones ya aprendidas y adaptándolas posteriormente al problema específico. Fuente: elaboración propia.}
     \label{fig:transfer_learning_general}
 \end{figure}
 
 \section{Explicabilidad en Inteligencia Artificial (XAI)}
 
-La Inteligencia Artificial Explicable, o XAI, agrupa técnicas que permiten entender mejor por qué un modelo produce una salida determinada. Esta cuestión es especialmente relevante en redes neuronales profundas, donde no resulta sencillo interpretar directamente qué ocurre dentro del modelo.
+La Inteligencia Artificial Explicable, o XAI, agrupa técnicas que permiten entender mejor por qué un modelo produce una salida determinada. Esta cuestión es especialmente relevante en redes neuronales profundas, donde no resulta sencillo interpretar directamente qué ocurre dentro del modelo \citep{arrieta2020xai, samek2017explainableartificialintelligenceunderstanding}.
 
-En imagen médica, la explicabilidad tiene un papel importante porque el resultado del modelo no debería analizarse solo mediante métricas. También interesa comprobar si la red está utilizando zonas relevantes de la imagen. Por ejemplo, si el modelo segmenta una lesión, lo esperable es que la información más influyente esté cerca de esa lesión y no en el fondo, en los bordes de la imagen o en ruido.
+En imagen médica, la explicabilidad tiene un papel importante porque el resultado del modelo no debería analizarse solo mediante métricas. También interesa comprobar si la red está utilizando zonas relevantes de la imagen. Por ejemplo, si el modelo segmenta una lesión, lo esperable es que la información más influyente esté cerca de esa lesión y no en el fondo, en los bordes de la imagen o en ruido \citep{samek2017explainableartificialintelligenceunderstanding, litjens2017survey}.
 
-Una forma habitual de estudiar este comportamiento es generar mapas de calor. Estos mapas muestran qué zonas de la imagen han influido más en la salida del modelo, de manera que permiten revisar visualmente si la predicción se apoya en regiones coherentes. No demuestran por sí solos que el modelo sea correcto, pero sí aportan información útil sobre su comportamiento.
+Una forma habitual de estudiar este comportamiento es generar mapas de calor. Estos mapas muestran qué zonas de la imagen han influido más en la salida del modelo, de manera que permiten revisar visualmente si la predicción se apoya en regiones coherentes. No demuestran por sí solos que el modelo sea correcto, pero sí aportan información útil sobre su comportamiento \citep{Selvaraju_2019, sundararajan2017axiomaticattributiondeepnetworks}.
 
-Entre los métodos más utilizados se encuentran los mapas de saliencia, Integrated Gradients y Grad-CAM. Los mapas de saliencia estudian cómo cambia la salida del modelo cuando varían los píxeles de entrada. Integrated Gradients compara la imagen con una referencia y calcula la contribución de cada píxel a la predicción \citep{sundararajan2017axiomaticattributiondeepnetworks}. Grad-CAM, por su parte, utiliza los gradientes de una salida concreta sobre una capa convolucional para generar un mapa de relevancia \citep{Selvaraju_2019}.
+Entre los métodos más utilizados se encuentran los mapas de saliencia, Integrated Gradients y Grad-CAM. Los mapas de saliencia estudian cómo cambia la salida del modelo cuando varían los píxeles de entrada. Integrated Gradients compara la imagen con una referencia y calcula la contribución de cada píxel a la predicción \citep{sundararajan2017axiomaticattributiondeepnetworks}. Grad-CAM, por su parte, utiliza los gradientes de una salida concreta sobre una capa convolucional para generar un mapa de relevancia \citep{Selvaraju_2019, Chattopadhay_2018}.
 
-Muchos de estos métodos se plantearon inicialmente para clasificación, donde suele explicarse la probabilidad asociada a una clase. En segmentación, el caso es distinto, ya que la salida del modelo no es un único valor, sino un mapa de probabilidades por píxel. Por esta razón, antes de aplicar estas técnicas es necesario definir qué parte de la salida se quiere explicar.
+Muchos de estos métodos se plantearon inicialmente para clasificación, donde suele explicarse la probabilidad asociada a una clase. En segmentación, el caso es distinto, ya que la salida del modelo no es un único valor, sino un mapa de probabilidades por píxel. Por esta razón, antes de aplicar estas técnicas es necesario definir qué parte de la salida se quiere explicar \citep{Selvaraju_2019, Vinogradova_2020}.
 
-Esta decisión cambia la interpretación de la explicación. No es lo mismo explicar toda la activación de la clase lesión que explicar únicamente la región segmentada por el modelo. Por ello, cuando se utilizan técnicas de XAI en segmentación, conviene indicar con claridad qué salida se explica y cómo se ha generado el mapa resultante.
+Esta decisión cambia la interpretación de la explicación. No es lo mismo explicar toda la activación de la clase lesión que explicar únicamente la región segmentada por el modelo. Por ello, cuando se utilizan técnicas de XAI en segmentación, conviene indicar con claridad qué salida se explica y cómo se ha generado el mapa resultante \citep{Selvaraju_2019}.
 
-La explicabilidad no sustituye a métricas como Dice o IoU, ya que estas siguen siendo necesarias para medir el parecido entre la máscara predicha y la máscara manual. Sin embargo, dichas métricas no indican por qué el modelo ha producido una predicción concreta. Los métodos de XAI añaden otra forma de revisar el resultado, centrada en analizar qué zonas de la imagen han influido en la decisión del modelo.
+La explicabilidad no sustituye a métricas como Dice o IoU, ya que estas siguen siendo necesarias para medir el parecido entre la máscara predicha y la máscara manual. Sin embargo, dichas métricas no indican por qué el modelo ha producido una predicción concreta. Los métodos de XAI añaden otra forma de revisar el resultado, centrada en analizar qué zonas de la imagen han influido en la decisión del modelo \citep{hesamian2019deep, arrieta2020xai, samek2017explainableartificialintelligenceunderstanding}.
 
-En este trabajo, la explicabilidad se utiliza como apoyo al análisis del modelo, con el objetivo de comprobar si las predicciones se basan en regiones coherentes con el problema biomédico estudiado.
+En este trabajo, la explicabilidad se utiliza como apoyo al análisis del modelo, con el objetivo de analizar si las predicciones se apoyan en regiones visualmente coherentes con el problema biomédico estudiado.
 
 \begin{figure}[htbp]
     \centering
@@ -171,6 +160,6 @@ En este trabajo, la explicabilidad se utiliza como apoyo al análisis del modelo
         \draw[flecha] (xai) -- (mapa);
 
     \end{tikzpicture}
-    \caption{Esquema general de aplicación de técnicas de explicabilidad visual. A partir de la imagen y de la salida del modelo, un método de XAI genera un mapa de relevancia que permite analizar qué regiones han influido más en la predicción. Elaboración propia.}
+    \caption{Esquema general de aplicación de técnicas de explicabilidad visual. A partir de la imagen y de la salida del modelo, un método de XAI genera un mapa de relevancia que permite analizar qué regiones han influido más en la predicción. Fuente: elaboración propia.}
     \label{fig:xai_general}
 \end{figure}

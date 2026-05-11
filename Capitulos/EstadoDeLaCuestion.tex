@@ -3,6 +3,18 @@
 
 \section{Conceptos biomédicos: RMN preclínica y lesiones cerebrales}
 
+La resonancia magnética nuclear (RMN) es una técnica de adquisición de imagen ampliamente utilizada en el ámbito biomédico, ya que permite obtener información anatómica y funcional de tejidos internos sin necesidad de procedimientos invasivos. En el contexto preclínico, esta técnica se emplea habitualmente sobre modelos animales, como el ratón, con el objetivo de estudiar la evolución de distintas patologías y evaluar su impacto sobre estructuras concretas.
+
+Las imágenes de RMN están formadas por cortes bidimensionales que, en conjunto, representan un volumen tridimensional del órgano estudiado. Cada píxel o vóxel de la imagen contiene un valor de intensidad asociado a la señal registrada. Dependiendo de la técnica usada y de las características del tejido, determinadas regiones pueden aparecer con mayor o menor intensidad. En este trabajo resultan especialmente relevantes las zonas de hiperintensidad, visualizadas como zonas de color blanco brillante, que corresponden a regiones con una señal más elevada que el tejido circundante y que pueden estar asociadas a alteraciones patológicas, como lesiones isquémicas.
+
+Para analizar estas imágenes es habitual delimitar regiones de interés, conocidas como ROI (\textit{Regions of Interest}). Una ROI representa una zona concreta de la imagen que se desea estudiar, como puede ser el cerebro completo o una región lesionada. A partir de estas regiones es posible generar máscaras de segmentación, es decir, imágenes binarias en las que se separa la estructura de interés del fondo. Este proceso permite cuantificar de forma objetiva propiedades como el área o el volumen de una región anatómica o patológica.
+
+En el caso abordado en este trabajo, la lesión de interés es la isquemia cerebral. Esta se produce cuando existe una reducción o interrupción del flujo sanguíneo en una zona del cerebro, lo que puede provocar daño en el tejido afectado. En imágenes de RMN, estas lesiones pueden presentar bordes difusos y gradientes de intensidad, lo que dificulta su delimitación manual y hace que la segmentación dependa en parte del criterio del experto.
+
+En este TFG se analiza la segmentación del cerebro y la lesión conocida como isquemia cerebral. La isquemia cerebral se entiende, de forma general, como una afección producida por la reducción o interrupción del flujo sanguíneo en una región del cerebro, lo que puede provocar daño en el tejido afectado. En imágenes de RMN, estas lesiones se visualizan como zonas de hiperintensidad debido a que presentan una mayor concentración de agua, lo que sse visualiza en las resonancias como áreas brillantes.
+
+Estos conceptos constituyen la base biomédica necesaria para comprender el problema tratado en este TFG: la segmentación automática de imágenes de RMN preclínica para delimitar el cerebro y la lesión isquémica.
+
 \section{Visión por computador en imagen biomédica}
 
 La visión por computador o visión artificial es un campo de la inteligencia artificial que se centra en desarrollar métodos para transformar las imágenes
@@ -33,6 +45,28 @@ comprobar si el resultado tiene sentido y si las medidas que se obtienen son coh
 En este Trabajo de Fin de Grado se aplica visión por computador al análisis de resonancias magnéticas preclínicas. El objetivo es automatizar parte de la
 segmentación del cerebro y de la lesión, y después calcular medidas como el volumen.
 
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[node distance=0.9cm]
+
+        \node[bloque] (img) {Imagen médica};
+        \node[bloquegris, below=of img] (prep) {Preprocesamiento};
+        \node[bloque, below=of prep] (modelo) {Modelo de visión por computador};
+        \node[bloquegris, below=of modelo] (tareas) {Clasificación \quad / \quad Detección \quad / \quad Segmentación};
+        \node[bloque, below=of tareas] (salida) {Resultado visual o cuantitativo};
+        \node[bloquegris, below=of salida] (analisis) {Análisis o revisión experta};
+
+        \draw[flecha] (img) -- (prep);
+        \draw[flecha] (prep) -- (modelo);
+        \draw[flecha] (modelo) -- (tareas);
+        \draw[flecha] (tareas) -- (salida);
+        \draw[flecha] (salida) -- (analisis);
+
+    \end{tikzpicture}
+    \caption{Flujo general de análisis en imagen médica mediante técnicas de visión por computador. A partir de una imagen biomédica pueden aplicarse distintas tareas automáticas, entre ellas la clasificación, la detección y la segmentación, con el objetivo de obtener resultados visuales o cuantitativos que apoyen el análisis posterior. Elaboración propia.}
+    \label{fig:flujo_general_imagen_medica}
+\end{figure}
+
 \section{Arquitecturas de segmentación: U-Net}
 
 La arquitectura U-Net, propuesta originalmente por Ronneberger et al. en 2015, fue diseñada para abordar las particularidades del análisis de imágenes biomédicas, un dominio con necesidades distintas a las de la visión por computador aplicada a imágenes naturales \citep{ronneberger2015unet}. En segmentación médica no basta con clasificar una imagen completa, sino que es necesario asignar una etiqueta a cada píxel o vóxel de la imagen de entrada, con el objetivo de delimitar con precisión estructuras anatómicas o regiones patológicas.
@@ -58,6 +92,85 @@ De manera simplificada, si \(x_l\) representa la salida del nivel \(l\) del \tex
 
 donde \(\operatorname{Up}(\cdot)\) representa la operación de sobremuestreo y \(\operatorname{Concat}(\cdot)\) la concatenación de características. Esta combinación permite recuperar detalle espacial sin renunciar al contexto global aprendido por la red.
 
+Como se muestra en la Figura~\ref{fig:arquitectura_unet_cuestion}, U-Net sigue una estructura encoder--decoder en la que las conexiones de salto permiten combinar información profunda con detalles espaciales de mayor resolución.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{Imagenes/EstadoCuestion/unet_wikipedia.png}
+    \caption{Ejemplo de arquitectura U-Net para segmentación de imágenes. La red sigue una estructura encoder--decoder con conexiones de salto entre niveles de resolución equivalentes. Fuente: Mehrdad Yazdani, Wikimedia Commons, licencia CC BY-SA 4.0.}
+    \label{fig:arquitectura_unet_cuestion}
+\end{figure}
+
 \section{Aprendizaje por transferencia (Transfer Learning)}
 
+El aprendizaje por transferencia consiste en partir de un modelo previamente entrenado y adaptarlo a una tarea nueva. En lugar de entrenar una red desde cero, se aprovechan pesos que ya han aprendido a extraer información útil de otras imágenes.
+
+Esta técnica resulta especialmente útil cuando hay pocos datos disponibles, algo frecuente en imagen médica. Conseguir imágenes anotadas no es sencillo y, en el caso de la segmentación, el proceso es todavía más costoso, ya que no basta con asignar una etiqueta a cada imagen. También es necesario delimitar manualmente la región de interés, y esa máscara debe estar bien alineada si después se va a utilizar para calcular volúmenes.
+
+Cuando una red profunda se entrena desde cero con pocos ejemplos, puede aparecer sobreajuste. En ese caso, el modelo aprende demasiado bien los ejemplos de entrenamiento, pero no generaliza correctamente ante imágenes nuevas. El aprendizaje por transferencia ayuda a reducir este riesgo, ya que el modelo parte de características visuales aprendidas previamente.
+
+En visión por computador se ha utilizado tradicionalmente ImageNet como conjunto de preentrenamiento. Sin embargo, ImageNet está formado por imágenes naturales, como animales, objetos o escenas cotidianas, que son bastante distintas de las imágenes biomédicas. Por este motivo, en aplicaciones biomédicas puede resultar más adecuado utilizar modelos preentrenados con datos radiológicos.
+
+RadImageNet es un ejemplo de este tipo de recurso, ya que incluye imágenes médicas de distintas modalidades, como resonancia magnética, tomografía computarizada y ecografía \citep{mei2022radimagenet}. El uso de pesos preentrenados en un dominio más cercano al de la imagen médica puede aportar una base más adecuada que la obtenida únicamente a partir de imágenes naturales.
+
+En arquitecturas como U-Net, el aprendizaje por transferencia puede aplicarse utilizando un encoder preentrenado. De esta forma, el encoder actúa como extractor de características, mientras que el decoder aprende a generar la máscara de segmentación correspondiente. Así se aprovecha una base visual ya entrenada, pero el modelo sigue adaptándose a la tarea concreta.
+
+En este tipo de trabajos, el \textit{Transfer Learning} no se utiliza solo como una mejora adicional, sino como una respuesta a una limitación práctica del problema: la escasez de datos anotados. Partir de un modelo previamente entrenado permite trabajar con redes de mayor capacidad sin depender completamente de disponer de un conjunto de datos grande.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[node distance=0.9cm]
+
+        \node[bloque] (origen) {Modelo preentrenado};
+        \node[bloquegris, below=of origen] (caract) {Extracción de características};
+        \node[bloque, below=of caract] (integracion) {Integración en una nueva arquitectura};
+        \node[bloquegris, below=of integracion] (ajuste) {Ajuste con el dataset específico};
+        \node[bloque, below=of ajuste] (tarea) {Nueva tarea de imagen médica};
+
+        \draw[flecha] (origen) -- (caract);
+        \draw[flecha] (caract) -- (integracion);
+        \draw[flecha] (integracion) -- (ajuste);
+        \draw[flecha] (ajuste) -- (tarea);
+
+    \end{tikzpicture}
+    \caption{Esquema general del aprendizaje por transferencia. Un modelo previamente entrenado se reutiliza como punto de partida para una nueva tarea, aprovechando representaciones ya aprendidas y adaptándolas posteriormente al problema específico. Elaboración propia.}
+    \label{fig:transfer_learning_general}
+\end{figure}
+
 \section{Explicabilidad en Inteligencia Artificial (XAI)}
+
+La Inteligencia Artificial Explicable, o XAI, agrupa técnicas que permiten entender mejor por qué un modelo produce una salida determinada. Esta cuestión es especialmente relevante en redes neuronales profundas, donde no resulta sencillo interpretar directamente qué ocurre dentro del modelo.
+
+En imagen médica, la explicabilidad tiene un papel importante porque el resultado del modelo no debería analizarse solo mediante métricas. También interesa comprobar si la red está utilizando zonas relevantes de la imagen. Por ejemplo, si el modelo segmenta una lesión, lo esperable es que la información más influyente esté cerca de esa lesión y no en el fondo, en los bordes de la imagen o en ruido.
+
+Una forma habitual de estudiar este comportamiento es generar mapas de calor. Estos mapas muestran qué zonas de la imagen han influido más en la salida del modelo, de manera que permiten revisar visualmente si la predicción se apoya en regiones coherentes. No demuestran por sí solos que el modelo sea correcto, pero sí aportan información útil sobre su comportamiento.
+
+Entre los métodos más utilizados se encuentran los mapas de saliencia, Integrated Gradients y Grad-CAM. Los mapas de saliencia estudian cómo cambia la salida del modelo cuando varían los píxeles de entrada. Integrated Gradients compara la imagen con una referencia y calcula la contribución de cada píxel a la predicción \citep{sundararajan2017axiomaticattributiondeepnetworks}. Grad-CAM, por su parte, utiliza los gradientes de una salida concreta sobre una capa convolucional para generar un mapa de relevancia \citep{Selvaraju_2019}.
+
+Muchos de estos métodos se plantearon inicialmente para clasificación, donde suele explicarse la probabilidad asociada a una clase. En segmentación, el caso es distinto, ya que la salida del modelo no es un único valor, sino un mapa de probabilidades por píxel. Por esta razón, antes de aplicar estas técnicas es necesario definir qué parte de la salida se quiere explicar.
+
+Esta decisión cambia la interpretación de la explicación. No es lo mismo explicar toda la activación de la clase lesión que explicar únicamente la región segmentada por el modelo. Por ello, cuando se utilizan técnicas de XAI en segmentación, conviene indicar con claridad qué salida se explica y cómo se ha generado el mapa resultante.
+
+La explicabilidad no sustituye a métricas como Dice o IoU, ya que estas siguen siendo necesarias para medir el parecido entre la máscara predicha y la máscara manual. Sin embargo, dichas métricas no indican por qué el modelo ha producido una predicción concreta. Los métodos de XAI añaden otra forma de revisar el resultado, centrada en analizar qué zonas de la imagen han influido en la decisión del modelo.
+
+En este trabajo, la explicabilidad se utiliza como apoyo al análisis del modelo, con el objetivo de comprobar si las predicciones se basan en regiones coherentes con el problema biomédico estudiado.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[node distance=0.9cm]
+
+        \node[bloque] (entrada) {Imagen de entrada};
+        \node[bloquegris, below=of entrada] (modelo) {Modelo de inteligencia artificial};
+        \node[bloque, below=of modelo] (salida) {Salida del modelo};
+        \node[bloquegris, below=of salida] (xai) {Método de explicabilidad};
+        \node[bloque, below=of xai] (mapa) {Mapa de relevancia};
+
+        \draw[flecha] (entrada) -- (modelo);
+        \draw[flecha] (modelo) -- (salida);
+        \draw[flecha] (salida) -- (xai);
+        \draw[flecha] (xai) -- (mapa);
+
+    \end{tikzpicture}
+    \caption{Esquema general de aplicación de técnicas de explicabilidad visual. A partir de la imagen y de la salida del modelo, un método de XAI genera un mapa de relevancia que permite analizar qué regiones han influido más en la predicción. Elaboración propia.}
+    \label{fig:xai_general}
+\end{figure}

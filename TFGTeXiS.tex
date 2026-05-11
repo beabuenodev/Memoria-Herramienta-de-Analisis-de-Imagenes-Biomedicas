@@ -78,7 +78,11 @@ constantes,guionado,Cascaras/bibliografia,config%
 \usepackage{TeXiS/TeXiS}
 \usepackage{amsmath}
 \usepackage{tikz}
-\usetikzlibrary{positioning}
+\usepackage{makecell}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{graphicx}
+\usetikzlibrary{positioning, arrows.meta}
 % Incluimos el fichero con comandos de constantes
 \include{constantes}
 
@@ -100,6 +104,37 @@ constantes,guionado,Cascaras/bibliografia,config%
     \pdfinfo{/CreationDate (\today)}
 \fi
 
+%
+% Tikz estilo para diagramas de flujo
+%
+
+\tikzset{
+    bloque/.style={
+        rectangle,
+        rounded corners,
+        draw=black!60,
+        fill=blue!8,
+        minimum width=8cm,
+        minimum height=1cm,
+        align=center,
+        font=\small
+    },
+    bloquegris/.style={
+        rectangle,
+        rounded corners,
+        draw=black!60,
+        fill=gray!10,
+        minimum width=8cm,
+        minimum height=1cm,
+        align=center,
+        font=\small
+    },
+    flecha/.style={
+        -{Latex[length=3mm]},
+        thick,
+        draw=black!70
+    }
+}
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 %                        Documento
@@ -211,6 +246,6 @@ constantes,guionado,Cascaras/bibliografia,config%
 %
 % Final
 %
-\include{Cascaras/fin}
+%\include{Cascaras/fin}
 %\end{otherlanguage}
 \end{document}

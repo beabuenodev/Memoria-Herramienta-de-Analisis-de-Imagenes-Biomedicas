@@ -3,7 +3,7 @@
 
 
 \section{Descripción del conjunto de datos (\textit{Dataset})}
- El conjunto de datos empleado está compuesto por imágenes de resonancia magnética nuclear (\textit{RMN}) preclínicas de cerebros de ratón, obtenidas en el contexto de colaboración con el centro \textit{ICTS BioImagen Complutense}. Estas imágenes constituyen la base para el entrenamiento y evaluación de los modelos de segmentación automática de la estructura cerebral y las lesiones asociadas, en este caso, la lesión por isquemia cerebral.
+ El conjunto de datos empleado está compuesto por imágenes de resonancia magnética nuclear (IRM) preclínicas de cerebros de ratón, obtenidas en el contexto de colaboración con el centro \textit{ICTS BioImagen Complutense}. Estas imágenes constituyen la base para el entrenamiento y evaluación de los modelos de segmentación automática de la estructura cerebral y las lesiones asociadas, en este caso, la lesión por isquemia cerebral.
 
  Tal y como se establece en los objetivos del proyecto, el dataset ha sido diseñado para permitir tanto la delimitación anatómica del cerebro como la identificación de regiones patológicas, lo que implica la coexistencia de dos tipos de anotaciones: segmentación de órgano sano y segmentación de lesión.
   
@@ -11,12 +11,12 @@
 El dataset presenta una estructura jerárquica, en la que cada caso de estudio se presenta en una carpeta individual con la denominación "\textit{CASE n}". 
 Para cada caso, se dispone de los siguientes elementos:
 
-\subsubsection{Volúmenes MRI en formato NIfTI (\texttt{.nii})}
+\subsubsection{Volúmenes en formato NIfTI (\texttt{.nii})}
 El formato \textbf{NIfTI} \textit{(Neuroimaging Informatics Technology Initiative)} es el estándar en neuroimagen por su capacidad de almacenar datos volumétricos junto a metadatos asociados, como se describe en la documentación oficial estándar \citep{nifti} .
 
 Además, se ha decidido usar NIfTI frente a otros formatos debido a que es uno de los estándares más utilizados en el ecosistema de procesamiento de imágenes médicas en Python, debido a su compatibilidad con librerías ampliamente empleadas como \textit{nibabel}, que permiten la carga, manipulación y análisis de volúmenes de neuroimagen de forma eficiente \citep{nifti,nibabel}.
 
-Su estructura interna está constituida por una matriz de datos tridimensionales, en la cual cada voxel representa una medida de intensidad, la señal RMN. Además, en su cabecera se almacenan metadatos críticos para el estudio de cada sujeto, entre los cuales la resolución espacial (tamaño del voxel), necesario para calcular los volúmenes de una región de la imagen, orientación, el tipo de dato (en nuestro caso \textbackslash{\texttt{int16} )}
+Su estructura interna está constituida por una matriz de datos tridimensionales, en la cual cada voxel representa una medida de intensidad, la señal IRM. Además, en su cabecera se almacenan metadatos críticos para el estudio de cada sujeto, entre los cuales la resolución espacial (tamaño del voxel), necesario para calcular los volúmenes de una región de la imagen, orientación, el tipo de dato (en nuestro caso \textbackslash{\texttt{int16} )}
 y el identificador del sujeto y de estudio.
 
 Cada uno de estos archivos, facilitados por el centro \textit{ ICTS BioImagen Complutense}, contienen 28 \textit{slices}.
@@ -24,7 +24,7 @@ Las \textit{slice} son cortes bidimensionales que muestran una sección anatómi
 
 \subsubsection{Regiones de interés (\texttt{.ROI})}
 Las \textbf{ROI} \textit{(Regions Of Interest)} son una herramienta estándar en análisis de imagen médica para delimitar manualmente estructuras anatómicas o patológicas relevantes \citep{nifti}.
-Se tratan de anotaciones geométricas representadas como contornos que aíslan la región de estudio, delimitando su extensión espacial. Estas selecciones se realizan para cada una de las \textit{slices} de la RMN, definiendo así la estructura anatómica de la característica de estudio.
+Se tratan de anotaciones geométricas representadas como contornos que aíslan la región de estudio, delimitando su extensión espacial. Estas selecciones se realizan para cada una de las \textit{slices} de la IRM, definiendo así la estructura anatómica de la característica de estudio.
 Para cada caso de estudio, se cuenta con dos conjuntos de datos \textbf{ROI}, el conjunto de selección del cerebro y el conjunto de selección de la isquemia cerebral.
 Cabe destacar que, especialmente en el caso de la isquemia, las ROI presentan bordes difusos, regiones de transición (gradientes de intensidad) y variabilidad entre anotadores
 
@@ -65,7 +65,7 @@ Resolución & 120x120 \\
 El preprocesamiento de imágenes constituye una etapa crítica en el pipeline de entrenamiento, ya que garantiza la homogeneidad de los datos de entrada y mejora la estabilidad del modelo.
 Para obtener los datos necesarios para formar el dataset, el procesamiento ha sido realizado por los alumnos bajo las directrices y supervisión de los profesionales del\textit{ ICTS BioImagen Complutense}.
 
-El procesamiento de las imágenes, desde la MRI en formato RAW (\texttt{.bruker}) hasta el dataset final usado para el entrenamiento, se describe con el siguiente pipeline:
+El procesamiento de las imágenes, desde la IRM en formato RAW (\texttt{.bruker}) hasta el dataset final usado para el entrenamiento, se describe con el siguiente pipeline:
 
 \begin{figure}[h]
 \centering
@@ -103,7 +103,7 @@ El procesamiento de las imágenes, desde la MRI en formato RAW (\texttt{.bruker}
 
 \subsection{Conversión de datos RAW a formato NIfTI}
 
-Las imágenes originales son adquiridas en formato propietario del fabricante del escáner RMN utilizado (\texttt{.bruker}), el cual contiene tanto la señal de resonancia magnética como información específica del dispositivo. Sin embargo, este formato no es directamente compatible con las herramientas estándar de procesamiento de imagen médica ni con los frameworks de aprendizaje profundo.
+Las imágenes originales son adquiridas en formato propietario del fabricante del escáner utilizado (\texttt{.bruker}), el cual contiene tanto la señal de resonancia magnética como información específica del dispositivo. Sin embargo, este formato no es directamente compatible con las herramientas estándar de procesamiento de imagen médica ni con los frameworks de aprendizaje profundo.
 
 Por este motivo, se realiza una conversión a formato \textbf{NIfTI}, el cual permite trabajar con los datos de manera más flexible, amplia y estándar.
 
@@ -114,7 +114,7 @@ Para la realización de este proceso, así como de las etapas posteriores de seg
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{Imagenes/Procesamiento/NiftyExample.png}
-    \caption{Ejemplo de slices de RMN}
+    \caption{Ejemplo de slices de IRM}
     \label{fig:img_slice}
 \end{figure}
 
@@ -159,7 +159,7 @@ Durante este proceso se aplica interpolación, lo que puede introducir suavizado
 
 Asimismo, las intensidades de las imágenes, originalmente almacenadas en formato entero (\texttt{int16}), se convierten a formato de coma flotante (\texttt{float32}) y se normalizan para estabilizar el proceso de entrenamiento.
 
-Por último, tanto las máscaras de entrenamiento como las \textit{slices} de la RMN se orientan y se muestra una superposición para asegurar que el entrenamiento va a realizarse de manera correcta, alineando la máscara de entrenamiento con el órgano.
+Por último, tanto las máscaras de entrenamiento como las \textit{slices} de la IRM se orientan y se muestra una superposición para asegurar que el entrenamiento va a realizarse de manera correcta, alineando la máscara de entrenamiento con el órgano.
 
 \begin{figure}[h]
     \centering
@@ -173,7 +173,7 @@ Tras realizar un preprocesamiento de las imágenes para su uso en el entrenamien
 
 Para esta tarea, alistamos la arquitectura U-Net para crear dos modelos, entrenados con las mismas imágenes pero con distintas máscaras binarias. Aunque existen múltiples variantes de UNet (UNet++, Attention UNet, ResUNet), se decide usar UNet como la estructura básica, teniendo en cuenta ventajas e inconvenientes en características técnicas, capacidad y costes de computación, que se expondrán más adelante en esta sección.
 
-Debido al bajo número de datos anotados, habitual en el ámbito biomédico, usaremos además \textit{Transfer Learning}, una técnica de \textit{Deep Learning} usada para entrenar redes neuronales en base a otros modelos ya entrenados, para un caso de uso más concreto. Para esto, usaremos los pesos del modelo RadImageNet, un modelo entrenado en imágenes de MRI, TAC y Ecografía. 
+Debido al bajo número de datos anotados, habitual en el ámbito biomédico, usaremos además \textit{Transfer Learning}, una técnica de \textit{Deep Learning} usada para entrenar redes neuronales en base a otros modelos ya entrenados, para un caso de uso más concreto. Para esto, usaremos los pesos del modelo RadImageNet, un modelo entrenado en imágenes de IRM, TAC y Ecografía. 
 
 Tras el entrenamiento, se observó una clara "sobresegmentación" sobre los casos de prueba en el caso de la isquemia. Para intentar mitigar este problema, se aplicaron varias estrategias, entre ellas cambiar la función de pérdida para penalizar los falsos positivos, pero se acabó eligiendo una estrategia de umbral del 0.8 elegido en base a los resultados en error absoluto y métricas de validación.
 
@@ -464,7 +464,7 @@ con la anotación de referencia.
     \includegraphics[width=\textwidth]{Imagenes/XAI_isquemia/CASE_12_slice_015.png}
     \caption{Ejemplo de visualización generada por el procedimiento de
     explicabilidad aplicado al modelo de segmentación de isquemia. Se muestran
-    el corte original de RMN, la máscara de referencia, la predicción del modelo
+    el corte original de IRM, la máscara de referencia, la predicción del modelo
     y los mapas de relevancia obtenidos mediante distintos métodos de
     explicabilidad. La figura ilustra el tipo de salida utilizada para el análisis
     cualitativo del comportamiento del modelo.}
@@ -512,14 +512,14 @@ variante orientada a mejorar la localización espacial de las regiones relevante
 \citep{Chattopadhay_2018}, mientras que \textit{Integrated
 Gradients} permite estimar la contribución de cada píxel a partir de la comparación
 progresiva entre una imagen de referencia o \textit{baseline} y la imagen original
-\citep{sundararajan2017axiomaticattributiondeepnetworks}. En el caso de las imágenes de RMN, la elección
+\citep{sundararajan2017axiomaticattributiondeepnetworks}. En el caso de las imágenes de IRM, la elección
 del \textit{baseline} debe realizarse con cautela, ya que una imagen completamente
 negra puede introducir una referencia artificial alejada de la distribución real de
 intensidades.
 
 Los mapas de relevancia generados se redimensionan al tamaño de la imagen de
 entrada y se normalizan para facilitar su visualización conjunta. Posteriormente, se
-superponen sobre el corte original de RMN, junto con la máscara de referencia y la
+superponen sobre el corte original de IRM, junto con la máscara de referencia y la
 máscara predicha. Esta representación permite analizar de forma cualitativa si las
 regiones destacadas por los métodos de explicabilidad se sitúan sobre zonas
 anatómicamente relacionadas con el tejido cerebral o si aparecen activaciones en
@@ -546,7 +546,7 @@ métricas de segmentación.
     \includegraphics[width=\textwidth]{Imagenes/XAI_Cerebro/CASE_20_slice_014.png} 
     \caption{Ejemplo de visualización generada por el procedimiento de
     explicabilidad aplicado al modelo de segmentación cerebral. Se muestran,
-    de izquierda a derecha, el corte original de RMN, la máscara de referencia,
+    de izquierda a derecha, el corte original de IRM, la máscara de referencia,
     la máscara predicha por el modelo y los mapas de relevancia obtenidos
     mediante distintos métodos de explicabilidad. Esta figura ilustra el tipo de
     salida utilizada para el análisis cualitativo del comportamiento del modelo.}

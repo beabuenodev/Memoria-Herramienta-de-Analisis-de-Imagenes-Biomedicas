@@ -358,6 +358,12 @@ Además, se incluyen los dos modelos desarrollados, guardados en formato \texttt
 
 Por último, también se adjuntan, como parte de la reproducibilidad del proyecto, los archivos resultantes de la ejecución de los notebooks de cálculo de métricas y explicabilidad, con los datos resultantes en formato CSV y las imágenes generadas en formato PNG.
 
+\subsection{Discusión crítica del sistema desarrollado}
+
+Es importante destacar que el sistema desarrollado se concibe como una herramienta de apoyo supervisada, en la que el especialista mantiene el control sobre la interpretación final de los resultados. Los modelos de segmentación cerebral e isquémica generan máscaras automáticas y medidas volumétricas que pueden ser revisadas posteriormente, de forma que cualquier desviación respecto al criterio experto pueda identificarse y corregirse antes de utilizar los datos en un análisis definitivo.
+
+Este enfoque resulta especialmente relevante en el contexto biomédico, donde la automatización no debe entenderse como una sustitución del especialista, sino como un mecanismo de asistencia para reducir el trabajo manual repetitivo y mejorar la eficiencia del proceso. Así, la herramienta se integra dentro de un flujo de trabajo asistido, en el que los resultados automáticos sirven como una primera aproximación cuantitativa y visual, pero requieren supervisión experta para su validación final.
+
 \subsection{Requisitos de ejecución}
 
 Para facilitar la reproducción del trabajo, el código se ha organizado de forma que pueda ejecutarse en un entorno estándar de \textit{Python}, preferiblemente mediante Jupyter Notebook o Google Colab. No se requiere una infraestructura específica ni software propietario para ejecutar la inferencia o el cálculo de métricas, aunque el entrenamiento de los modelos puede beneficiarse del uso de GPU para reducir el tiempo de ejecución.

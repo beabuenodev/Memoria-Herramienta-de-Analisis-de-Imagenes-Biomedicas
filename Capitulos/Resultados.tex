@@ -88,14 +88,13 @@ Las principales  se concentrdiscrepanciasan en los cortes extremos de los casos,
 
 En los cortes centrales, la segmentación es precisa y la estructura está bien definida, presentando bordes incluso más ajustados que la segmentación manual. Esto indica que el modelo es capaz de identificar de manera estable la región cerebral principal, incluso en presencia de variaciones de intensidad propias de la resonancia magnética.
 
-\subsection{Resultados de explicabilidad en la segmentación de cerebro}
-Además de evaluar la calidad de las máscaras generadas, se aplicaron técnicas de explicabilidad con el objetivo de analizar la coherencia espacial de las regiones utilizadas por el modelo durante la predicción. Este análisis no pretende sustituir a las métricas clásicas de segmentación, sino complementarlas mediante una evaluación del comportamiento interno del modelo. Esto es especialmente importante en un pipeline aplicado a la investigación biomédica. 
+\subsection{Resultados de explicabilidad en la segmentación cerebral}
 
-El análisis se realizó sobre 84 cortes pertenecientes a tres casos distintos. No obstante, durante la interpretación de los resultados se observó que los cortes extremos de cada volumen presentan un comportamiento diferente al de los cortes centrales. En estas zonas, la presencia de tejido cerebral es reducida o incluso inexistente en la máscara de referencia, lo que afecta negativamente a métricas como Dice e IoU y puede producir valores poco representativos. Por este motivo, los resultados se analizaron distinguiendo entre cortes interiores y cortes extremos.
+Además de evaluar la calidad de las máscaras generadas, se aplicaron técnicas de explicabilidad para analizar la coherencia espacial de las regiones utilizadas por el modelo durante la predicción. Este análisis se realizó sobre 84 cortes pertenecientes a tres casos distintos.
 
-En el conjunto completo de cortes analizados, el modelo obtuvo un Dice medio de 0,802 y un IoU medio de 0,774. Sin embargo, al considerar únicamente los cortes interiores, más representativos de la tarea principal de segmentación cerebral, el rendimiento aumentó notablemente, alcanzando un Dice medio de 0,969 y un IoU medio de 0,940. Esta diferencia indica que la reducción del rendimiento global se debe principalmente a los cortes de borde, donde la región anatómica objetivo es pequeña o ambigua, y no a un fallo sistemático del modelo en la segmentación del cerebro.
+Durante la revisión de los resultados se observó que los cortes extremos del volumen presentaban un comportamiento diferente al de los cortes centrales. En estas zonas, la presencia de tejido cerebral es reducida o incluso inexistente en la máscara de referencia, lo que afecta negativamente a métricas como Dice e IoU. Por este motivo, los resultados se analizaron diferenciando entre el conjunto completo de cortes, los cortes interiores y los cortes extremos.
 
-\begin{table}[H]
+\begin{table}[h]
 \centering
 \caption{Rendimiento medio del modelo de segmentación cerebral en los cortes analizados para explicabilidad.}
 \label{tab:rendimiento_xai_cerebro}
@@ -110,32 +109,22 @@ Cortes extremos & 18 & 0,189 & 0,174 \\
 \end{tabular}
 \end{table}
 
-La Figura~\ref{fig:xai_cerebro_ejemplo_bueno} muestra ejemplos representativos de cortes interiores en los que el modelo obtiene una segmentación cerebral precisa. En cada fila se presenta la imagen original, la máscara de referencia, la máscara predicha, los mapas de relevancia generados por Grad-CAM, Grad-CAM++ e Integrated Gradients, y la curva de eliminación normalizada asociada.
+Como se observa en la Tabla~\ref{tab:rendimiento_xai_cerebro}, el rendimiento global se ve condicionado por los cortes extremos. Al considerar únicamente los cortes interiores, más representativos de la tarea principal de segmentación cerebral, el modelo alcanza un Dice medio de 0,969 y un IoU medio de 0,940. Esta diferencia indica que la disminución del rendimiento en el conjunto completo se debe principalmente a los cortes de borde, donde la región anatómica objetivo es pequeña o ambigua.
 
-\begin{figure}[H]
+La Figura~\ref{fig:xai_cerebro_ejemplo_bueno} muestra un ejemplo representativo de un corte interior con buena segmentación cerebral. En ella se presenta la imagen original, la máscara de referencia, la máscara predicha, los mapas de relevancia generados mediante Grad-CAM, Grad-CAM++ e Integrated Gradients, y la curva de eliminación normalizada asociada.
+
+\begin{figure}[h]
     \centering
-    \includegraphics[width=\textwidth]{Imagenes/XAI_Cerebro/good_brain_segmentation/CASE_12_slice_011.png}
-    \caption{Ejemplo cualitativo de explicabilidad aplicado al modelo de segmentación cerebral. Se muestra la imagen original, la máscara manual, la máscara predicha, los mapas obtenidos mediante Grad-CAM, Grad-CAM++ e Integrated Gradients, y la curva de eliminación normalizada.}
+    \includegraphics[width=\textwidth]{Imagenes/XAI_Cerebro/CASE_20_slice_014.png}
+    \caption{Ejemplo cualitativo de explicabilidad aplicado al modelo de segmentación cerebral.}
     \label{fig:xai_cerebro_ejemplo_bueno}
 \end{figure}
 
-En estos ejemplos, la máscara predicha presenta un alto grado de solapamiento con la segmentación manual, con valores Dice próximos a 1. Esta coincidencia entre la evaluación cuantitativa y la visualización de los mapas de relevancia refuerza la interpretación de que, en los cortes representativos del volumen, el modelo realiza una segmentación estable y espacialmente coherente. Además, tanto Grad-CAM como Grad-CAM++ producen mapas suaves y continuos, lo que facilita su interpretación visual en el contexto de una tarea de segmentación anatómica.
+En los cortes interiores, la máscara predicha presenta un alto grado de solapamiento con la segmentación manual. Los mapas generados por Grad-CAM y Grad-CAM++ muestran activaciones amplias y continuas sobre la región cerebral, lo que facilita su interpretación visual en una tarea de segmentación anatómica. Integrated Gradients, en cambio, produce mapas más localizados y dispersos, resaltando zonas concretas de la imagen, como bordes o regiones de mayor variación de intensidad.
 
-Integrated Gradients, por el contrario, muestra un patrón más localizado y disperso. En lugar de generar una región amplia de activación sobre todo el cerebro, tiende a resaltar puntos concretos, bordes o zonas de mayor variación de intensidad. Este comportamiento puede resultar menos intuitivo desde el punto de vista visual, pero es coherente con los resultados cuantitativos obtenidos en las métricas de eliminación, donde este método mostró una mayor sensibilidad al retirar las regiones consideradas relevantes. Por tanto, Integrated Gradients parece identificar zonas críticas para la predicción, aunque su representación sea menos directa que la obtenida mediante Grad-CAM o Grad-CAM++.
+Esta diferencia entre métodos también se refleja en las métricas de fidelidad. La Tabla~\ref{tab:xai_cerebro_metricas} resume los valores medios obtenidos para Grad-CAM, Grad-CAM++ e Integrated Gradients. La sensibilidad por oclusión se empleó como análisis complementario, pero no se incluye en esta tabla al no generar las mismas métricas agregadas que los métodos basados en mapas de relevancia.
 
-Las curvas de eliminación normalizada permiten complementar esta interpretación visual. En ellas se observa cómo varía la puntuación del modelo al perturbar progresivamente las regiones identificadas como relevantes por cada método. En los casos con buena segmentación, la eliminación de las zonas destacadas provoca una caída progresiva de la puntuación, lo que indica que dichas regiones tienen una influencia real sobre la salida del modelo. Esta relación entre mapas de relevancia y caída del score aporta una medida adicional de fidelidad de las explicaciones.
-
-No obstante, el análisis cualitativo también evidencia ciertas limitaciones. En los cortes extremos del volumen, la interpretación de los mapas resulta menos estable. En algunos de estos cortes, la máscara manual contiene muy poca región cerebral o incluso ningún píxel etiquetado, mientras que la imagen todavía puede presentar estructuras anatómicas residuales. En estos casos, el modelo puede generar una predicción parcial de cerebro, lo que conduce a valores Dice nulos o muy bajos y a ratios de área no representativos. Por ello, estos cortes no deben interpretarse del mismo modo que los cortes interiores.
-
-Esta diferencia justifica la separación realizada entre cortes interiores y cortes extremos en el análisis cuantitativo. Los cortes interiores permiten evaluar el comportamiento del modelo en las regiones donde la estructura cerebral está claramente presente, mientras que los cortes de borde reflejan situaciones más ambiguas, condicionadas tanto por la anatomía visible como por el criterio de anotación manual. En consecuencia, las explicaciones obtenidas en cortes extremos deben entenderse como una herramienta para estudiar el comportamiento del modelo ante casos límite, no como una medida directa de buen funcionamiento.
-
-En conjunto, el análisis cualitativo de los mapas de relevancia muestra que, en los cortes representativos de la estructura cerebral, las explicaciones son coherentes con la segmentación obtenida. Grad-CAM y Grad-CAM++ ofrecen visualizaciones más suaves y anatómicamente interpretables, mientras que Integrated Gradients proporciona una explicación más sensible a regiones concretas de la imagen. La combinación de estos métodos permite analizar el modelo desde perspectivas complementarias y aporta información útil sobre la relación entre la imagen de entrada, la máscara predicha y las regiones que influyen en la predicción.
-
-Una vez caracterizado el comportamiento del modelo, se evaluó la fidelidad de las explicaciones mediante métricas basadas en perturbación. En particular, se utilizaron curvas de eliminación e inserción, así como sus variantes MoRF y LeRF. En las curvas de eliminación, se eliminan progresivamente las regiones más relevantes según el mapa de explicación; por tanto, un valor bajo de \textit{Deletion AUC} indica que la explicación identifica regiones importantes para la predicción. En cambio, en las curvas de inserción, valores altos de \textit{Insertion AUC} indican que las regiones destacadas por el método permiten reconstruir progresivamente la activación del modelo.
-
-La Tabla~\ref{tab:xai_cerebro_metricas} resume los resultados medios obtenidos para Grad-CAM, Grad-CAM++ e Integrated Gradients. La sensibilidad por oclusión se empleó como análisis complementario, pero no se incluye en esta tabla al no calcular las mismas métricas agregadas que los métodos basados en mapas de relevancia.
-
-\begin{table}[H]
+\begin{table}[h]
 \centering
 \caption{Resumen cuantitativo de las métricas de fidelidad para los métodos de explicabilidad aplicados al modelo de segmentación cerebral.}
 \label{tab:xai_cerebro_metricas}
@@ -151,14 +140,16 @@ Integrated Gradients & \textbf{0,102} & 0,755 & 0,721 & \textbf{0,914} & \textbf
 \end{tabular}%
 }
 \end{table}
-Los resultados muestran que Integrated Gradients obtuvo el mejor comportamiento en las métricas basadas en eliminación, con un \textit{Deletion AUC} medio de 0,102 y un \textit{AOPC} normalizado de 0,923. Esto indica que las regiones identificadas como relevantes por este método tienen una influencia directa sobre la predicción del modelo, ya que su eliminación provoca una reducción rápida de la puntuación asociada a la segmentación cerebral.
 
-Por otro lado, Grad-CAM++ presentó los mejores valores en las métricas de inserción y LeRF, con un \textit{Insertion AUC} medio de 0,795 y un \textit{LeRF AUC} medio de 0,807. Este resultado sugiere que las regiones resaltadas por Grad-CAM++ contienen información suficiente para reconstruir progresivamente la predicción del modelo, y que las zonas consideradas menos relevantes afectan en menor medida a la salida cuando se eliminan en primer lugar.
+Integrated Gradients obtuvo el mejor comportamiento en las métricas basadas en eliminación, con un \textit{Deletion AUC} medio de 0,102 y un \textit{AOPC} normalizado de 0,923. Esto indica que las regiones identificadas como relevantes por este método tienen una influencia directa sobre la predicción, ya que su eliminación provoca una caída más rápida de la puntuación del modelo.
 
-El comportamiento de las curvas de perturbación refuerza esta interpretación. En el caso de Integrated Gradients, al eliminar el 25\% de los píxeles considerados más relevantes, la puntuación media del modelo descendió hasta 0,097. En cambio, para Grad-CAM y Grad-CAM++, la puntuación en ese mismo punto fue de 0,663 y 0,750, respectivamente. Esto sugiere que Integrated Gradients produce mapas más focalizados en regiones críticas para la predicción, mientras que Grad-CAM y Grad-CAM++ generan explicaciones más distribuidas espacialmente.
+Por otro lado, Grad-CAM++ presentó los mejores valores en las métricas de inserción y LeRF, con un \textit{Insertion AUC} medio de 0,795 y un \textit{LeRF AUC} medio de 0,807. Este resultado sugiere que las regiones resaltadas por Grad-CAM++ contienen información suficiente para reconstruir progresivamente la predicción, y que las zonas consideradas menos relevantes afectan en menor medida a la salida cuando se eliminan en primer lugar.
 
+El comportamiento observado en las curvas de perturbación refuerza esta interpretación. Al eliminar el 25\% de los píxeles considerados más relevantes, la puntuación media del modelo descendió hasta 0,097 con Integrated Gradients, frente a 0,663 con Grad-CAM y 0,750 con Grad-CAM++. Esto sugiere que Integrated Gradients produce mapas más focalizados en regiones críticas para la predicción, mientras que Grad-CAM y Grad-CAM++ generan explicaciones más distribuidas espacialmente.
 
-En conjunto, los resultados de explicabilidad no deben interpretarse como una validación clínica independiente del modelo, sino como una herramienta complementaria para analizar su comportamiento. Las métricas cuantitativas indican que las regiones destacadas por los métodos XAI influyen de forma significativa en la predicción, especialmente en el caso de Integrated Gradients. Asimismo, Grad-CAM++ aporta una visualización útil para interpretar la reconstrucción progresiva de la evidencia visual. Por tanto, la combinación de estos métodos permite obtener una visión más completa del proceso de segmentación realizado por el modelo.
+En los cortes extremos, la interpretación de las explicaciones fue menos estable. Esto se debe a que la máscara manual puede contener una región cerebral muy reducida o incluso vacía, mientras que la imagen todavía puede mostrar estructuras anatómicas residuales. En consecuencia, estos cortes deben entenderse como casos límite del volumen, útiles para estudiar el comportamiento del modelo en zonas de transición, pero no como ejemplos representativos de la segmentación cerebral principal.
+
+En conjunto, los resultados muestran que las explicaciones generadas son coherentes con el comportamiento cuantitativo del modelo en los cortes interiores. Grad-CAM y Grad-CAM++ ofrecen visualizaciones más suaves y anatómicamente interpretables, mientras que Integrated Gradients identifica regiones más concretas y con mayor impacto en las métricas de perturbación. Por tanto, la combinación de estos métodos permite analizar la segmentación cerebral desde perspectivas complementarias, sin sustituir la evaluación basada en métricas de segmentación.
 
 \section{Resultados en segmentación de isquemia}
 A continuación, se presentan los resultados obtenidos en la tarea de segmentación de las regiones de lesión por isquemia cerebral, la cual, por razones que se describirán en la siguiente sección, supone un problema más complejo que la segmentación del órgano sano. Para ello, al igual que en el modelo de cerebro, se han evaluado varias configuraciones de arquitecturas \textit{U-Net}, utilizando las métricas descritas anteriormente.
@@ -224,12 +215,40 @@ Tal y como se observa en la Figura \ref{fig:volumen_isquemia}, las diferencias e
     \label{fig:volumen_isquemia}
 \end{figure}
 
-\subsection{Impacto del threshold}
-Uno de los factores clave en la calidad de la segmentación es el umbral de decisión aplicado sobre la salida del modelo:
-Valores de umbral bajos tienden a producir segmentaciones más extensas, incrementando la detección de posibles zonas afectadas, pero también introduciendo falsos positivos. 
-Por lo contrario, umbrales altos generan segmentaciones más conservadoras, generando posibles omisiones de zonas de baja hiperintensidad.
+\subsection{Análisis del umbral de binarización}
 
-Este comportamiento es especialmente crítico en el caso de la isquemia, donde las regiones ambiguas son frecuentes. Por ello, la elección del umbral óptimo depende en gran medida del criterio clínico y del uso final de la herramienta.
+Durante la evaluación del modelo de segmentación de isquemia se observó que el umbral de binarización aplicado sobre la salida probabilística influía de forma directa en la máscara final obtenida. Este efecto resulta especialmente relevante en la segmentación de lesiones pequeñas, donde pequeñas variaciones en la probabilidad asignada a los píxeles pueden traducirse en falsos positivos o en cambios apreciables en el volumen estimado.
+
+Por este motivo, se evaluaron distintos valores de umbral entre \(0.50\) y \(0.95\). Para cada configuración se calcularon el coeficiente Dice medio, el error absoluto de volumen y el error relativo porcentual, con el objetivo de analizar el equilibrio entre el solapamiento espacial de la segmentación y la precisión de la cuantificación volumétrica.
+
+\begin{table}[h]
+\centering
+\caption{Comparación del rendimiento medio del modelo de isquemia para distintos umbrales de binarización.}
+\label{tab:comparacion_threshold}
+\begin{tabular}{ccccc}
+\hline
+Umbral & Dice medio & Error absoluto (ml) & Error relativo (\%) & Casos procesados \\
+\hline
+0.50 & 0.8323 & 0.0009 & 6.65 & 3 \\
+0.55 & 0.8310 & 0.0008 & 5.89 & 3 \\
+0.60 & 0.8308 & 0.0007 & 4.95 & 3 \\
+0.65 & 0.8314 & 0.0005 & 3.85 & 3 \\
+0.70 & 0.8301 & 0.0004 & 2.59 & 3 \\
+0.75 & 0.8301 & 0.0003 & 1.73 & 3 \\
+0.80 & 0.8290 & 0.0001 & 0.86 & 3 \\
+0.85 & 0.8281 & 0.0002 & 1.33 & 3 \\
+0.90 & 0.8256 & 0.0004 & 3.02 & 3 \\
+0.95 & 0.8220 & 0.0007 & 5.65 & 3 \\
+\hline
+\end{tabular}
+\end{table}
+
+Como se observa en la Tabla~\ref{tab:comparacion_threshold}, el mayor valor de Dice medio se obtiene con un umbral de \(0.50\). Sin embargo, al aumentar el umbral se reduce progresivamente el error volumétrico hasta alcanzar su valor mínimo en \(0.80\), donde se obtiene el menor error absoluto y relativo. A partir de este punto, incrementos adicionales del umbral reducen ligeramente el Dice y vuelven a aumentar el error volumétrico.
+
+Estos resultados muestran que el umbral óptimo depende del criterio priorizado. Un umbral de \(0.50\) maximiza ligeramente el solapamiento espacial, mientras que un umbral de \(0.80\) ofrece una estimación volumétrica más precisa. Dado que uno de los objetivos principales de la herramienta es cuantificar el volumen de la lesión, se adoptó finalmente un umbral de \(0.80\) para la fase de inferencia del modelo de isquemia.
+
+Debe tenerse en cuenta que este análisis se realizó sobre un número reducido de casos, por lo que el umbral seleccionado debe interpretarse como una decisión experimental adecuada para este conjunto de validación, y no como un valor universal generalizable a cualquier adquisición de resonancia magnética.
+
 
 \subsection{Análisis cualitativo}
 Con el objetivo de complementar el análisis cuantitativo presentado anteriormente, se ha realizado una evaluación cualitativa de las segmentaciones obtenidas en los casos de isquemia cerebral, prestando especial atención al comportamiento del modelo en regiones de alta ambigüedad.
@@ -262,26 +281,26 @@ En conjunto, el análisis cualitativo respalda los resultados cuantitativos obte
 
 \subsection{Resultados de explicabilidad en la segmentación de isquemia}
 
-Una vez evaluado el rendimiento del modelo de segmentación de isquemia, se analizó la coherencia de sus predicciones mediante técnicas de explicabilidad visual. El objetivo de este análisis no es sustituir la evaluación cuantitativa de segmentación, sino estudiar si las regiones destacadas por los métodos de explicabilidad se corresponden con las zonas que el modelo utiliza para generar la máscara predicha.
+Una vez evaluado el rendimiento del modelo de segmentación de isquemia, se analizó la coherencia espacial de sus predicciones mediante técnicas de explicabilidad visual. El análisis se realizó sobre un subconjunto de 84 cortes pertenecientes a tres casos de prueba, de los cuales 22 presentaban lesión en la segmentación manual y 62 no contenían lesión.
 
-El análisis se realizó sobre un subconjunto de 84 cortes pertenecientes a tres casos de prueba. De estos cortes, 22 presentaban lesión en la segmentación manual y 62 no contenían lesión. A nivel de presencia o ausencia de lesión por corte, el modelo obtuvo 21 verdaderos positivos, 60 verdaderos negativos, 2 falsos positivos y 1 falso negativo. Esto supone una sensibilidad del 95,45 \%, una especificidad del 96,77 \% y una puntuación F1 del 93,33 \%. En los cortes con lesión correctamente detectada, el Dice medio fue de 0,784 y la IoU media de 0,672.
+A nivel de presencia o ausencia de lesión por corte, el modelo obtuvo 21 verdaderos positivos, 60 verdaderos negativos, 2 falsos positivos y 1 falso negativo. Esto supone una sensibilidad del 95,45 \%, una especificidad del 96,77 \% y una puntuación F1 del 93,33 \%. En los cortes con lesión correctamente detectada, el Dice medio fue de 0,784 y la IoU media de 0,672.
 
-Para la interpretación visual se aplicaron Grad-CAM, Grad-CAM++ e Integrated Gradients utilizando como objetivo la máscara predicha por el propio modelo. Esta decisión permite analizar qué regiones de la imagen contribuyen a la predicción generada, independientemente de si esta coincide o no con la segmentación manual. Por tanto, las explicaciones deben interpretarse como una medida de fidelidad respecto al comportamiento del modelo, y no como una validación clínica directa de la lesión.
+Para la interpretación visual se aplicaron Grad-CAM, Grad-CAM++ e Integrated Gradients utilizando como objetivo la máscara predicha por el propio modelo. De este modo, las explicaciones analizan las regiones que contribuyen a la predicción generada por la red, independientemente de su coincidencia exacta con la segmentación manual.
 
-Como se muestra en la Figura~\ref{fig:xai_isquemia_ejemplo}, en los cortes correctamente segmentados los mapas de Grad-CAM y Grad-CAM++ presentan activaciones localizadas en la región predicha como isquemia, con una correspondencia visual clara con la máscara de referencia en los casos de mayor solapamiento. Integrated Gradients también resalta la zona de interés, aunque con un patrón más disperso y fragmentado, lo que resulta esperable en métodos basados directamente en gradientes a nivel de píxel. Esta diferencia hace que Grad-CAM y Grad-CAM++ resulten más interpretables desde el punto de vista visual, mientras que Integrated Gradients aporta una explicación más fina, aunque menos compacta.
+La Figura~\ref{fig:xai_isquemia_ejemplo} muestra un ejemplo representativo de explicabilidad aplicado a un corte con lesión. En los casos correctamente segmentados, Grad-CAM y Grad-CAM++ presentan activaciones localizadas en la región predicha como isquemia, con una correspondencia visual clara con la zona de lesión en los cortes de mayor solapamiento. Integrated Gradients también resalta la región de interés, aunque con un patrón más disperso y fragmentado.
 
-\begin{figure}[H]
+\begin{figure}[h]
     \centering
-    \includegraphics[width=\textwidth]{Imagenes/XAI_isquemia/CASE_1_slice_017.png}
-    \caption{Ejemplo cualitativo de explicabilidad aplicado al modelo de segmentación de isquemia. Se muestran la imagen original, la máscara manual, la máscara predicha y los mapas de relevancia obtenidos mediante Grad-CAM, Grad-CAM++ e Integrated Gradients.}
+    \includegraphics[width=\textwidth]{Imagenes/XAI_isquemia/xai_ejemplo.png}
+    \caption{Ejemplo cualitativo de explicabilidad aplicado al modelo de segmentación de isquemia.}
     \label{fig:xai_isquemia_ejemplo}
 \end{figure}
 
-Este comportamiento resulta especialmente relevante en segmentación médica, donde una explicación coherente puede ayudar a identificar si el modelo se apoya en patrones anatómicos plausibles o en regiones ambiguas de la imagen.
+Esta diferencia entre métodos es coherente con lo observado en la segmentación cerebral: Grad-CAM y Grad-CAM++ generan mapas más compactos y visualmente interpretables, mientras que Integrated Gradients proporciona una atribución más fina, pero menos localizada espacialmente.
 
-La evaluación cuantitativa mediante perturbación, resumida en la Tabla~\ref{tab:xai_isquemia_resultados}, refuerza esta interpretación. En los cortes con lesión correctamente detectada, los valores medios de \textit{Deletion AUC} fueron muy bajos para los tres métodos, con valores de 0,025 para Grad-CAM y Grad-CAM++, y 0,026 para Integrated Gradients. Esto indica que, al eliminar en primer lugar las regiones consideradas más relevantes, el score asociado a la predicción cae de forma abrupta. De forma complementaria, las curvas de \textit{Insertion} muestran que al reconstruir la imagen empezando por las regiones más relevantes el modelo recupera progresivamente su activación, especialmente en Grad-CAM++ e Integrated Gradients, con valores medios de 0,840 y 0,879 respectivamente.
+La evaluación cuantitativa mediante perturbación se resume en la Tabla~\ref{tab:xai_isquemia_resultados}. En los cortes con lesión correctamente detectada, los valores medios de \textit{Deletion AUC} fueron muy bajos para los tres métodos, con valores de 0,025 para Grad-CAM y Grad-CAM++, y 0,026 para Integrated Gradients. Esto indica que, al eliminar en primer lugar las regiones consideradas más relevantes, el score asociado a la predicción cae de forma abrupta.
 
-\begin{table}[H]
+\begin{table}[h]
 \centering
 \caption{Resultados cuantitativos de explicabilidad para los cortes de isquemia correctamente detectados.}
 \label{tab:xai_isquemia_resultados}
@@ -302,14 +321,13 @@ Integrated Gradients & 0,026 & 0,879 & 0,882 & 0,999 \\
 \end{tabular}
 \end{table}
 
-Además, los valores de \textit{LeRF AUC} se mantienen elevados, lo que indica que al eliminar inicialmente las regiones menos relevantes la predicción se conserva durante una parte importante del proceso de perturbación. Del mismo modo, el \textit{AOPC} normalizado se sitúa en valores cercanos a 1 para los tres métodos, reforzando la idea de que las regiones destacadas por los mapas tienen una influencia significativa en la salida del modelo.
+Las curvas de \textit{Insertion} muestran que, al reconstruir la imagen comenzando por las regiones más relevantes, el modelo recupera progresivamente su activación. Este comportamiento es especialmente claro en Grad-CAM++ e Integrated Gradients, con valores medios de 0,840 y 0,879, respectivamente. Por su parte, los valores elevados de \textit{LeRF AUC} indican que la eliminación inicial de las regiones menos relevantes mantiene la predicción durante una parte importante del proceso de perturbación.
 
-No obstante, el análisis también permite identificar limitaciones. En los falsos positivos, las explicaciones muestran activaciones localizadas en las regiones que han originado la predicción errónea. Esto evidencia que la explicabilidad no garantiza que la predicción sea correcta, sino que permite analizar qué información ha utilizado el modelo para producirla. Por tanto, estos casos resultan especialmente útiles para detectar patrones de error y posibles regiones ambiguas en la imagen.
+El \textit{AOPC} normalizado se sitúa en valores cercanos a 1 para los tres métodos, lo que refuerza la influencia de las regiones destacadas sobre la salida del modelo. En conjunto, estos resultados indican que los mapas de relevancia no solo son visualmente coherentes, sino que además identifican regiones con impacto directo sobre la predicción.
 
-En conjunto, los resultados de explicabilidad sugieren que el modelo de isquemia basa sus predicciones en regiones espacialmente coherentes con las máscaras generadas. Las técnicas Grad-CAM y Grad-CAM++ proporcionan explicaciones visualmente más compactas, mientras que Integrated Gradients ofrece una atribución más detallada pero menos localizada. La combinación de análisis cualitativo y métricas de perturbación permite aportar una capa adicional de interpretación al modelo, aunque sus resultados deben entenderse como apoyo a la evaluación del sistema y no como validación clínica independiente.
+El análisis también permite observar el comportamiento del modelo en casos erróneos. En los falsos positivos, las explicaciones muestran activaciones localizadas en las regiones que han originado la predicción incorrecta. Esto evidencia que la explicabilidad no garantiza que la segmentación sea correcta, sino que permite identificar qué información ha utilizado el modelo para producirla. Por tanto, estos casos resultan útiles para estudiar patrones de error y posibles regiones ambiguas de la imagen.
 
-\subsection{Discusión crítica del modelo de isquemia}
-Es importante destacar que el sistema desarrollado se concibe como una herramienta supervisada en la que el especialista mantiene el control de los datos finales. La herramienta permite la edición de cada una de las máscaras generada así como los valores volumétricos en cada corte de la resonancia analizada. Este enfoque garantiza que cualquier desviación pueda ser corregida de manera sencilla por el experto, integrando la automatización dentro de un \textbf{flujo de trabajo asistido y no sustitutivo}. 
+En conjunto, los resultados de explicabilidad muestran que, en los cortes con lesión correctamente detectada, el modelo de isquemia basa sus predicciones en regiones espacialmente coherentes con las máscaras generadas. Grad-CAM y Grad-CAM++ ofrecen explicaciones más compactas y fáciles de interpretar visualmente, mientras que Integrated Gradients presenta una atribución más detallada y sensible a regiones concretas. La combinación de análisis visual y métricas de perturbación aporta una capa adicional de interpretación al modelo, sin sustituir la evaluación cuantitativa de segmentación ni constituir una validación clínica independiente.
 
 \section{Conclusiones del capítulo}
 
@@ -318,6 +336,8 @@ De forma global, los resultados obtenidos muestran un comportamiento diferenciad
 Por el contrario, la segmentación de isquemia representa una tarea más compleja. Las regiones lesionadas son de menor tamaño, presentan bordes menos definidos y pueden mostrar una intensidad más variable en la imagen de resonancia magnética. Por ello, pequeñas discrepancias espaciales entre la predicción y la referencia manual tienen un impacto mayor sobre métricas como Dice o IoU. Aun así, el modelo permite localizar de forma coherente las zonas patológicas principales y proporciona estimaciones volumétricas útiles para una primera aproximación automatizada.
 
 El análisis conjunto de métricas cuantitativas, resultados visuales y mapas de explicabilidad indica que la herramienta desarrollada cumple el objetivo de ofrecer apoyo al análisis de imágenes biomédicas, especialmente como sistema de asistencia y cuantificación preliminar. No obstante, los resultados también muestran que la segmentación de lesiones requiere una validación más amplia y un refinamiento adicional antes de su uso en contextos de análisis clínico o experimental más exigentes.
+
+Las Figuras~\ref{fig:bland_altman}, \ref{fig:boxplots_metricas} y \ref{fig:dice_pacientes} resumen de forma visual esta interpretación global de los resultados. El gráfico de Bland-Altman permite analizar la concordancia entre el volumen de referencia y el volumen estimado por el modelo, mientras que los diagramas de caja muestran la distribución de las métricas principales y ayudan a identificar la variabilidad entre casos. Por último, la comparación del Dice medio por paciente permite observar si el rendimiento se mantiene de forma homogénea o si existen casos concretos con mayor dificultad de segmentación.
 
 \begin{figure}[h]
     \centering

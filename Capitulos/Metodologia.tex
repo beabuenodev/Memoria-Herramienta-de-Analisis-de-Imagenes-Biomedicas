@@ -171,27 +171,27 @@ Por último, tanto las máscaras de entrenamiento como las slices de la IRM se o
 
 Tras realizar un preprocesamiento de las imágenes para su uso en el entrenamiento, procedemos a definir la arquitectura a alto nivel de la aplicación de segmentación automática. En el caso de estudio que nos presenta ICTS BioImagen Complutense, se requiere la automatización de la medición de volúmenes de la lesión isquémica en el cerebro, además de la afectación en este órgano; por lo que es necesaria la segmentación automática por separado del órgano y de la lesión.
 
-Para esta tarea, alistamos la arquitectura U-Net para crear dos modelos, entrenados con las mismas imágenes pero con distintas máscaras binarias. Aunque existen múltiples variantes de UNet (UNet++, Attention UNet, ResUNet), se decide usar UNet como la estructura básica, teniendo en cuenta ventajas e inconvenientes en características técnicas, capacidad y costes de computación, que se expondrán más adelante en esta sección.
+Para esta tarea, se utiliza la arquitectura U-Net para crear dos modelos, entrenados con las mismas imágenes pero con distintas máscaras binarias. Aunque existen múltiples variantes de U-Net, como U-Net++, Attention U-Net o ResUNet, se decide usar U-Net como estructura básica, teniendo en cuenta ventajas e inconvenientes relacionados con la complejidad técnica, la capacidad del modelo y el coste computacional, que se expondrán más adelante en esta sección.
 
-Debido al bajo número de datos anotados, habitual en el ámbito biomédico, usaremos además \textit{Transfer Learning}, una técnica de \textit{Deep Learning} usada para entrenar redes neuronales en base a otros modelos previamente entrenados, para un caso de uso más concreto. Para ello, usaremos los pesos del modelo RadImageNet, un modelo entrenado con imágenes de IRM, TAC y Ecografía. 
+Debido al bajo número de datos anotados, habitual en el ámbito biomédico, se aplica además \textit{Transfer Learning}, una técnica de \textit{Deep Learning} que permite reutilizar pesos previamente aprendidos por otros modelos para adaptarlos a una tarea más concreta. Para ello, se emplean pesos de \textit{RadImageNet}, un modelo preentrenado con IRM, TAC y ecografía.
 
-Tras el entrenamiento, se observó una clara sobreestimación de segmentación en los cortes de isquemia. Para mitigar este problema, se probaron varias estrategias como el cambio de la función de pérdida para penalizar los falsos positivos, pero se acabó escogiendo una estrategia de umbral del 0.8, elegido en base a los resultados en error absoluto y métricas de validación. 
+Tras los primeros entrenamientos, se observó una tendencia a la sobresegmentación en el modelo de isquemia. Para mitigar este problema, se probaron varias estrategias, como el cambio de la función de pérdida para penalizar los falsos positivos. Finalmente, se optó por ajustar el umbral de binarización de la salida probabilística del modelo. La comparación cuantitativa de los distintos umbrales se presenta en el capítulo de resultados.
 
-Además, se precisa la aplicación de técnicas de Inteligencia Artificial Explicable para proporcionar robustez al análisis, verificar que el modelo basa sus predicciones en regiones anatómica y patológicamente relevantes, y mejorar la confianza en los resultados obtenidos.
+Además, se contempla la aplicación de técnicas de Inteligencia Artificial Explicable para proporcionar robustez al análisis, verificar que el modelo basa sus predicciones en regiones anatómica y patológicamente relevantes, y mejorar la confianza en los resultados obtenidos.
 
 \subsection{Arquitectura U-Net y decisiones de implementación}
 
 La arquitectura principal empleada en este trabajo para la segmentación automática se basa en una U-Net 2D, la cual se repite en los dos modelos desarrollados (cerebro e isquemia). En nuestro caso, esta arquitectura se adaptó para trabajar con cortes bidimensionales de resonancia magnética preclínica, de manera que cada muestra de entrada se representa como una imagen en escala de grises redimensionada a \(120 \times 120\) píxeles. Además, dado que el encoder seleccionado requiere tres canales de entrada, cada imagen monocanal se replicó tres veces antes de ser introducida en la red.
 
-A nivel estructural, la red mantiene el esquema clásico encoder--decoder característico de U-Net. En la rama contractiva, el encoder \texttt{ResNet50} actúa como extractor jerárquico de características, generando representaciones cada vez más abstractas de la imagen de entrada conforme aumenta la profundidad de la red. A su vez, a partir del encoder se obtienen varios mapas de características intermedios que posteriormente se reutilizan en el decoder a través de conexiones de salto, preservando así información espacial de alta resolución, necesaria para resultar en una segmentación precisa \citep{ronneberger2015unet}. En la rama expansiva, la máscara de salida se reconstruye mediante varias etapas sucesivas de sobremuestreo y concatenación con estos mapas intermedios.
+A nivel estructural, la red mantiene el esquema clásico encoder--decoder característico de U-Net. En la rama contractiva, el encoder \texttt{ResNet50} actúa como extractor jerárquico de características, generando representaciones cada vez más abstractas de la imagen de entrada conforme aumenta la profundidad de la red. A su vez, a partir del encoder se obtienen varios mapas de características intermedios que posteriormente se reutilizan en el decoder a través de conexiones de salto, preservando así información espacial de alta resolución, necesaria para obtener una segmentación precisa \citep{ronneberger2015unet}. En la rama expansiva, la máscara de salida se reconstruye mediante varias etapas sucesivas de sobremuestreo y concatenación con estos mapas intermedios.
 
-En la implementación del decoder se optó por una estrategia de sobremuestreo mediante \texttt{UpSampling2D} seguida de convoluciones convencionales, en lugar de utilizar convoluciones transpuestas. Esta decisión permite separar el aumento de resolución del refinamiento de características y ayuda a reducir la aparición de artefactos tipo  \textit{checkerboard}\footnote{
+En la implementación del decoder se optó por una estrategia de sobremuestreo mediante \texttt{UpSampling2D} seguida de convoluciones convencionales, en lugar de utilizar convoluciones transpuestas. Esta decisión permite separar el aumento de resolución del refinamiento de características y ayuda a reducir la aparición de artefactos tipo \textit{checkerboard}\footnote{
 Los artefactos \textit{checkerboard} son patrones visuales no deseados con apariencia de cuadrícula o tablero de ajedrez, que pueden aparecer en imágenes generadas o reconstruidas mediante ciertas operaciones de convolución transpuesta.
 }, asociados a ciertas configuraciones de deconvolución \citep{odena2016deconvolution}.
 
 En cuanto a la salida del modelo, esta se obtiene mediante una convolución \(1 \times 1\) con activación sigmoidal, lo que permite generar una máscara binaria de probabilidad por píxel para la clase objetivo. Esta formulación es coherente con el problema planteado, ya que tanto la segmentación del cerebro como la de la lesión se modelan como tareas de segmentación binaria, donde cada píxel debe clasificarse como perteneciente o no a la región de interés.
 
-Como se muestra en la Figura \ref{fig:arquitectura_unet}, ambos modelos comparten la misma arquitectura base, diferenciándose únicamente en la máscara objetivo empleada durante el entrenamiento: uno orientado a la segmentación del cerebro y el otro hacia la segmentación de la lesión isquémica.
+Como se muestra en la Figura \ref{fig:arquitectura_unet}, ambos modelos comparten la misma arquitectura base, diferenciándose únicamente en la máscara objetivo empleada durante el entrenamiento: uno orientado a la segmentación del cerebro y el otro hacia la segmentación de la lesión isquémica. La figura muestra la entrada de tamaño \(120 \times 120 \times 3\), el encoder \texttt{ResNet50} preentrenado sobre \textit{RadImageNet}, las conexiones de salto, el decoder basado en \texttt{UpSampling2D} y convoluciones, y la generación de la máscara binaria de salida. Esta misma arquitectura base se utiliza tanto para el modelo de segmentación de cerebro como para el de segmentación de isquemia, diferenciándose únicamente en la máscara objetivo empleada durante el entrenamiento.
 
 \begin{figure}[htbp]
     \centering
@@ -199,21 +199,19 @@ Como se muestra en la Figura \ref{fig:arquitectura_unet}, ambos modelos comparte
     \caption{Esquema de la arquitectura U-Net 2D empleada en este trabajo.}
     \label{fig:arquitectura_unet}
 \end{figure}
- La figura muestra la entrada de tamaño \(120 \times 120 \times 3\), el encoder \texttt{ResNet50} preentrenado sobre \textit{RadImageNet}, las conexiones de salto, el decoder basado en \texttt{UpSampling2D} y convoluciones, y la generación de la máscara binaria de salida. Esta misma arquitectura base se utiliza tanto para el modelo de segmentación de cerebro como para el de segmentación de isquemia, diferenciándose únicamente en la máscara objetivo empleada durante el entrenamiento. Elaboración propia.
-
 \subsection{Justificación de la arquitectura y uso de \textit{Transfer Learning}}
 
-Aunque existen variantes más complejas de esta arquitectura, como U-Net++ \citep{zhou2018unetplusplus} o Attention U-Net \citep{oktay2018attentionunet}, se decide utilizar U-Net como estructura base del sistema. Esta elección se toma teniendo en cuenta que, aunque estas variantes introducen mejoras interesantes a nivel arquitectónico, también aumentan la complejidad del modelo y el número de elementos a ajustar durante el entrenamiento. En este caso, al trabajar con un conjunto de datos reducido y dentro del alcance de un TFG, resulta más razonable partir de una arquitectura ya consolidada en segmentación biomédica, suficientemente robusta y más sencilla de controlar experimentalmente \citep{ronneberger2015unet}. De este modo, en lugar de añadir complejidad desde la propia arquitectura, se opta por mantener una U-Net base y reforzarla mediante \textit{transfer learning}, buscando así un equilibrio entre capacidad de segmentación, coste computacional y facilidad de implementación.
+Aunque existen variantes más complejas de esta arquitectura, como U-Net++ \citep{zhou2018unetplusplus} o Attention U-Net \citep{oktay2018attentionunet}, se decide utilizar U-Net como estructura base del sistema. Esta elección se toma teniendo en cuenta que, aunque estas variantes introducen mejoras interesantes a nivel arquitectónico, también aumentan la complejidad del modelo y el número de elementos a ajustar durante el entrenamiento. En este caso, al trabajar con un conjunto de datos reducido y dentro del alcance de un TFG, resulta más razonable partir de una arquitectura ya consolidada en segmentación biomédica, suficientemente robusta y más sencilla de controlar experimentalmente \citep{ronneberger2015unet}. De este modo, en lugar de añadir complejidad desde la propia arquitectura, se opta por mantener una U-Net base y reforzarla mediante \textit{Transfer Learning}, buscando así un equilibrio entre capacidad de segmentación, coste computacional y facilidad de implementación.
 
-De esta manera se opta por aplicar \textit{Transfer Learning}: una técnica de \textit{Deep Learning} especialmente útil cuando no se dispone de un conjunto de entrenamiento lo suficientemente grande como para entrenar un modelo profundo desde cero. Para ello, se incorporó un encoder \texttt{ResNet50} preentrenado con pesos de \textit{RadImageNet}, con el objetivo de partir de una base de conocimiento visual ya aprendida en imagen médica, en lugar de comenzar con una inicialización aleatoria de los pesos. Esta decisión, respaldada por el trabajo de \citep{mei2022radimagenet}, donde se muestra que los modelos preentrenados en \textit{RadImageNet} pueden servir como un punto de partida eficaz para tareas posteriores de imagen biomédica. De este modo, la U-Net implementada en este trabajo no parte de un encoder entrenado desde cero, sino de un backbone previamente adaptado al dominio radiológico, lo que refuerza la justificación de esta elección.
+De esta manera se opta por aplicar \textit{Transfer Learning}: una técnica de \textit{Deep Learning} especialmente útil cuando no se dispone de un conjunto de entrenamiento lo suficientemente grande como para entrenar un modelo profundo desde cero. Para ello, se incorporó un encoder \texttt{ResNet50} preentrenado con pesos de \textit{RadImageNet}, con el objetivo de partir de una base de conocimiento visual ya aprendida en imagen médica, en lugar de comenzar con una inicialización aleatoria de los pesos. Esta decisión está respaldada por el trabajo de \citep{mei2022radimagenet}, donde se muestra que los modelos preentrenados en \textit{RadImageNet} pueden servir como un punto de partida eficaz para tareas posteriores de imagen biomédica. De este modo, la U-Net implementada en este trabajo no parte de un encoder entrenado desde cero, sino de un backbone previamente adaptado al dominio radiológico, lo que refuerza la justificación de esta elección.
 
-En conjunto, ambas decisiones responden a una misma necesidad: disponer de un modelo con suficiente capacidad de representación para segmentar estructuras biomédicas complejas, pero que al mismo tiempo pueda entrenarse de forma estable en un contexto de datos limitados, sugiriendo que el uso de trasnfer learning es una estrategia adecuada para alcanzar este objetivo.
+En conjunto, ambas decisiones responden a una misma necesidad: disponer de un modelo con suficiente capacidad de representación para segmentar estructuras biomédicas complejas, pero que al mismo tiempo pueda entrenarse de forma estable en un contexto de datos limitados, por lo que el uso de \textit{Transfer Learning} resulta una estrategia adecuada para alcanzar este objetivo.
 
 \subsection{Estrategia de entrenamiento y ajuste de la salida}
 
 Para el proceso de entrenamiento, se siguió una estrategia en dos fases: en una primera etapa, el encoder preentrenado permaneció congelado y únicamente se entrenó la parte decodificadora de la red, de forma que el modelo pudiera adaptarse a la tarea concreta sin modificar las representaciones aprendidas previamente. En una segunda etapa, se descongelaron las últimas capas del encoder para realizar un ajuste fino controlado del modelo completo. Con ello se buscó mantener el conocimiento transferido desde el preentrenamiento, permitiendo al mismo tiempo cierta especialización del extractor de características al dominio concreto de la imagen de IRM.
 
-La función de pérdida seleccionada fue una combinación de entropía cruzada binaria y pérdida Dice (\texttt{BCE + Dice loss}). Esta elección se tomó debido a que permite optimizar simultáneamente dos aspectos importantes de la segmentación: por un lado, la clasificación correcta de cada píxel de forma individual y, por otro lado, el grado de solapamiento global entre la máscara predicha y la máscara de referencia. 
+La función de pérdida seleccionada fue una combinación de entropía cruzada binaria y pérdida Dice (\texttt{BCE + Dice loss}). Esta elección se tomó debido a que permite optimizar simultáneamente dos aspectos importantes de la segmentación: por un lado, la clasificación correcta de cada píxel de forma individual y, por otro lado, el grado de solapamiento global entre la máscara predicha y la máscara de referencia.
 
 Mientras que la componente BCE penaliza errores locales de clasificación, la componente Dice resulta especialmente útil en segmentación médica cuando existe un claro desbalance entre fondo y región objetivo, como ocurre con frecuencia en la delimitación de lesiones pequeñas \citep{milletari2016vnet}. Como métrica principal de seguimiento durante el entrenamiento se utilizó el coeficiente Dice, por ofrecer una medida directa del grado de coincidencia entre la segmentación automática y la segmentación manual.
 
@@ -242,57 +240,21 @@ Salida del modelo & Máscara probabilística con activación sigmoidal \\
 \end{tabular}
 \end{table}
 
-Tras los primeros experimentos con el modelo de isquemia, se observó que el umbral de binarización influía de forma directa tanto en la calidad espacial de la segmentación como en la precisión de la cuantificación volumétrica. Por ello, se evaluaron distintos valores de umbral entre 0.50 y 0.95, comparando para cada uno de ellos el coeficiente Dice medio, el error absoluto de volumen y el error relativo percentual.
+Tras los primeros experimentos con el modelo de isquemia, se observó que el umbral de binarización influía de forma directa tanto en la calidad espacial de la segmentación como en la precisión de la cuantificación volumétrica. Por ello, durante la fase de validación se evaluaron distintos valores de umbral, con el objetivo de seleccionar una configuración adecuada para la inferencia final.
 
-Los resultados mostraron que el mayor valor de Dice medio se obtenía con un umbral de 0.50, con una puntuación de 0.8323. Sin embargo, al aumentar progresivamente el umbral, el error volumétrico disminuía de forma notable, alcanzando su valor mínimo con un umbral de 0.80, donde se obtuvo un error absoluto de 0.0001 ml y un error relativo del 0.86 \%. A partir de ese punto, incrementos adicionales del umbral muestran nuevamente un decremento tanto el error absoluto como el relativo, además de producir una ligera caída adicional en Dice.
+Este ajuste se consideró especialmente relevante en el modelo de isquemia, ya que la lesión ocupa una región reducida respecto al fondo y el modelo puede generar falsos positivos en zonas de baja probabilidad. En cambio, en el modelo de segmentación cerebral no se introdujo un ajuste específico del umbral, al tratarse de una estructura anatómica de mayor tamaño y con una segmentación más estable.
 
-Estos resultados indican que el umbral óptimo depende del criterio que se quiera priorizar: mientras que un umbral de 0.50 maximiza ligeramente el solapamiento espacial entre la máscara predicha y la manual, un umbral de 0.80 ofrece el mejor compromiso para la cuantificación del volumen de la lesión, que constituye uno de los objetivos principales de la herramienta desarrollada. Por este motivo, se adoptó finalmente un umbral de 0.80 en la fase de inferencia.
-
-Conviene señalar que este proceso de ajuste del umbral se consideró necesario únicamente para el modelo de segmentación de isquemia. En el caso del modelo de cerebro, los resultados obtenidos fueron ya suficientemente estables y elevados con la configuración estándar, alcanzando un Dice medio 3D de 0.969 y un error relativo medio del 3.77 \%, por lo que no se introdujeron ajustes adicionales en la salida.
-
-\begin{table}[h]
-\centering
-\caption{Comparación del rendimiento medio del modelo de isquemia para distintos umbrales de binarización.}
-\label{tab:comparacion_threshold}
-\begin{tabular}{ccccc}
-\hline
-Umbral & Dice medio & Error absoluto (ml) & Error relativo (\%) & Casos procesados \\
-\hline
-0.50 & 0.8323 & 0.0009 & 6.65 & 3 \\
-0.55 & 0.8310 & 0.0008 & 5.89 & 3 \\
-0.60 & 0.8308 & 0.0007 & 4.95 & 3 \\
-0.65 & 0.8314 & 0.0005 & 3.85 & 3 \\
-0.70 & 0.8301 & 0.0004 & 2.59 & 3 \\
-0.75 & 0.8301 & 0.0003 & 1.73 & 3 \\
-0.80 & 0.8290 & 0.0001 & 0.86 & 3 \\
-0.85 & 0.8281 & 0.0002 & 1.33 & 3 \\
-0.90 & 0.8256 & 0.0004 & 3.02 & 3 \\
-0.95 & 0.8220 & 0.0007 & 5.65 & 3 \\
-\hline
-\end{tabular}
-\end{table}
-
-\subsection{Funcionamiento conjunto de los modelos en el pipeline de segmentación}
-
-Aunque los dos modelos desarrollados comparten la misma arquitectura base, no cumplen la misma función dentro del sistema. El modelo de segmentación de cerebro se utiliza como primer paso del pipeline, ya que permite delimitar automáticamente el órgano y restringir la región de análisis al tejido cerebral. Esta segmentación previa resulta especialmente útil porque elimina de la entrada información irrelevante del resto de la imagen, reduciendo así el ruido y facilitando que el análisis posterior se centre únicamente en la zona anatómicamente relevante.
-
-Una vez obtenida la máscara del cerebro, esta se emplea para acotar la región que analizará el modelo de segmentación de isquemia. De este modo, el modelo de segmentación de isquemia no analiza la imagen completa, sino únicamente el tejido cerebral previamente aislado. Esta estrategia permite reducir la aparición de activaciones incorrectas fuera del órgano y hace más robusta la detección de la lesión, ya que limita la búsqueda a una región donde la predicción tiene sentido desde el punto de vista anatómico.
-
-Por tanto, ambos modelos no se entienden como soluciones independientes, sino como partes complementarias de una misma cadena de procesamiento. El primero se encarga de localizar y segmentar el cerebro, mientras que el segundo utiliza esa información para segmentar la lesión isquémica dentro del órgano ya delimitado. Esta organización secuencial permite estructurar el análisis de forma más coherente con el caso de uso real del proyecto, donde no solo interesa detectar la lesión, sino hacerlo de manera localizada y sobre una región anatómica correctamente identificada.
-
-Finalmente, a partir de las máscaras generadas por ambos modelos, la herramienta puede llevar a cabo la cuantificación de métricas de interés, como el volumen segmentado del cerebro y de la lesión. De este modo, la salida combinada de ambos modelos constituye la base del análisis posterior, tanto para la cuantificación volumétrica como para la evaluación e interpretación de las segmentaciones generadas.
+Finalmente, para el modelo de isquemia se adoptó un umbral de binarización de \(0.80\) en la fase de inferencia. La comparación cuantitativa de los umbrales evaluados, así como la justificación experimental del valor finalmente seleccionado, se presentan en el capítulo de resultados.
 
 \section{Cuantificación y métricas biomédicas (volumen)}
 
-Aunque el objetivo principal de la arquitectura propuesta es la segmentación automática del cerebro y de la lesión isquémica, la segmentación constituye por sí sola una delimitación espacial de las regiones de interés. Para que dicha delimitación resulte útil en un contexto de investigación biomédica, es necesario transformarla en magnitudes cuantitativas que permitan realizar análisis objetivos y comparables entre casos.
+La segmentación automática proporciona una delimitación espacial del cerebro y de la lesión isquémica. Sin embargo, para que esta salida sea útil en un contexto de investigación biomédica, es necesario transformarla en magnitudes cuantitativas que permitan comparar casos y evaluar diferencias entre segmentaciones manuales y automáticas.
 
-En este trabajo, la métrica cuantitativa principal considerada es el volumen de las regiones segmentadas. Esta magnitud permite estimar de forma objetiva la extensión de la lesión y del órgano analizado, facilitando la comparación entre segmentaciones manuales y automáticas, así como el análisis posterior de los casos estudiados. En el ámbito de la imagen cerebral, y en particular en estudios de ictus, el volumen de la lesión se utiliza habitualmente como una medida cuantitativa relevante para el análisis de biomarcadores de imagen y de la afectación observada en la resonancia magnética. \citep{Harston2015,Ospel2024}
+En este trabajo, la métrica cuantitativa principal es el volumen de las regiones segmentadas. Esta magnitud permite estimar la extensión del órgano y de la lesión, facilitando el análisis posterior de los casos estudiados. En el ámbito de la imagen cerebral, y en particular en estudios de ictus, el volumen lesional se utiliza habitualmente como una medida relevante para caracterizar la afectación observada en resonancia magnética \citep{Harston2015,Ospel2024}.
 
-Para realizar esta cuantificación, se toma como entrada la salida del \textit{pipeline} de segmentación. Esta salida consiste en una máscara binaria asociada a cada corte de la resonancia magnética, en la que cada píxel queda etiquetado como perteneciente o no a la región de interés. En estas máscaras, los píxeles con valor positivo representan la presencia de tejido segmentado, mientras que el resto corresponde a fondo o regiones no incluidas en la segmentación.
+Para realizar esta cuantificación, se toma como entrada la salida del \textit{pipeline} de segmentación. Dicha salida consiste en una máscara binaria asociada a cada corte de la resonancia magnética, donde los píxeles con valor positivo representan la región segmentada y el resto corresponde al fondo o a zonas no incluidas en la segmentación.
 
-Dado que el procesamiento se realiza sobre imágenes médicas almacenadas en formato NIfTI, el volumen total no se obtiene a partir de una única imagen, sino mediante la agregación de todos los cortes segmentados. En primer lugar, para cada corte se contabiliza el número de píxeles pertenecientes a la región segmentada. A continuación, este recuento se transforma a una magnitud física empleando la información espacial contenida en la cabecera de la imagen NIfTI.
-
-En este formato, el campo \texttt{pixdim} codifica el espaciado físico de la rejilla en cada dimensión, mientras que la información \textit{affine} (\texttt{sform}/\texttt{qform}) permite representar la geometría espacial asociada a la imagen. \citep{NIfTI1Fields,NiBabelNifti} De este modo, si $N$ representa el número total de vóxeles segmentados, y $s_x$, $s_y$ y $s_z$ representan, respectivamente, el tamaño físico del vóxel en cada una de las tres dimensiones espaciales, el volumen total puede expresarse como:
+Dado que las imágenes médicas se almacenan en formato NIfTI, el volumen no se calcula únicamente a partir del número de píxeles segmentados, sino teniendo en cuenta la información espacial de la imagen. En este formato, el campo \texttt{pixdim} codifica el espaciado físico de la rejilla en cada dimensión, mientras que la información \textit{affine} (\texttt{sform}/\texttt{qform}) permite representar la geometría espacial asociada a la imagen \citep{NIfTI1Fields,NiBabelNifti}. De este modo, si \(N\) representa el número total de vóxeles segmentados, y \(s_x\), \(s_y\) y \(s_z\) representan el tamaño físico del vóxel en cada una de las tres dimensiones espaciales, el volumen total puede expresarse como:
 
 \begin{equation}
 V = N \cdot s_x \cdot s_y \cdot s_z
@@ -301,27 +263,27 @@ V = N \cdot s_x \cdot s_y \cdot s_z
 donde:
 
 \begin{itemize}
-    \item $V$ es el volumen total de la región segmentada,
-    \item $N$ es el número total de vóxeles clasificados como pertenecientes al órgano o a la lesión,
-    \item $s_x$ y $s_y$ corresponden a la resolución espacial en el plano de la imagen,
-    \item $s_z$ corresponde al espesor del corte, expresado en unidades físicas.
+    \item \(V\) es el volumen total de la región segmentada,
+    \item \(N\) es el número total de vóxeles clasificados como pertenecientes al órgano o a la lesión,
+    \item \(s_x\) y \(s_y\) corresponden a la resolución espacial en el plano de la imagen,
+    \item \(s_z\) corresponde al espesor del corte, expresado en unidades físicas.
 \end{itemize}
 
-En la práctica, dado que la segmentación se obtiene corte a corte, este cálculo puede formularse también como la suma del volumen parcial aportado por cada corte. Si $A_i$ representa el área segmentada en el corte $i$, el volumen total se obtiene como:
+En la práctica, como la segmentación se obtiene corte a corte, el cálculo también puede formularse como la suma del volumen parcial aportado por cada corte. Si \(A_i\) representa el área segmentada en el corte \(i\), el volumen total se obtiene como:
 
 \begin{equation}
 V = \sum_{i=1}^{n} A_i \cdot s_z
 \end{equation}
 
-siendo $n$ el número total de cortes segmentados. A su vez, el área segmentada en cada corte puede expresarse como:
+siendo \(n\) el número total de cortes segmentados. A su vez, el área segmentada en cada corte puede calcularse como:
 
 \begin{equation}
 A_i = N_i \cdot s_x \cdot s_y
 \end{equation}
 
-donde $N_i$ es el número de píxeles segmentados en el corte $i$.
+donde \(N_i\) es el número de píxeles segmentados en el corte \(i\).
 
-Finalmente, la estimación volumétrica se realiza de forma secuencial, partiendo del recuento de píxeles segmentados por corte hasta la obtención del volumen total, tal como se ilustra en la Figura~\ref{fig:calculo_volumen_lesion}: para cada corte, se obtiene el número de píxeles pertenecientes a la lesión, que se transforma en un área física utilizando la resolución espacial de la imagen en el plano $(\Delta x, \Delta y)$. Posteriormente, la suma de las áreas segmentadas en todos los cortes se combina con el espaciado entre cortes $(\Delta z)$ para estimar el volumen total de la lesión.
+La Figura~\ref{fig:calculo_volumen_lesion} resume este procedimiento. Para cada corte, se contabilizan los píxeles pertenecientes a la región de interés y se transforman en un área física utilizando la resolución espacial de la imagen en el plano \((s_x, s_y)\). Posteriormente, la suma de las áreas segmentadas se combina con el espaciado entre cortes \((s_z)\) para estimar el volumen total.
 
 \begin{figure}[htbp]
     \centering
@@ -330,285 +292,131 @@ Finalmente, la estimación volumétrica se realiza de forma secuencial, partiend
     \label{fig:calculo_volumen_lesion}
 \end{figure}
 
-Este procedimiento permite transformar la salida binaria del modelo en una medida físicamente interpretable, expresada en milímetros cúbicos (\(\text{mm}^3\)). La utilización de unidades físicas, en lugar de recuentos de píxeles sin escala, resulta esencial para garantizar que las medidas obtenidas sean comparables entre diferentes resonancias, sujetos y estudios experimentales.
+Este procedimiento permite transformar la salida binaria del modelo en una medida físicamente interpretable, expresada en milímetros cúbicos (\(\text{mm}^3\)). El uso de unidades físicas, en lugar de recuentos de píxeles sin escala, resulta esencial para que las medidas obtenidas sean comparables entre diferentes resonancias, sujetos y estudios experimentales.
 
-Desde el punto de vista metodológico, esta cuantificación volumétrica amplía la utilidad del sistema desarrollado, ya que no solo proporciona una segmentación visual de la lesión, sino también una medida numérica objetiva susceptible de ser utilizada en tareas de análisis, comparación y evaluación experimental. Además, la cuantificación automática del volumen a partir de máscaras de cerebro y lesión constituye un enfoque coherente con otros trabajos de segmentación biomédica orientados a la medición automática de carga lesional en resonancia magnética \citep{Oliveira2022,Akkus2017} además de coincidir con el proceso de trabajo manual en BioImagen Complutense, en concreto, el proceso que se quiere automatizar y siendo el instituto nuestro usuario final establecido.
+Desde el punto de vista metodológico, la cuantificación volumétrica amplía la utilidad del sistema desarrollado, ya que la herramienta no solo proporciona una segmentación visual de la región de interés, sino también una medida numérica objetiva. Esta salida resulta coherente con el flujo de trabajo que se busca automatizar en ICTS BioImagen Complutense, donde la segmentación manual de las regiones de interés se utiliza posteriormente para estimar volúmenes y analizar la afectación observada. Además, este enfoque coincide con otros trabajos de segmentación biomédica orientados a la medición automática de carga lesional en resonancia magnética \citep{Oliveira2022,Akkus2017}.
 
 \section{Integración de explicabilidad}
 
-Desde el inicio de este Trabajo de Fin de Grado, uno de los objetivos principales (OX) implicaba no sólo el desarrollo del pipeline de segmentación y cálculo de volúmenes, sino la validación y la robustez de los modelos. Si se aplican modelos de Deep Learning a una tarea realizada por expertos investigadores, nos exponemos a introducir un proceso de caja negra en un marco en el que se prioriza la transparencia como es el ámbito biomédico, donde la interpretabilidad resulta especialmente relevante para generar confianza en los resultados y facilitar su análisis crítico \citep{samek2017explainableartificialintelligenceunderstanding,doshivelez2017rigorousscienceinterpretablemachine}.
+Desde el inicio de este Trabajo de Fin de Grado, uno de los objetivos del proyecto no solo implicaba el desarrollo del \textit{pipeline} de segmentación y cálculo de volúmenes, sino también el análisis de la robustez y la interpretabilidad de los modelos. La aplicación de modelos de \textit{deep learning} a una tarea realizada habitualmente por expertos introduce el riesgo de incorporar un proceso de caja negra en un contexto, como el biomédico, donde la transparencia resulta especialmente relevante para generar confianza en los resultados y facilitar su análisis crítico \citep{samek2017explainableartificialintelligenceunderstanding,doshivelez2017rigorousscienceinterpretablemachine}.
 
-En este apartado se expone la metodología seguida para aplicar la Inteligencia Artificial Explicable (XAI) a los dos modelos que forman parte del pipeline de segmentación automática. Debido a que las técnicas de explicabilidad se aplican de forma transversal a los modelos desarrollados, se presenta, en primer lugar, el marco metodológico común para posteriormente detallar su aplicación específica en cada caso.
+En este apartado se expone la metodología seguida para integrar técnicas de Inteligencia Artificial Explicable (XAI) en los dos modelos que forman parte del \textit{pipeline} de segmentación automática. Dado que los fundamentos de los métodos empleados ya se han descrito en el estado de la cuestión, esta sección se centra en su adaptación práctica al problema de segmentación y en cómo se incorporan al flujo de análisis desarrollado.
 
-\subsection{Fundamentos y motivación de la explicabilidad}
+\subsection{Motivación de la explicabilidad en el sistema}
 
-A pesar de que los resultados del modelo pueden evaluarse mediante métricas cuantitativas, estas no son suficientes para entender cómo se están generando las predicciones, por lo que esnecesario analizar también el comportamiento interno de los modelos. Este aspecto resulta especialmente relevante en el caso de la segmentación isquémica, donde los límites de la región afectada no siempre están claramente definidos y dependen del criterio experto \citep{samek2017explainableartificialintelligenceunderstanding}.
+Aunque los resultados de segmentación pueden evaluarse mediante métricas cuantitativas, estas no son suficientes para comprender cómo se generan las predicciones del modelo. Una segmentación puede obtener buenos valores de solapamiento y, aun así, apoyarse en patrones no deseados, artefactos de adquisición o regiones anatómicas no relacionadas con la estructura de interés.
 
-Además, el uso de un conjunto de datos reducido incrementa la probabilidad de que el modelo aprenda patrones no deseados o poco generalizables. Por este motivo, resulta necesario complementar el análisis cuantitativo con técnicas que permitan estudiar el comportamiento interno del modelo. 
+Este aspecto resulta especialmente relevante en imagen biomédica, donde el objetivo no es únicamente obtener una máscara precisa, sino también comprobar que el comportamiento del modelo sea coherente con el dominio de aplicación. Además, el uso de un conjunto de datos reducido incrementa la probabilidad de que la red aprenda relaciones poco generalizables, por lo que la explicabilidad se incorpora como una herramienta complementaria para analizar el comportamiento interno del sistema.
 
-Esta necesidad es abordada mediante la incorporación de técnicas de Inteligencia Artificial Explicable (XAI). Estas técnicas permiten analizar en qué regiones de la imagen se basa el modelo para generar sus predicciones, aportando un nivel adicional de validación cualitativa \citep{samek2017explainableartificialintelligenceunderstanding,doshivelez2017rigorousscienceinterpretablemachine}.
+En este trabajo, la explicabilidad se utiliza con dos objetivos principales. En primer lugar, permite generar mapas de relevancia que indican qué zonas de la imagen contribuyen en mayor medida a la salida del modelo. En segundo lugar, facilita el análisis crítico de las segmentaciones obtenidas, al permitir estudiar si la red se apoya en regiones anatómicamente coherentes o si aparecen dependencias no deseadas en zonas externas a la región de interés.
 
-\subsection{Adaptación de técnicas de XAI a segmentación}
+\subsection{Adaptación de XAI a modelos de segmentación}
 
-Una vez decidimos aplicar técnicas de XAI a nuestra herramienta, nos encontramos con el primer bloqueo: la mayoría de técnicas de explicabilidad que han sido diseñadas originalmente lo fueron con tareas de clasificación como objetivo principal. Las tareas de clasificación tienen como salida un escalar asociado a un enumerado, y nuestros modelos, al ser modelos diseñados para la tarea de segmentación, tienen como salida una máscara de segmentación a nivel de píxel.
+Una de las principales dificultades al aplicar técnicas de explicabilidad en este trabajo es que muchos métodos de XAI fueron diseñados originalmente para tareas de clasificación. En estos problemas, la salida del modelo suele ser un valor escalar asociado a una clase concreta. Sin embargo, en segmentación, la salida del modelo es una máscara densa, donde cada píxel tiene asociada una probabilidad de pertenencia a la clase objetivo.
 
-Esto implica que no es posible aplicar directamente estos métodos sin realizar una adaptación previa. Para ello se define una función de score escalar a partir de la salida del modelo, que permite resumir la predicción en un único valor.
-En este trabajo, dicha función se obtiene a partir de la activación del modelo en la región segmentada, lo que permite aplicar técnicas basadas en gradientes de forma consistente.
+Por este motivo, no es posible aplicar directamente estos métodos sin realizar una adaptación previa. Para ello, se define una función de \textit{score} escalar a partir de la salida del modelo. Esta función resume la predicción densa en un único valor, sobre el que pueden calcularse gradientes o perturbaciones de forma compatible con las técnicas de explicabilidad utilizadas.
 
-\subsection{Métodos de explicabilidad empleados}
+En este trabajo, el \textit{score} se define a partir de la activación del modelo en la región segmentada por la propia red. De este modo, la explicación no se calcula sobre una clase global de imagen, sino sobre la región que el modelo ha identificado como perteneciente a la estructura objetivo. Esta decisión permite adaptar métodos originalmente propuestos para clasificación al contexto de segmentación biomédica.
 
-Para el análisis de explicabilidad se han seleccionado técnicas basadas en gradientes, por su facilidad de integración con modelos convolucionales. En concreto, se han implementado los métodos Grad-CAM \citep{Selvaraju_2019}, Grad-CAM++ \citep{Chattopadhay_2018} e Integrated Gradients \citep{sundararajan2017axiomaticattributiondeepnetworks}.
+El cálculo se realiza sobre la predicción del modelo y no sobre la máscara de referencia. Esta decisión es importante, ya que el objetivo de la explicabilidad no es medir directamente la coincidencia con la anotación manual, sino analizar qué información utiliza la red para generar su propia salida.
 
-Grad-CAM permite identificar qué regiones de la imagen tienen mayor influencia en la predicción del modelo. Para ello, utiliza los gradientes de la salida respecto a las activaciones de una capa convolucional, generando un mapa de relevancia espacial. Este mapa se puede superponer sobre la imagen original, facilitando su interpretación \citep{Selvaraju_2019}. 
+\subsection{Procedimiento de integración en el \textit{pipeline}}
 
-Además, se ha considerado la variante Grad-CAM++, que introduce mejoras en la localización de múltiples regiones relevantes dentro de una misma imagen. Esta extensión resulta especialmente útil en el contexto de la segmentación de lesiones, donde pueden existir varias zonas de activación dentro de la región afectada \citep{Chattopadhay_2018}.
+La explicabilidad se integra como una fase posterior a la inferencia de los modelos de segmentación. Una vez obtenidas las máscaras predichas, se generan mapas de relevancia asociados a la salida de cada modelo. Para ello, se han implementado notebooks específicos que cargan los modelos entrenados, procesan los volúmenes de resonancia magnética corte a corte y reproducen el mismo flujo seguido durante la inferencia.
 
-Por su parte, Integrated Gradients, permite estimar la contribución de cada píxel a la predicción del modelo. Este método se basa en integrar los gradientes a lo largo de un camino entre una imagen base y la imagen original. En este trabajo, se ha utilizado como referencia una imagen completamente negra \citep{sundararajan2017axiomaticattributiondeepnetworks}.
+En el caso del modelo de isquemia, el procedimiento mantiene la estructura secuencial del \textit{pipeline}: primero se obtiene la máscara cerebral, después se utiliza dicha máscara para restringir la entrada al tejido cerebral y, finalmente, se genera la predicción de lesión. A partir de esta salida se calculan los mapas de relevancia asociados a la región segmentada como isquemia.
 
-Además del análisis visual mediante mapas de relevancia, se han considerado métricas cuantitativas de explicabilidad basadas en perturbación de la entrada.
+En el caso del modelo de segmentación cerebral, el procedimiento se aplica directamente sobre la predicción de cerebro generada por el modelo. La explicación se calcula sobre la región que la red identifica como tejido cerebral, con el objetivo de estudiar si la predicción depende de zonas coherentes con la estructura anatómica segmentada.
 
-En concreto, se han utilizado métricas de inserción y eliminación, así como variantes derivadas como AOPC y métricas normalizadas, que permiten evaluar hasta qué punto las regiones identificadas como relevantes influyen realmente en la predicción del modelo.
+Aunque cada modelo tiene una región objetivo distinta, el marco de explicabilidad empleado es común. En ambos casos se parte de la salida probabilística del modelo, se define un \textit{score} escalar sobre la región predicha y se calculan los mapas de relevancia correspondientes. Posteriormente, estos mapas se normalizan y se redimensionan al tamaño de la imagen de entrada para facilitar su visualización junto con el corte original, la máscara de referencia y la máscara predicha.
 
-Estas métricas se basan en modificar progresivamente la imagen de entrada, eliminando o incorporando información en las zonas destacadas por los métodos de explicabilidad, y observando cómo varía la salida del modelo. Este tipo de análisis resulta especialmente útil para diferenciar entre regiones que tienen un impacto real en la predicción y aquellas que únicamente presentan activaciones de baja intensidad sin relevancia significativa \citep{samek2017explainableartificialintelligenceunderstanding}.
+Para los métodos basados en Grad-CAM, se selecciona la última capa convolucional del decoder, previa a la convolución final \(1 \times 1\), al tratarse de una capa cercana a la generación de la máscara de salida y que todavía conserva información espacial relevante. Esta elección permite obtener mapas de activación relacionados con la decisión final del modelo sin perder completamente la estructura espacial de la imagen.
 
-Cabe destacar que, aunque estas técnicas permiten analizar el comportamiento del modelo, su interpretación en tareas de segmentación debe hacerse con cautela. Los mapas de relevancia no son una segmentación como tal, sino una aproximación.
+Además de los mapas visuales, se incorporan métricas basadas en perturbación de la entrada, como \textit{Deletion}, \textit{Insertion} y AOPC. Estas métricas se emplean para estudiar si las regiones identificadas como relevantes tienen influencia real sobre la salida del modelo, complementando así la interpretación visual de los mapas de relevancia \citep{samek2017evaluating,petsiuk2018rise}.
 
-En la Figura~\ref{fig:xai_ejemplo} se muestra un ejemplo de los mapas de explicabilidad obtenidos mediante estas técnicas. En ella se visualiza la imagen original, la máscara predicha y el mapa de relevancia superpuesto.
+Cabe destacar que los mapas de relevancia no deben interpretarse como segmentaciones adicionales ni como una validación clínica directa. Su función es proporcionar una aproximación al comportamiento interno del modelo, permitiendo analizar qué regiones de la imagen influyen en la predicción. Por tanto, la explicabilidad se plantea como una herramienta complementaria a las métricas de segmentación y a la evaluación volumétrica.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{Imagenes/XAI_isquemia/CASE_1_slice_016.png}
-\caption{Ejemplo de mapas de explicabilidad generados sobre una imagen de entrada.}
-\label{fig:xai_ejemplo}
-\end{figure}
-
-\subsection{Aplicación al modelo de segmentación de isquemia}
-
-A continuación, se describe cómo se han aplicado las técnicas de explicabilidad al
-modelo de segmentación de lesiones isquémicas. En este caso, la explicación se
-centra en una región patológica localizada, de tamaño reducido y con límites
-potencialmente difusos, por lo que resulta especialmente importante analizar qué
-zonas de la imagen contribuyen a la predicción generada por el modelo.
-
-El análisis se implementó en un notebook de Python desarrollado específicamente
-para evaluar el comportamiento del modelo de isquemia. Este notebook carga el
-modelo entrenado, procesa los volúmenes de resonancia magnética corte a corte y
-reproduce el mismo flujo seguido durante la inferencia. En primer lugar, se obtiene
-la máscara predicha por el modelo de segmentación cerebral. A continuación, dicha
-máscara se combina con la imagen original para restringir la entrada del modelo de
-isquemia al tejido cerebral. Finalmente, a partir de la predicción de lesión generada
-por este segundo modelo, se calculan distintos mapas de relevancia asociados a la
-salida obtenida.
-
-Para generar los mapas de Grad-CAM, se selecciona la última capa convolucional
-del decoder, al tratarse de una capa próxima a la generación de la máscara final y
-que todavía conserva información espacial relevante. Aunque Grad-CAM fue
-propuesto originalmente para tareas de clasificación, puede adaptarse a problemas
-de segmentación siempre que se defina una puntuación escalar sobre la salida densa
-del modelo \citep{Selvaraju_2019}. En este trabajo, la puntuación se
-define a partir de la activación del modelo en la región segmentada como lesión,
-agregando la contribución de los píxeles predichos como pertenecientes a la clase
-isquemia. De este modo, la salida del modelo se reduce a un único valor sobre el que
-es posible calcular gradientes de forma coherente con la tarea de segmentación.
-
-Además de Grad-CAM, se emplean Grad-CAM++ e \textit{Integrated Gradients}
-como métodos complementarios de explicación. Grad-CAM++ se incorpora como una
-variante orientada a mejorar la localización espacial de las regiones relevantes
-\citep{Chattopadhay_2018}, mientras que \textit{Integrated Gradients}
-permite estimar la contribución de cada píxel a partir de la comparación progresiva
-entre una imagen de referencia y la imagen original
-\citep{sundararajan2017axiomaticattributiondeepnetworks}. La combinación de estos métodos permite
-analizar la predicción desde enfoques distintos, evitando depender de una única
-técnica de explicación.
-
-Los mapas de relevancia obtenidos se normalizan y se superponen sobre la imagen
-original, junto con la máscara de referencia y la máscara predicha por el modelo.
-Esta representación permite estudiar de forma cualitativa si las regiones señaladas
-por los métodos de explicabilidad se corresponden con zonas anatómicamente
-compatibles con la lesión isquémica o si, por el contrario, aparecen activaciones en
-áreas no relevantes.
-
-Este análisis resulta especialmente importante en el modelo de isquemia, ya que
-durante el desarrollo se observaron problemas de sobreestimación 
-en los bordes de la lesión. En estas zonas pueden aparecer activaciones de baja
-intensidad que, al aplicar un umbral de binarización poco restrictivo, acaban
-incorporándose a la máscara final como falsos positivos. Por ello, la explicabilidad
-se utiliza como una herramienta adicional para analizar si esas regiones están siendo
-realmente relevantes para la predicción del modelo o si corresponden a ruido en la
-salida probabilística.
-
-De esta forma, el análisis de explicabilidad también permite apoyar la justificación
-metodológica del umbral aplicado durante la inferencia. Si las zonas eliminadas por
-el umbral presentan baja relevancia en los mapas de explicación, el umbral puede
-interpretarse como un mecanismo de filtrado de activaciones poco informativas. No
-obstante, esta interpretación debe entenderse como un apoyo cualitativo al análisis
-del modelo, y no como una sustitución de las métricas cuantitativas de
-segmentación.
-
-Además del análisis visual, se incorporan métricas basadas en perturbación para
-evaluar la fidelidad de las explicaciones generadas. En concreto, se analiza cómo
-varía la salida del modelo al modificar progresivamente las regiones consideradas
-más relevantes por cada método de explicación, utilizando métricas como
-\textit{Deletion}, \textit{Insertion} y AOPC. Estas métricas permiten comprobar si
-las zonas destacadas por los mapas de relevancia tienen un impacto real sobre la
-predicción del modelo \citep{samek2017explainableartificialintelligenceunderstanding}.
-
-En conjunto, la integración de explicabilidad en el modelo de isquemia se plantea
-como un mecanismo complementario de análisis del comportamiento de la red. Su
-objetivo no es únicamente generar visualizaciones interpretables, sino también
-estudiar la relación entre las activaciones del modelo, la localización de la lesión y
-las decisiones de postprocesado aplicadas durante la inferencia.
-
-Como se observa en la Figura~\ref{fig:xai_ejemplo_isquemia}, las técnicas de explicabilidad 
-concentran la activación en la región correspondiente a la lesión isquémica, lo que 
-sugiere que el modelo basa su predicción en características espacialmente coherentes 
-con la anotación de referencia. En ella Se muestran
-el corte original de IRM, la máscara de referencia, la predicción del modelo
-y los mapas de relevancia obtenidos mediante distintos métodos de
-explicabilidad. La figura ilustra el tipo de salida utilizada para el análisis
-cualitativo del comportamiento del modelo.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{Imagenes/XAI_isquemia/CASE_12_slice_015.png}
-    \caption{Ejemplo de visualización generada por el procedimiento de
-    explicabilidad aplicado al modelo de segmentación de isquemia. }
-    \label{fig:xai_ejemplo_isquemia}
-\end{figure}
-
-Una vez descrito el procedimiento aplicado al modelo de isquemia, se presenta a
-continuación su adaptación al modelo de segmentación cerebral, donde la región
-objetivo deja de ser una lesión localizada y pasa a corresponderse con una estructura
-anatómica completa.
-
-\subsection{Aplicación de explicabilidad al modelo de segmentación cerebral}
-
-A continuación, se describe cómo se han aplicado las técnicas de explicabilidad al
-modelo encargado de segmentar el cerebro. A diferencia del modelo de isquemia,
-donde la región objetivo corresponde a una lesión localizada, en este caso la
-explicación se orienta a analizar el comportamiento del modelo ante una estructura
-anatómica extensa y de contorno relativamente continuo.
-
-El análisis se implementó en un notebook de Python, desarrollado específicamente para
-evaluar el modelo de segmentación cerebral. Este notebook carga el modelo
-entrenado, procesa los volúmenes de resonancia magnética corte a corte, obtiene la
-máscara predicha por el modelo y genera distintos mapas de relevancia asociados a
-la predicción.
-
-Para el cálculo de Grad-CAM, se selecciona la última capa convolucional del
-decoder previa a la convolución final \(1 \times 1\), al tratarse de una capa cercana
-a la generación de la máscara de salida y que todavía conserva información espacial
-relevante. Aunque Grad-CAM fue propuesto originalmente para problemas de
-clasificación, puede adaptarse a segmentación siempre que se defina una puntuación
-escalar sobre la salida del modelo \citep{Selvaraju_2019}.
-
-En este caso, dicha puntuación se define como la probabilidad media de
-pertenencia a la clase cerebro dentro de la máscara cerebral predicha por el propio
-modelo. Esta formulación permite transformar la salida densa de segmentación en
-un valor escalar sobre el que calcular gradientes, manteniendo la explicación
-centrada en la región que el modelo ha considerado como cerebro. Es importante
-destacar que el cálculo se realiza sobre la predicción del modelo y no sobre la
-máscara de referencia, ya que el objetivo de la explicabilidad es analizar el criterio
-seguido por la red al generar su propia salida.
-
-Además de Grad-CAM, se incorporan Grad-CAM++ e \textit{Integrated Gradients}
-como métodos complementarios de explicación. Grad-CAM++ se incluye como una
-variante orientada a mejorar la localización espacial de las regiones relevantes
-\citep{Chattopadhay_2018}, mientras que \textit{Integrated
-Gradients} permite estimar la contribución de cada píxel a partir de la comparación
-progresiva entre una imagen de referencia o \textit{baseline} y la imagen original
-\citep{sundararajan2017axiomaticattributiondeepnetworks}. En el caso de las imágenes de IRM, la elección
-del \textit{baseline} debe realizarse con cautela, ya que una imagen completamente
-negra puede introducir una referencia artificial alejada de la distribución real de
-intensidades.
-
-Los mapas de relevancia generados se redimensionan al tamaño de la imagen de
-entrada y se normalizan para facilitar su visualización conjunta. Posteriormente, se
-superponen sobre el corte original de IRM, junto con la máscara de referencia y la
-máscara predicha. Esta representación permite analizar de forma cualitativa si las
-regiones destacadas por los métodos de explicabilidad se sitúan sobre zonas
-anatómicamente relacionadas con el tejido cerebral o si aparecen activaciones en
-regiones externas a la estructura de interés.
-
-El procedimiento también contempla el uso de técnicas basadas en perturbación,
-como la oclusión progresiva de regiones de la imagen. Estas técnicas permiten
-estudiar cómo cambia la salida del modelo cuando se modifican zonas concretas del
-corte, proporcionando una perspectiva complementaria a los métodos basados en
-gradientes. En este contexto, las métricas de inserción, eliminación y AOPC se
-plantean como herramientas para evaluar la fidelidad de las explicaciones, es decir,
-si las regiones identificadas como relevantes tienen realmente influencia sobre la
-predicción del modelo \citep{samek2017evaluating,petsiuk2018rise}.
-
-En conjunto, la integración de explicabilidad en el modelo de segmentación
-cerebral no se plantea como una métrica de rendimiento adicional, sino como un
-mecanismo de análisis metodológico. Su objetivo es comprobar la coherencia espacial
-del comportamiento del modelo, detectar posibles dependencias no deseadas de
-regiones externas al cerebro y complementar la evaluación cuantitativa basada en
-métricas de segmentación.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{Imagenes/XAI_Cerebro/CASE_20_slice_014.png} 
-    \caption{Ejemplo de visualización generada por el procedimiento de
-    explicabilidad aplicado al modelo de segmentación cerebral.}
-    \label{fig:xai_ejemplo_cerebro}
-\end{figure}
-En la figura \ref{fig:xai_ejemplo_cerebro} se muestra un ejemplo de los mapas de explicabilidad generados para el modelo de segmentación cerebral. 
-En ella se muestran,
-de izquierda a derecha, el corte original de IRM, la máscara de referencia,
-la máscara predicha por el modelo y los mapas de relevancia obtenidos
-mediante distintos métodos de explicabilidad. Esta figura ilustra el tipo de
-salida utilizada para el análisis cualitativo del comportamiento del modelo.
+Los resultados visuales y cuantitativos derivados de esta integración se presentan posteriormente en el capítulo de resultados, donde se analizan ejemplos representativos para ambos modelos y se discute la coherencia de las explicaciones obtenidas.
 
 \section[Implementación y reproducibilidad]{Implementación, reproducibilidad y código entregado}
 
-El desarrollo práctico del programa se ha organizado en una serie de notebooks de \textit{Python}, que constituyen el código entregado junto con esta memoria. Esta decisión corresponde con el carácter experimental de este proyecto. Durante el desarrollo del TFG se acordó mantener el sistema en formato notebook, sin interfaz gráfica independiente, siempre que estos incluyeran de forma clara el procedimiento de entrenamiento, uso y evaluación de los modelos.
+El desarrollo práctico del programa se ha organizado en una serie de notebooks de \textit{Python}, que constituyen el código entregado junto con esta memoria. Esta decisión se corresponde con el carácter experimental del proyecto y con la necesidad de documentar de forma clara cada fase del flujo de trabajo: entrenamiento, inferencia, cálculo de métricas y explicabilidad.
 
-Por lo tanto, se entregan cinco notebooks principales, cada uno de ellos con responsabilidades diferenciadas. En primer lugar, el notebook de entrenamiento: \path{UNET_RadImageNet_unificado.ipynb} contiene la definición de la arquitectura U-Net empleada, la carga del conjunto de datos, el preprocesamiento de las imágenes y máscaras, la configuración de entrenamiento y el guardado final de los modelos. Este notebook permite reproducir el proceso de entrenamiento, pudiéndose entrenar solo un modelo para una tarea concreta o dos modelos (uno de órgano y otro de lesión). En este último caso, se aplica la máscara de \textit{Ground Truth} del órgano en la imagen original, y con esa imagen modificada en la que solo aparece el órgano, se entrena el modelo de lesión. 
+El uso de notebooks resulta adecuado en este contexto por varios motivos. En primer lugar, permite combinar código, explicaciones intermedias, visualizaciones y resultados en un mismo entorno, facilitando la revisión del proceso seguido. En segundo lugar, favorece la reproducibilidad, ya que cada notebook puede ejecutarse de forma secuencial y permite comprobar de manera directa las entradas, salidas y transformaciones aplicadas en cada etapa. Además, durante el desarrollo del TFG se acordó mantener el sistema en formato notebook, sin interfaz gráfica independiente, siempre que estos incluyeran de forma clara el procedimiento de entrenamiento, uso y evaluación de los modelos.
 
-Se adjunta además un notebook de testeo: \path{Tester_Pipeline.ipynb}, que permite cargar los modelos entrenados para realizar el pipeline completo. Primero se cargan los modelos y el caso de estudio a analizar, se obtienen las máscaras a través de los modelos, modificando la imagen original de la misma forma que en el entreno, y se usan las máscaras resultantes para el cálculo de los volúmenes de órgano y lesión. Este notebook permite reproducir el proceso de inferencia, obteniendo las máscaras segmentadas y los volúmenes cuantificados a partir de la imagen de entrada.
+Esta organización también facilita el uso del sistema por parte de usuarios no especializados en desarrollo software, especialmente en entornos como Google Colab o Jupyter Notebook. De este modo, el usuario puede ejecutar el flujo de trabajo por bloques, modificar parámetros concretos y visualizar los resultados sin necesidad de desplegar una aplicación completa. Por tanto, los notebooks no se plantean únicamente como scripts de desarrollo, sino como una forma documentada y ejecutable de entregar el prototipo.
 
-El notebook \path{GraphTester.ipynb} contiene el código utilizado para generar las métricas de los modelos, expuestas en el apartado de Resultados. En este notebook se implementan las funciones necesarias para calcular el coeficiente Dice, el error absoluto de volumen y el error relativo porcentual, tanto a nivel de corte como a nivel volumétrico. Además, se incluyen funciones para generar gráficos comparativos entre la segmentación automática y la manual, facilitando la visualización de los resultados obtenidos.
+Por lo tanto, se entregan cinco notebooks principales, cada uno de ellos con responsabilidades diferenciadas. En primer lugar, el notebook de entrenamiento, \path{UNET_RadImageNet_unificado.ipynb}, contiene la definición de la arquitectura U-Net empleada, la carga del conjunto de datos, el preprocesamiento de las imágenes y máscaras, la configuración de entrenamiento y el guardado final de los modelos. Este notebook permite reproducir el proceso de entrenamiento, pudiéndose entrenar un único modelo para una tarea concreta o dos modelos, uno de órgano y otro de lesión. En este último caso, se aplica la máscara de \textit{Ground Truth} del órgano sobre la imagen original, de forma que el modelo de lesión se entrena únicamente sobre la región anatómica correspondiente.
 
-Los notebooks de XAI para el cerebro y la lesión isquémica implementan el análisis de explicabilidad de los modelos entrenados. Ambos siguen una estructura común: carga del modelo, selección de la capa objetivo, generación de mapas de relevancia, cálculo de métricas de fidelidad y exportación de resultados. En ellos se aplican técnicas como Grad-CAM, Grad-CAM++, Integrated Gradients y oclusión. Además, se generan curvas de perturbación como deletion, insertion, MoRF y LeRF, junto con métricas derivadas como AOPC. Estos resultados se exportan en formato CSV y como figuras, facilitando su incorporación al análisis cualitativo y cuantitativo de la memoria.
+Se adjunta además un notebook de testeo, \path{Tester_Pipeline.ipynb}, que permite cargar los modelos entrenados y ejecutar el \textit{pipeline} completo. En primer lugar, se cargan los modelos y el caso de estudio a analizar. A continuación, se obtiene la máscara del órgano, se restringe la imagen original a dicha región y se aplica el modelo de lesión. Finalmente, las máscaras resultantes se utilizan para calcular los volúmenes de órgano y lesión. Este notebook permite reproducir el proceso de inferencia, obteniendo tanto las máscaras segmentadas como los volúmenes cuantificados a partir de la imagen de entrada.
 
-Además se incluyen los dos modelos desarrollados, guardados en formato \texttt{.h5}, que pueden ser cargados directamente para realizar el proceso de inferencia sobre nuevos casos de estudio. Estos modelos corresponden a la arquitectura U-Net entrenada para segmentar el cerebro y la lesión isquémica, respectivamente.
+El notebook \path{GraphTester.ipynb} contiene el código utilizado para generar las métricas de los modelos, expuestas posteriormente en el capítulo de resultados. En este notebook se implementan las funciones necesarias para calcular el coeficiente Dice, el error absoluto de volumen y el error relativo porcentual, tanto a nivel de corte como a nivel volumétrico. Además, se incluyen funciones para generar gráficos comparativos entre la segmentación automática y la manual, facilitando la visualización de los resultados obtenidos.
 
-Por último, también se adjuntan, a modo de reproducibilidad, los archivos resultantes de la ejecución de los notebooks de cálculo de métricas y explicabilidad, con los datos resultantes en formato CSV y las imágenes generadas en formato PNG.
+Los notebooks de XAI para el cerebro y la lesión isquémica implementan el análisis de explicabilidad de los modelos entrenados. Ambos siguen una estructura común: carga del modelo, selección de la capa objetivo, generación de mapas de relevancia, cálculo de métricas de fidelidad y exportación de resultados. En ellos se aplican técnicas como Grad-CAM, Grad-CAM++, \textit{Integrated Gradients} y oclusión. Además, se generan curvas de perturbación como \textit{Deletion}, \textit{Insertion}, MoRF y LeRF, junto con métricas derivadas como AOPC. Estos resultados se exportan en formato CSV y como figuras, facilitando su incorporación al análisis cualitativo y cuantitativo de la memoria.
+
+Además, se incluyen los dos modelos desarrollados, guardados en formato \texttt{.h5}, que pueden ser cargados directamente para realizar el proceso de inferencia sobre nuevos casos de estudio. Estos modelos corresponden a la arquitectura U-Net entrenada para segmentar el cerebro y la lesión isquémica, respectivamente.
+
+Por último, también se adjuntan, como parte de la reproducibilidad del proyecto, los archivos resultantes de la ejecución de los notebooks de cálculo de métricas y explicabilidad, con los datos resultantes en formato CSV y las imágenes generadas en formato PNG.
+
+\subsection{Requisitos de ejecución}
+
+Para facilitar la reproducción del trabajo, el código se ha organizado de forma que pueda ejecutarse en un entorno estándar de \textit{Python}, preferiblemente mediante Jupyter Notebook o Google Colab. No se requiere una infraestructura específica ni software propietario para ejecutar la inferencia o el cálculo de métricas, aunque el entrenamiento de los modelos puede beneficiarse del uso de GPU para reducir el tiempo de ejecución.
+
+Los requisitos principales del entorno son los siguientes:
+
+\begin{itemize}
+    \item Un entorno de ejecución compatible con notebooks, como Jupyter Notebook, JupyterLab o Google Colab.
+    \item Python 3.x, junto con las librerías necesarias para procesamiento de imagen, aprendizaje profundo, lectura de volúmenes médicos y visualización de resultados.
+    \item Acceso a los modelos entrenados en formato \texttt{.h5}, en caso de ejecutar únicamente la inferencia.
+    \item Imágenes de entrada en formato NIfTI, organizadas según la estructura de carpetas descrita en la sección del conjunto de datos.
+    \item Máscaras de referencia, en caso de reproducir el entrenamiento o calcular métricas comparativas frente a segmentaciones manuales.
+\end{itemize}
+
+Entre las librerías utilizadas se incluyen TensorFlow/Keras para la definición, entrenamiento y carga de los modelos; NumPy y Pandas para el tratamiento de datos; NiBabel para la lectura de imágenes médicas en formato NIfTI; Pillow y OpenCV para operaciones de preprocesamiento de imagen; Matplotlib y Plotly para la generación de figuras y visualizaciones; y Scikit-learn para funciones auxiliares de evaluación. Las dependencias concretas del proyecto deben recogerse en un fichero \texttt{requirements.txt} dentro del repositorio, de forma que el entorno pueda reconstruirse mediante instalación automática.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{p{0.28\textwidth} X}
+\hline
+\textbf{Requisito} & \textbf{Descripción} \\
+\hline
+
+Entorno de ejecución &
+Jupyter Notebook, JupyterLab o Google Colab. \\
+
+Lenguaje &
+Python 3.x. \\
+
+Aprendizaje profundo &
+TensorFlow/Keras para entrenamiento, carga e inferencia de los modelos. \\
+
+Procesamiento de datos &
+NumPy y Pandas para manipulación de matrices, métricas y exportación de resultados. \\
+
+Imagen médica &
+NiBabel para lectura de volúmenes NIfTI y acceso a la información espacial de la imagen. \\
+
+Procesamiento de imagen &
+Pillow y OpenCV para redimensionado, normalización y manipulación de máscaras. \\
+
+Visualización &
+Matplotlib y Plotly para generación de gráficas, máscaras, mapas de calor y figuras exportables. \\
+
+Archivos necesarios &
+Modelos \texttt{.h5}, imágenes NIfTI de entrada y, cuando proceda, máscaras manuales de referencia. \\
+
+\hline
+\end{tabularx}
+\caption{Requisitos principales para la ejecución y reproducción del código entregado.}
+\label{tab:requisitos_codigo}
+\end{table}
+
+\subsection{Repositorio y estructura del código entregado}
 
 Todo el código desarrollado se encuentra disponible en el repositorio de GitHub del proyecto:
 
 \begin{center}
 \url{https://github.com/beabuenodev/Herramienta-de-Analisis-de-Imagenes-Biomedicas}
 \end{center}
-
-En la tabla \ref{tab:notebooks_entregados} se presenta un resumen de los notebooks entregados, indicando su función principal dentro del proyecto y su relación con los distintos aspectos metodológicos descritos en esta sección. Esta tabla sirve como guía para navegar por el código y comprender la estructura general del desarrollo realizado.
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabular}{p{0.30\textwidth} p{0.60\textwidth}}
-\hline
-\textbf{Notebook} & \textbf{Función principal} \\
-\hline
-
-Entrenamiento U-Net &
-Entrenamiento de los modelos U-Net para cerebro e isquemia. Corresponde al archivo \path{UNET_RadImageNet_unificado.ipynb}. \\
-
-Extracción de métricas &
-Cálculo de métricas de rendimiento para los modelos entrenados. Corresponde al archivo \path{GraphTester.ipynb}. \\
-
-Tester del pipeline &
-Ejecución del pipeline completo de segmentación y cálculo de volumen. Corresponde al archivo \path{Tester_Pipeline.ipynb}. \\
-
-XAI cerebro &
-Generación y evaluación de explicaciones para el modelo cerebral. Corresponde al archivo \path{XAI_Cerebro_Explainability.ipynb}. \\
-
-XAI isquemia &
-Generación y evaluación de explicaciones para el modelo de isquemia. Corresponde al archivo \path{XAI_Isquemia_Explainability.ipynb}. \\
-
-\hline
-\end{tabular}
-\caption{Resumen de los notebooks entregados en el repositorio del proyecto.}
-\label{tab:notebooks_entregados}
-\end{table}

@@ -1,6 +1,78 @@
 \chapter{Conclusiones y Trabajo Futuro}
 \label{cap:Conclusiones}
+El trabajo desarrollado ha permitido alcanzar el objetivo principal planteado al inicio de la memoria: 
+construir un prototipo funcional de apoyo al análisis de imágenes biomédicas preclínicas mediante técnicas de visión por computador e inteligencia artificial.
+La herramienta obtenida permite segmentar automáticamente el cerebro y las regiones de isquemia cerebral en imágenes de resonancia magnética de ratón, calcular 
+medidas volumétricas asociadas e incorporar mecanismos de explicabilidad para analizar el comportamiento de los modelos.
 
-Conclusiones del trabajo y líneas de trabajo futuro.
+A partir de los resultados obtenidos, puede concluirse que la aproximación propuesta es adecuada como primera solución automatizada dentro de un flujo de trabajo supervisado.
+El sistema no sustituye el criterio del investigador experto, pero sí permite reducir parte de la carga manual asociada a la delimitación de regiones de interés y proporciona 
+una salida cuantitativa que puede ser revisada, corregida y utilizada como apoyo en estudios biomédicos.
+
+El modelo de segmentación cerebral ha mostrado un comportamiento especialmente sólido. Los resultados alcanzados, con un coeficiente Dice 3D medio de 0,973 y una IoU 3D media 
+de 0,947, indican una alta correspondencia entre las máscaras generadas automáticamente y las segmentaciones manuales de referencia. Además, el bajo error volumétrico obtenido 
+confirma que el modelo no solo reproduce adecuadamente la forma del cerebro, sino que también conserva de manera precisa su volumen total. Esta estabilidad convierte la segmentación
+cerebral en una base fiable para las fases posteriores del pipeline.
+
+La segmentación de isquemia cerebral ha presentado una mayor dificultad, como era esperable por la naturaleza del problema. Las lesiones isquémicas muestran bordes difusos, 
+variaciones de intensidad y zonas de transición cuya delimitación depende en parte del criterio del anotador. Aun así, el modelo ha obtenido resultados coherentes, con un Dice 3D
+medio de 0,820 y una IoU 3D media de 0,717. Estos valores, aunque inferiores a los obtenidos en la segmentación cerebral, resultan razonables para una tarea con mayor ambigüedad 
+anatómica y visual. El modelo permite localizar las regiones patológicas principales y ofrece estimaciones volumétricas útiles como primera aproximación automatizada.
+
+Desde el punto de vista de la cuantificación, el sistema cumple una función relevante, ya que transforma las máscaras generadas en medidas volumétricas interpretables.
+Esta salida resulta especialmente importante en el contexto del trabajo, puesto que el interés del usuario final no se limita a visualizar una segmentación, sino también a 
+disponer de valores numéricos que permitan comparar casos, estudiar la evolución de una lesión o analizar diferencias entre sujetos.
+
+La incorporación de técnicas de Inteligencia Artificial Explicable ha aportado una capa adicional de análisis. Los mapas generados mediante Grad-CAM, Grad-CAM++ e 
+Integrated Gradients han permitido estudiar qué regiones de la imagen influyen en las predicciones de los modelos. En los casos correctamente segmentados, las explicaciones 
+obtenidas se concentran en zonas coherentes con las estructuras segmentadas, lo que refuerza la interpretación de que los modelos no se apoyan únicamente en artefactos o regiones 
+externas irrelevantes. No obstante, estas técnicas deben entenderse como una herramienta complementaria de inspección, no como una validación clínica independiente.
+
+En conjunto, el trabajo demuestra que el uso de arquitecturas U-Net con aprendizaje por transferencia es una estrategia viable para abordar tareas de segmentación biomédica
+en un contexto de datos limitados. La decisión de emplear dos modelos diferenciados, uno para cerebro y otro para isquemia, ha permitido estructurar el problema de forma clara
+y aprovechar la segmentación anatómica como paso previo al análisis de la lesión. Esta organización mejora la coherencia del sistema y facilita su interpretación.
+
+A pesar de estos resultados, el trabajo presenta varias limitaciones. La primera y más importante es el tamaño reducido del conjunto de datos. Aunque esta situación es habitual 
+en proyectos de imagen biomédica, limita la capacidad de generalización de los modelos y obliga a interpretar los resultados como una validación exploratoria. Una evaluación más
+robusta requeriría incorporar un mayor número de casos, distintos protocolos de adquisición y una mayor variabilidad en la morfología e intensidad de las lesiones.
+
+Otra limitación relevante es la dependencia de las anotaciones manuales utilizadas como referencia. En el caso de la isquemia, las fronteras de la lesión no siempre están
+claramente definidas, por lo que el ground truth contiene un cierto grado de subjetividad. Esta variabilidad afecta directamente a métricas como Dice e IoU, que penalizan
+pequeñas diferencias espaciales aunque estas puedan ser aceptables desde el punto de vista experto. Por ello, los resultados deben interpretarse teniendo en cuenta que la
+segmentación manual representa una referencia operativa, no una verdad absoluta.
+
+También debe considerarse que la validación se ha realizado sobre un número limitado de casos de prueba. Aunque estos casos permiten estudiar situaciones relevantes, como
+control, isquemia transitoria e isquemia permanente, no son suficientes para afirmar que el sistema generaliza a todos los escenarios posibles. Antes de su uso en estudios 
+experimentales más amplios, sería necesario realizar una validación externa con más sujetos y, preferiblemente, con revisión por parte de varios expertos.
+
+Como trabajo futuro, una primera línea de mejora consistiría en ampliar el conjunto de datos disponible. La incorporación de nuevos casos permitiría entrenar modelos más 
+robustos, reducir el riesgo de sobreajuste y evaluar con mayor precisión el comportamiento del sistema ante lesiones de distinta morfología, tamaño e intensidad. También 
+sería recomendable estudiar técnicas de aumento de datos específicas para imagen médica, siempre que las transformaciones aplicadas mantengan la coherencia anatómica de las imágenes.
+
+Una segunda línea de trabajo sería mejorar la evaluación experimental. En futuras versiones deberían utilizarse particiones de entrenamiento, validación y test más amplias, 
+así como validación cruzada y análisis separados por tipo de lesión, tiempo de adquisición y calidad de imagen. Además, sería especialmente útil comparar las predicciones del
+modelo con anotaciones realizadas por varios expertos, con el fin de cuantificar la variabilidad interobservador y contextualizar mejor el rendimiento del sistema automático.
+
+Desde el punto de vista técnico, podrían explorarse arquitecturas más avanzadas que la U-Net base empleada en este trabajo, como U-Net++, Attention U-Net o modelos con 
+mecanismos de atención. Estas arquitecturas podrían mejorar la detección de lesiones pequeñas o de bordes poco definidos. Sin embargo, su uso debería evaluarse con cautela, 
+ya que un aumento de complejidad no garantiza necesariamente una mejora en contextos con pocos datos anotados.
+
+Otra posible mejora sería estudiar modelos tridimensionales. El enfoque actual trabaja corte a corte con imágenes 2D, lo que reduce el coste computacional y facilita el uso
+de modelos preentrenados, pero no aprovecha completamente la continuidad espacial entre slices consecutivas. Una arquitectura 3D podría mejorar la coherencia volumétrica de 
+las predicciones, aunque requeriría más datos, mayor capacidad computacional y una estrategia de entrenamiento más compleja.
+
+También sería conveniente desarrollar una interfaz de usuario orientada al investigador biomédico. Aunque los notebooks entregados permiten reproducir el entrenamiento, la
+inferencia y la evaluación, una aplicación con interfaz gráfica facilitaría la carga de volúmenes, la visualización de cortes, la edición de máscaras, el cálculo de volúmenes
+y la exportación de resultados. Esta mejora favorecería la integración de la herramienta en un entorno de trabajo real.
+
+Finalmente, la metodología desarrollada podría extenderse a otros órganos, lesiones o modalidades de imagen. Aunque este trabajo se ha centrado en cerebro e isquemia
+cerebral en ratón, el pipeline propuesto proporciona una base adaptable a otros problemas de segmentación biomédica, siempre que se disponga de datos anotados y se ajusten
+adecuadamente las fases de preprocesamiento, entrenamiento y validación.
+
+En conclusión, este Trabajo de Fin de Grado ha permitido desarrollar una primera herramienta funcional para el análisis automatizado de imágenes biomédicas preclínicas.
+Los resultados obtenidos muestran un rendimiento sólido en segmentación cerebral y un comportamiento prometedor en segmentación de isquemia, especialmente teniendo en 
+cuenta la dificultad del problema y la limitación de datos disponibles. Aunque el sistema requiere validación adicional y mejoras antes de su aplicación en entornos experimentales
+más amplios, constituye una base técnica válida para avanzar hacia herramientas de apoyo que reduzcan la carga manual, mejoren la reproducibilidad y faciliten la cuantificación de 
+lesiones en investigación biomédica.
 
 

@@ -22,11 +22,11 @@ y el identificador del sujeto y de estudio.
 Cada uno de estos archivos, facilitados por el centro \textit{ ICTS BioImagen Complutense}, contienen 28 \textit{slices}.\footnote{
 Las \textit{slice} son cortes bidimensionales que muestran una sección anatómica del cerebro, los cuales son utilizados para analizar el órgano y la lesión, así como para calcular posteriormente su volumen en base al tamaño de Voxel definido.
 }
-\subsubsection{Regiones de interés (\texttt{.ROI})}
-Las \textbf{ROI} \textit{(Regions Of Interest)} son una herramienta estándar en análisis de imagen médica para delimitar manualmente estructuras anatómicas o patológicas relevantes \citep{nifti}.
-Se tratan de anotaciones geométricas representadas como contornos que aíslan la región de estudio, delimitando su extensión espacial. Estas selecciones se realizan para cada una de las slices de la IRM, definiendo así la estructura anatómica de la característica de estudio.
+\subsubsection{Region of Interest (\texttt{.ROI})}
+Las \textbf{ROI} (Region Of Interest) son una herramienta estándar en análisis de imagen médica para delimitar estructuras anatómicas o patológicas relevantes \citep{nifti}.
+Se tratan de anotaciones geométricas representadas como contornos que aíslan la región de estudio, delimitando su extensión espacial. Estas selecciones se realizan para cada una de las slices o cortes anatómicos de la IRM, definiendo así la estructura anatómica de la característica de estudio.
 Para cada caso de estudio, se cuenta con dos conjuntos de datos ROI, el conjunto de selección del cerebro y el conjunto de selección de la isquemia cerebral.
-Cabe destacar que, especialmente en el caso de la isquemia, las ROI presentan bordes difusos, regiones de transición (gradientes de intensidad) y variabilidad entre anotadores
+Cabe destacar que, especialmente en el caso de la isquemia, las ROI presentan bordes difusos, regiones de transición (gradientes de intensidad) y variabilidad variabilidad interobservador de la medida.
 
 \subsubsection{Máscaras de segmentación (\texttt{.png})}
 Las máscaras son la representación final utilizada en el entrenamiento supervisado. 
@@ -35,14 +35,16 @@ Estas máscaras son producidas a partir de las selecciones ROI, respetando su ta
 Se opta por trabajar con slices bidimensionales en lugar de volúmenes tridimensionales completos debido a la reducción del coste computacional y a la disponibilidad de arquitecturas preentrenadas en 2D.
 
 \subsection{Tamaño de dataset}
-El conjunto de datos utilizado está compuesto por un total de 30 casos de estudio. Estos incluyen imágenes de resonancia magnética correspondientes a lesiones cerebrales de tipo isquémico, tanto transitorias como permanentes, adquiridas en dos instantes temporales distintos: 4 horas y 24 horas tras la inducción de la lesión. Esta configuración permite analizar la evolución temporal del daño cerebral, abarcando desde fases tempranas hasta estados más avanzados, así como distintos grados de reversibilidad del tejido afectado.
+El conjunto de datos utilizado está compuesto por un total de 30 casos de estudio. Estos incluyen imágenes de resonancia magnética correspondientes a lesiones cerebrales de tipo isquémico, tanto transitorias como permanentes, adquiridas en dos instantes temporales distintos: 4 horas y 24 horas tras la inducción de la lesión. Esta configuración permite analizar la evolución temporal del daño cerebral, abarcando desde fases tempranas hasta estados más avanzados, así como distintos grados de reversibilidad del tejido afectado. \citep{pradillo2022ictus}
 
 Adicionalmente, se han incorporado casos de control sin presencia de lesión, con el objetivo de mejorar la capacidad del modelo para discriminar entre tejido sano y patológico, contribuyendo así a una mayor robustez en la clasificación y segmentación.
 
-Pese a que cada uno de estos 30 casos cuenta con un total de 28 slices, se han descartado los 2 primeros y el último corte de cada resonancia. Esto se debe a la baja calidad de señal en estas regiones, donde la presencia de ruido y artefactos compromete la fiabilidad de las anotaciones y puede introducir sesgos en el entrenamiento del modelo.
-Tras esta limpieza, se cuenta con un total de 750 imágenes bidimensionales utilizadas como entrada del modelo.
+Pese a que cada uno de estos 30 casos cuenta con un total de 28 slices, se han descartado los 2 primeros y el último corte de cada resonancia. Esto se debe a la baja calidad de la señal en estos cortes, donde la presencia de ruido y artefactos compromete la fiabilidad de las anotaciones y puede introducir sesgos en el entrenamiento del modelo.
+Tras la depuración de los datos iniciales, se cuenta con un total de 750 imágenes bidimensionales utilizadas como entrada del modelo.
 
-Para cada una de estas slices, se dispone de anotaciones manuales en forma de máscaras binarias correspondientes a dos tareas de segmentación: cerebro e isquemia. En el caso de la segmentación cerebral, esto supone un total de\textbf{ 750 máscaras de \textit{ground truth}}. Para la segmentación de isquemia, el número de máscaras efectivas es menor ya que únicamente están presentes en aquellos casos donde existe lesión. Como media, se cuenta con 9 máscaras de selección de isquemia por sujeto.
+Para cada una de estas slices, se dispone de anotaciones manuales en forma de máscaras binarias correspondientes a dos tareas de segmentación: cerebro e isquemia. En el caso de la segmentación cerebral, esto supone un total de\textbf{ 750 máscaras de \textit{ground truth}}.
+\footnote{En este contexto, el término \textit{ground truth} hace referencia a las máscaras obtenidas a partir de anotaciones manuales, utilizadas como referencia para entrenar y evaluar los modelos de segmentación.}.
+Para la segmentación de la zona isquémica, el número de máscaras efectivas es menor ya que únicamente están presentes en aquellos casos donde existe lesión. Como media, se cuenta con 9 máscaras de selección del daño isquémico por sujeto.
 
 En conjunto, considerando ambas tareas, el dataset incluye más de 1.000 anotaciones de \textit{ground truth}, lo que proporciona un volumen significativo de datos etiquetados a nivel de píxel para el entrenamiento supervisado del modelo.
 
@@ -51,21 +53,24 @@ En conjunto, considerando ambas tareas, el dataset incluye más de 1.000 anotaci
 \begin{tabular}{l c}
 \hline
 Número de casos & 30 \\
-Slices por caso & 28 (25 utilizados) \\
+Cortes por caso & 28 (25 utilizados) \\
 Imágenes totales & 750 \\
 Máscaras cerebro & 750 \\
 Máscaras isquemia (media) & $\sim$270 \\
-Resolución & 120x120 \\
+Resolución & $120 \times 120$ píxeles \\
 \hline
 \end{tabular}
 \caption{Resumen del dataset utilizado}
+\label{tab:resumen_dataset}
 \end{table}
+
+La resolución indicada corresponde al número de píxeles en los que se divide el campo de visión, o \textit{Field of View} (FOV), de cada imagen.
 
 \section{Preprocesamiento de imágenes}
 El preprocesamiento de imágenes constituye una etapa crítica en el pipeline de entrenamiento, ya que garantiza la homogeneidad de los datos de entrada y mejora la estabilidad del modelo.
 Para obtener los datos necesarios para formar el dataset, el procesamiento ha sido realizado por los alumnos bajo las directrices y supervisión de los profesionales del\textit{ ICTS BioImagen Complutense}.
 
-El procesamiento de las imágenes, desde la IRM en formato RAW (\texttt{.bruker}) hasta el dataset final usado para el entrenamiento, se describe con el siguiente pipeline:
+El procesamiento de las imágenes, desde la IRM en formato RAW (\texttt{.bruker}\footnote{Formato de datos generado por equipos de resonancia magnética de la compañía Bruker, utilizado para almacenar los datos originales adquiridos durante el estudio.}) hasta el dataset final usado para el entrenamiento, se describe con el siguiente pipeline:
 
 \begin{figure}[h]
 \centering
@@ -109,7 +114,8 @@ Por este motivo, se realiza una conversión a formato NIfTI, el cual permite tra
 
 Durante este proceso, se preserva la información tridimensional original, así como los parámetros necesarios para el análisis cuantitativo posterior.
 
-Para la realización de este proceso, así como de las etapas posteriores de segmentación manual, se ha empleado el software \textit{MRI File Manager}, una herramienta de código abierto para la gestión y conversión de datos de resonancia magnética. Asimismo, para la correcta utilización del software y la comprensión del flujo de procesado de imágenes, se ha estudiado el manual proporcionado por la Universidad Complutense de Madrid sobre el tratamiento de imágenes de resonancia magnética mediante \textit{ImageJ}.  \citep{ucm_imagej_manual}.
+Para la realización de este proceso, así como de las etapas posteriores de segmentación manual, se ha empleado el software \textit{MRI File Manager}\footnote{Software disponible en: \url{https://populse.github.io/mri_conv/Home/index.html}},
+una herramienta de código abierto para la gestión y conversión de datos de resonancia magnética. Asimismo, para la correcta utilización del software y la comprensión del flujo de procesado de imágenes, se ha estudiado el manual proporcionado por la Universidad Complutense de Madrid sobre el tratamiento de imágenes de resonancia magnética mediante \textit{ImageJ}.  \citep{ucm_imagej_manual}.
 
 \begin{figure}[h]
     \centering
@@ -120,10 +126,10 @@ Para la realización de este proceso, así como de las etapas posteriores de seg
 
 \subsection{Segmentación manual mediante ROI}
 
-Una vez obtenidos los volúmenes en formato NIfTI, se procede a la segmentación manual de las estructuras de interés mediante la definición de regiones de interés (ROI). Este proceso ha sido realizado utilizando las herramientas \textit{MRIFIleManager} junto con la libreria \textit{ImageJ}, siguiendo el manual de uso y bajo la supervisión de expertos del centro ICTS BioImagen Complutense.
+Una vex transformado el Dataset al formato NIfTI, se procede a la segmentación manual de las estructuras de interés mediante la definición de regiones de interés (ROI). Este proceso ha sido realizado utilizando las herramientas \textit{MRIFIleManager} junto con la libreria \textit{ImageJ}, siguiendo el manual de uso y bajo la supervisión de expertos del centro ICTS BioImagen Complutense.
 
-Las ROI se definen como contornos sobre cada \textit{slice}, delimitando tanto el cerebro completo como las regiones afectadas por isquemia. Este proceso requiere una interpretación visual experta, especialmente en el caso de las lesiones isquémicas, donde los bordes no están claramente definidos y existen gradientes de intensidad.
-Como consecuencia, las anotaciones presentan un cierto grado de subjetividad, lo cual constituye una limitación inherente al problema abordado.
+Las ROI se definen como contornos sobre cada \textit{slice}, delimitando tanto el cerebro completo como las regiones afectadas por la isquemia. Este proceso requiere una interpretación visual experta, especialmente en el caso de las lesiones isquémicas, donde los bordes no están claramente definidos y existen gradientes de intensidad.
+Como consecuencia, las segmentaciones presentan un cierto grado de subjetividad, lo cual constituye una limitación inherente al problema abordado.
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{Imagenes/Procesamiento/SegmentationExaple.png}
@@ -137,9 +143,9 @@ A partir de las anotaciones ROI, se generan máscaras binarias que representan l
 
 Este proceso ha sido implementado mediante un script específico desarrollado en Python, que permite transformar las regiones definidas por contornos en imágenes discretas binarias alineadas con las slices originales. En estas máscaras, cada píxel se etiqueta como fondo (valor 0) o región de interés (valor 255), garantizando la correspondencia espacial con la imagen de entrada.
 
-Adicionalmente, el script realiza las operaciones de adaptación necesarias para el entrenamiento del modelo, incluyendo el redimensionado de las imágenes y máscaras a una resolución uniforme(120px x 120px), así como la interpolación correspondiente. Este paso es crítico para asegurar la coherencia dimensional del dataset y su compatibilidad con la arquitectura de la red neuronal empleada.
+Adicionalmente, el script realiza las operaciones de adaptación necesarias para el entrenamiento del modelo, incluyendo el redimensionado de las imágenes y máscaras a una resolución uniforme($120 \times 120$ píxeles), así como la interpolación correspondiente. Este paso es crítico para asegurar la coherencia dimensional del dataset y su compatibilidad con la arquitectura de la red neuronal empleada.
 
-El desarrollo de esta herramienta ha permitido automatizar el proceso de generación de \textit{ground truth}, asegurando la consistencia del dataset y reduciendo posibles errores derivados de la intervención manual. Asimismo, facilita la reutilización del pipeline por parte de usuarios con menor experiencia técnica, permitiendo la generación de nuevos conjuntos de entrenamiento y el reentrenamiento de los modelos de forma más accesible. \citep{repositorio_github}
+El desarrollo de esta herramienta ha permitido automatizar el proceso de generación de \textit{ground truth}, asegurando la consistencia del dataset y reduciendo posibles errores derivados de la intervención manual. Asimismo, facilita la reutilización del pipeline por parte de usuarios con menor experiencia técnica, permitiendo la generación de nuevos conjuntos de entrenamiento y el reentrenamiento de los modelos de forma más accesible.
 
 \begin{figure}[h]
     \centering
@@ -153,9 +159,9 @@ El desarrollo de esta herramienta ha permitido automatizar el proceso de generac
 
 Con el objetivo de garantizar la homogeneidad de los datos de entrada, las imágenes y sus máscaras son sometidas a un proceso de adaptación previo al entrenamiento.
 
-En primer lugar, todas las imágenes son redimensionadas a una resolución de 120x120 píxeles. Esta decisión permite adaptar los datos a la arquitectura de la red neuronal empleada y reducir el coste computacional.
+En primer lugar, todas las imágenes son redimensionadas a una resolución de $120 \times 120$ píxeles, correspondiente al tamaño de las imágenes disponibles tras su adquisición y exportación. Esta decisión permite adaptar los datos a la arquitectura de la red neuronal empleada y reducir el coste computacional.
 
-Durante este proceso se aplica interpolación, lo que puede introducir suavizado en los bordes y pérdida de detalle en estructuras pequeñas.
+Durante este proceso se aplica interpolación, lo que puede introducir suavizado en los bordes y pérdida de detalle en estructuras pequeñas.\citep{lehmann1999survey}
 
 Asimismo, las intensidades de las imágenes, originalmente almacenadas en formato entero (\texttt{int16}), se convierten a formato de coma flotante (\texttt{float32}) y se normalizan para estabilizar el proceso de entrenamiento.
 
@@ -173,7 +179,7 @@ Tras realizar un preprocesamiento de las imágenes para su uso en el entrenamien
 
 Para esta tarea, se utiliza la arquitectura U-Net para crear dos modelos, entrenados con las mismas imágenes pero con distintas máscaras binarias. Aunque existen múltiples variantes de U-Net, como U-Net++, Attention U-Net o ResUNet, se decide usar U-Net como estructura básica, teniendo en cuenta ventajas e inconvenientes relacionados con la complejidad técnica, la capacidad del modelo y el coste computacional, que se expondrán más adelante en esta sección.
 
-Debido al bajo número de datos anotados, habitual en el ámbito biomédico, se aplica además \textit{Transfer Learning}, una técnica de \textit{Deep Learning} que permite reutilizar pesos previamente aprendidos por otros modelos para adaptarlos a una tarea más concreta. Para ello, se emplean pesos de \textit{RadImageNet}, un modelo preentrenado con IRM, TAC y ecografía.
+Debido al bajo número de datos disponibles, habitual en el ámbito biomédico, se aplica además \textit{Transfer Learning}, una técnica de \textit{Deep Learning} que permite reutilizar pesos previamente aprendidos por otros modelos para adaptarlos a una tarea más concreta. Para ello, se emplean pesos de \textit{RadImageNet}, un modelo preentrenado con IRM, TAC y ecografía. \citep{pan2010survey,mei2022radimagenet}.
 
 Tras los primeros entrenamientos, se observó una tendencia a la sobresegmentación en el modelo de isquemia. Para mitigar este problema, se probaron varias estrategias, como el cambio de la función de pérdida para penalizar los falsos positivos. Finalmente, se optó por ajustar el umbral de binarización de la salida probabilística del modelo. La comparación cuantitativa de los distintos umbrales se presenta en el capítulo de resultados.
 

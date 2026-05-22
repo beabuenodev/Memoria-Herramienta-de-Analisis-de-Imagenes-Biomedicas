@@ -55,7 +55,7 @@ En la Figura~\ref{fig:dice_paciente_cerebro} se representan los valores medios d
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/dice_paciente_cerebro.png}
-    \caption{Evolución del coeficiente Dice por Caso}
+    \caption{Evolución del coeficiente Dice por Caso en el estudio de segmentación del cerebro en modelo control y con ictus isquémico permanente y transitorio.}
     \label{fig:dice_paciente_cerebro}
 \end{figure}
 
@@ -64,7 +64,7 @@ La Figura~\ref{fig:volumen_cerebro} compara el volumen cerebral estimado por el 
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/volumen_cerebro.png}
-    \caption{Evolución del coeficiente Dice por caso}
+    \caption{Comparación del volumen cerebral estimado por el modelo y el volumen obtenido a partir de la segmentación manual.}
     \label{fig:volumen_cerebro}
 \end{figure}
 
@@ -78,13 +78,13 @@ Con el objetivo de complementar la evaluación cuantitativa, se ha realizado un 
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/cualitativo_cerebro.png}
-    \caption{Ejemplos cualitativos de segmentación de isquemia en distintos escenarios}
+    \caption{Ejemplos cualitativos de segmentación del cerebro en distintos escenarios.}
     \label{fig:cualitativo_cerebro}
 \end{figure}
 
-A nivel visual, las máscaras generadas presentan una delimitación coherente del contorno cerebral. El modelo conserva forma de la estructura y no presenta artefactos fuera del área esperada. Este comportamiento es consistente con los valores elevados de Dice e IoU observados en el análisis cuantitativo.
+A nivel visual, las máscaras generadas presentan una delimitación coherente del contorno cerebral. El modelo conserva la forma de la estructura y no presenta artefactos fuera del área esperada. Este comportamiento es consistente con los valores elevados de Dice e IoU observados en el análisis cuantitativo.
 
-Las principales  se concentrdiscrepanciasan en los cortes extremos de los casos, donde las slices contienen ruido y son menos definida. Estos cortes no se han tenido en cuenta, ya que en un entorno de investigación son descartados por su baja calidad e interés, ya que no forman parte de la anatomía cerebral relevante para el análisis de la isquemia cerebral.
+Las principales discrepancias se concentran en los cortes extremos de los casos, donde las slices contienen ruido y son menos definidas. Estos cortes no se han tenido en cuenta, ya que en un entorno de investigación son descartados por su baja calidad e interés, ya que no forman parte de la anatomía cerebral relevante para el análisis de la isquemia cerebral.
 
 En los cortes centrales, la segmentación es precisa y la estructura está bien definida, presentando bordes incluso más ajustados que la segmentación manual. Esto indica que el modelo es capaz de identificar de manera estable la región cerebral principal, incluso en presencia de variaciones de intensidad propias de la resonancia magnética.
 
@@ -177,7 +177,7 @@ En la Figura \ref{fig:dice_paciente_isquemia} se representan los valores del coe
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/dice_paciente_isquemia.png}
-    \caption{Evolución del coeficiente Dice por Caso}
+    \caption{Evolución del coeficiente Dice por Caso en el estudio de segmentación de lesión isquémica en modelo control y con ictus isquémico permanente y transitorio.}
     \label{fig:dice_paciente_isquemia}
 \end{figure}
 En el caso de control, donde no existe presencia de lesión, el modelo obtiene un valor de Dice igual a 1, lo que indica una coincidencia perfecta entre la predicción y la máscara de referencia al no detectar regiones patológicas. En los casos con presencia de isquemia, los valores de Dice se sitúan en torno a 0.8, lo que refleja un alto grado de solapamiento entre la segmentación automática y la manual, aunque con discrepancias en las zonas de transición y en la delimitación de los bordes.
@@ -211,7 +211,7 @@ Tal y como se observa en la Figura \ref{fig:volumen_isquemia}, las diferencias e
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/volumen_isquemia.png}
-    \caption{Evolución del coeficiente Dice por caso}
+    \caption{Comparación del volumen de lesión isquémica estimado por el modelo y el volumen obtenido a partir de la segmentación manual.}
     \label{fig:volumen_isquemia}
 \end{figure}
 
@@ -281,7 +281,7 @@ En conjunto, el análisis cualitativo respalda los resultados cuantitativos obte
 
 \subsection{Discusión crítica del modelo de isquemia}
 
-Es importante destacar que el sistema desarrollado se concibe como una herramienta supervisada en la que el especialista mantiene el control de los datos finales. La herramienta permite la edición de cada una de las máscaras generada así como los valores volumétricos en cada corte de la resonancia analizada. Este enfoque garantiza que cualquier desviación pueda ser corregida de manera sencilla por el experto, integrando la automatización dentro de un \textbf{flujo de trabajo asistido y no sustitutivo}
+Es importante destacar que el sistema desarrollado se concibe como una herramienta supervisada en la que el especialista mantiene el control de los datos finales. La herramienta permite la edición de cada una de las máscaras generada así como los valores volumétricos en cada corte de la resonancia analizada. Este enfoque garantiza que cualquier desviación pueda ser corregida de manera sencilla por el experto, integrando la automatización dentro de un \textbf{flujo de trabajo asistido y no sustitutivo}.
 
 \subsection{Resultados de explicabilidad en la segmentación de isquemia}
 
@@ -346,7 +346,7 @@ Las Figuras~\ref{fig:bland_altman}, \ref{fig:boxplots_metricas} y \ref{fig:dice_
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/bland_altman.png}
-    \caption{Gráfico de Bland-Altman para analizar la concordancia entre el volumen real y el volumen estimado por el modelo.}
+    \caption{Gráfico de Bland-Altman para analizar la concordancia entre el volumen calculado manualmente y el volumen estimado por el modelo.}
     \label{fig:bland_altman}
 \end{figure}
 

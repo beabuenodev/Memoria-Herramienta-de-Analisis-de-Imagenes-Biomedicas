@@ -1,7 +1,78 @@
 \chapter*{Conclusions and Future Work}
 \label{cap:conclusions}
-\addcontentsline{toc}{chapter}{Conclusions and Future Work}
+The work developed has made it possible to achieve the main objective set out at the beginning of the report: 
+to build a functional prototype to support the analysis of preclinical biomedical images using computer vision and artificial intelligence techniques.
+The resulting tool makes it possible to automatically segment the brain and cerebral ischaemia regions in mouse magnetic resonance imaging images, calculate 
+associated volumetric measurements, and incorporate explainability mechanisms to analyse the behaviour of the models.
 
-Conclusions and future lines of work. This chapter contains the translation of Chapter \ref{cap:Conclusiones}.
+Based on the results obtained, it can be concluded that the proposed approach is suitable as a first automated solution within a supervised workflow.
+The system does not replace the judgement of the expert researcher, but it does reduce part of the manual workload associated with the delimitation of regions of interest and provides 
+a quantitative output that can be reviewed, corrected, and used as support in biomedical studies.
 
+The brain segmentation model has shown particularly robust behaviour. The results achieved, with a mean 3D Dice coefficient of 0.973 and a mean 3D IoU 
+of 0.947, indicate a high correspondence between the automatically generated masks and the reference manual segmentations. In addition, the low volumetric error obtained 
+confirms that the model not only adequately reproduces the shape of the brain, but also accurately preserves its total volume. This stability makes brain segmentation 
+a reliable basis for the later stages of the pipeline.
 
+Cerebral ischaemia segmentation has presented greater difficulty, as expected given the nature of the problem. Ischaemic lesions show diffuse borders, 
+intensity variations, and transition areas whose delimitation partly depends on the operator's judgement. Even so, the model has obtained coherent results, with a mean 3D Dice 
+of 0.820 and a mean 3D IoU of 0.717. Although these values are lower than those obtained in brain segmentation, they are reasonable for a task with greater anatomical 
+and visual ambiguity. The model makes it possible to locate the main pathological regions and offers useful volumetric estimates as a first automated approximation.
+
+From the point of view of quantification, the system fulfils a relevant function, since it transforms the generated masks into interpretable volumetric measurements.
+This output is especially important in the context of the work, since the interest of the end user is not limited to visualising a segmentation, but also to 
+obtaining numerical values that make it possible to compare cases, study the evolution of a lesion, or analyse differences between subjects.
+
+The incorporation of Explainable Artificial Intelligence techniques has provided an additional layer of analysis. The maps generated using Grad-CAM, Grad-CAM++, and 
+Integrated Gradients have made it possible to study which regions of the image influence the predictions of the models. In correctly segmented cases, the explanations 
+obtained are concentrated in areas consistent with the segmented structures, which reinforces the interpretation that the models do not rely solely on artefacts or irrelevant 
+external regions. Nevertheless, these techniques should be understood as a complementary inspection tool, not as an independent clinical validation.
+
+Overall, the work demonstrates that the use of U-Net architectures with transfer learning is a viable strategy for addressing biomedical segmentation tasks 
+in a limited-data context. The decision to use two differentiated models, one for the brain and another for ischaemia, has made it possible to structure the problem clearly 
+and to use anatomical segmentation as a prior step before lesion analysis. This organisation improves the coherence of the system and facilitates its interpretation.
+
+Despite these results, the work presents several limitations. The first and most important is the reduced size of the dataset. Although this situation is common 
+in biomedical imaging projects, it limits the generalisation capacity of the models and requires the results to be interpreted as an exploratory validation. A more 
+robust evaluation would require the incorporation of a larger number of cases, different acquisition protocols, and greater variability in the morphology and intensity of the lesions.
+
+Another relevant limitation is the dependence on the manual annotations used as reference. In the case of ischaemia, the boundaries of the lesion are not always 
+clearly defined, so the ground truth contains a certain degree of subjectivity. This variability directly affects metrics such as Dice and IoU, which penalise 
+small spatial differences even when these may be acceptable from an expert point of view. Therefore, the results should be interpreted taking into account that the 
+manual segmentation represents an operational reference, not an absolute truth.
+
+It should also be considered that the validation has been performed on a limited number of test cases. Although these cases make it possible to study relevant situations, such as 
+control, transient ischaemia, and permanent ischaemia, they are not sufficient to state that the system generalises to all possible scenarios. Before its use in broader 
+experimental studies, it would be necessary to perform an external validation with more subjects and, preferably, with review by several experts.
+
+\section{Future Work}
+
+As future work, a first line of improvement would consist of expanding the available dataset. The incorporation of new cases would make it possible to train more 
+robust models, reduce the risk of overfitting, and evaluate more accurately the behaviour of the system when faced with lesions of different morphology, size, and intensity. It would also 
+be advisable to study data augmentation techniques specific to medical imaging, provided that the transformations applied maintain the anatomical coherence of the images.
+
+A second line of work would be to improve the experimental evaluation. In future versions, larger training, validation, and test partitions should be used, 
+as well as cross-validation and separate analyses by lesion type, acquisition time, and image quality. In addition, it would be especially useful to compare the predictions of the 
+model with annotations made by several experts, in order to quantify interobserver variability and better contextualise the performance of the automatic system.
+
+From a technical point of view, more advanced architectures than the base U-Net used in this work could be explored, such as U-Net++, Attention U-Net, or models with 
+attention mechanisms. These architectures could improve the detection of small lesions or lesions with poorly defined borders. However, their use should be evaluated with caution, 
+since an increase in complexity does not necessarily guarantee an improvement in contexts with few annotated data.
+
+Another possible improvement would be to study three-dimensional models. The current approach works slice by slice with 2D images, which reduces the computational cost and facilitates the use 
+of pretrained models, but does not fully exploit the spatial continuity between consecutive slices. A 3D architecture could improve the volumetric coherence of 
+the predictions, although it would require more data, greater computational capacity, and a more complex training strategy.
+
+It would also be advisable to develop a user interface aimed at the biomedical researcher. Although the delivered notebooks make it possible to reproduce the training, 
+inference, and evaluation, an application with a graphical interface would facilitate the loading of volumes, the visualisation of slices, the editing of masks, the calculation of volumes, 
+and the export of results. This improvement would favour the integration of the tool into a real working environment.
+
+Finally, the methodology developed could be extended to other organs, lesions, or imaging modalities. Although this work has focused on the brain and cerebral ischaemia 
+in mice, the proposed pipeline provides a basis that can be adapted to other biomedical segmentation problems, provided that annotated data are available and that 
+the preprocessing, training, and validation stages are appropriately adjusted.
+
+In conclusion, this Bachelor's Degree Final Project has made it possible to develop a first functional tool for the automated analysis of preclinical biomedical images.
+The results obtained show robust performance in brain segmentation and promising behaviour in ischaemia segmentation, especially taking into 
+account the difficulty of the problem and the limitation of the available data. Although the system requires additional validation and improvements before its application in broader 
+experimental environments, it constitutes a valid technical basis for moving towards support tools that reduce the manual workload, improve reproducibility, and facilitate the quantification of 
+lesions in biomedical research.

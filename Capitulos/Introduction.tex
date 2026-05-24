@@ -1,11 +1,109 @@
 \chapter*{Introduction}
 \label{cap:introduction}
-\addcontentsline{toc}{chapter}{Introduction}
 
-Introduction to the subject area. This chapter contains the translation of Chapter \ref{cap:introduccion}.
+\section{Context, background and motivation}
 
+In the field of biomedical research, the analysis of magnetic resonance images, or Magnetic Resonance Imaging (MRI), constitutes a fundamental tool for the study of anatomical structures and the analysis of their evolution. In particular, in preclinical studies on animal models, such as the mouse brain, magnetic resonance imaging makes it possible to observe the evolution of different pathologies, providing relevant information for neuroscience research and the analysis of treatments. \citep{bioimagenManualRMImageJ2024,saito2024preclinicalMRI}
 
+The processing of this type of images, known as \textbf{segmentation}, consists of delimiting the anatomical or pathological region of interest, referred to as \textbf{ROI}, from the English term \textbf{Region of Interest}, with the aim of quantifying the characteristics of the organ or lesion, as well as estimating its volume. These tasks are essential to ensure the reproducibility of experiments and the comparability of results between different studies and subjects, especially in those cases in which the temporal evolution of a pathology is analysed or a possible treatment is being evaluated. \citep{ucm_imagej_manual}
 
+Traditionally, these tasks have been performed manually: the usual workflow consists of analysing each of the MRI slices, identifying the regions of interest and manually delimiting them using specific selection tools, from which the magnitudes of interest are subsequently calculated.
+Although this procedure makes it possible to obtain valid experimental results, it presents several limitations. It is a laborious process that consumes a large amount of time, especially in studies with a high number of subjects. This workload entails a significant investment of time by researchers, which may affect the development times of the research.
+On the other hand, the manual delimitation of certain regions, such as ischaemic lesions, presents a degree of ambiguity, since their boundaries are not always clearly defined. This may introduce variability in the results depending on the professional's criterion.
+In addition to these limitations, there is the need to analyse increasingly extensive image sets and to obtain quantitative measurements consistently, as well as the demand for detailed and precise analyses, which hinders the scalability of manual processes.
+\citep{ucm_imagej_manual,veigaCanuto2022interobserverMRI,liu2022interobserverSegmentation}
+
+In this context, there is a need to develop tools that make it possible to speed up and automate these tasks in a supervised manner, improving process efficiency and increasing the consistency and reproducibility of the results.
+
+The recent progress of artificial intelligence techniques applied to medical imaging has demonstrated their ability to identify complex patterns in visual data, opening the door to their application in biomedical tasks such as classification, detection and segmentation of anatomical structures and lesions. Nevertheless, the integration of this type of solution into real working contexts requires not only obtaining accurate results, but also ensuring that these results are interpretable and coherent from the point of view of the application domain. \citep{Akkus2017,litjens2017survey}
+
+This Bachelor's Degree Final Project, in collaboration with the ICTS BioImagen Complutense centre, aims to respond to a real need observed in the research environment. Based on the knowledge acquired, the analysis of the state of the art and the review of the bibliography, the development of a tool based on supervised models is proposed, with the aim of contributing to the improvement of the magnetic resonance image analysis process in preclinical research, proposing a solution that reduces the manual workload and may contribute to improving the consistency of the results.
+
+The motivation of this work is not limited solely to the implementation of an automatic model, but rather focuses on the development of a tool that can be integrated into the existing workflow, providing value as a support system for biomedical analysis. To this end, automation is combined with expert supervision, so that the user retains control over the final results and can interpret both the generated segmentations and the associated quantitative measurements.
+
+\section{Objectives}
+
+The objective of this Bachelor's Degree Final Project is to develop a software tool to support the analysis of preclinical biomedical images obtained by means of MRI. The work developed focuses on two segmentation tasks: the automatic delimitation of the brain and the segmentation of regions corresponding to cerebral ischaemia.
+
+The tool is not intended to replace the judgement of the expert researcher, but rather to reduce the workload associated with manual segmentation and provide reproducible results that can be reviewed, interpreted and used as support within the usual workflow of the ICTS BioImagen Complutense centre.
+
+\subsection{General objective}
+
+To develop and evaluate a prototype based on computer vision and artificial intelligence techniques capable of automatically segmenting, in preclinical magnetic resonance images, the area corresponding to the brain and the regions affected by cerebral ischaemia, while also providing quantitative information associated with these segmentations and incorporating explainability mechanisms that facilitate the interpretation of the results obtained.
+
+\subsection{Specific objectives}
+
+To achieve the general objective, the following specific objectives have been defined:
+
+\begin{itemize}
+    \item[\textbf{O1.}] To analyse the biomedical context of the problem and the workflow followed at ICTS BioImagen Complutense for the analysis of preclinical MRI images associated with cerebral ischaemia studies.
+
+    \item[\textbf{O2.}] To study the manual segmentation process of the brain and ischaemic regions, identifying its main limitations in terms of time, reproducibility and dependence on the researcher's criterion.
+
+    \item[\textbf{O3.}] To investigate artificial intelligence models and approaches applied to medical imaging, assessing both existing models and the possibility of developing a proprietary model adapted to the domain of preclinical mouse magnetic resonance imaging.
+
+    \item[\textbf{O4.}] To organise and prepare a dataset composed of real magnetic resonance images, regions of interest and binary masks corresponding to the brain and cerebral ischaemia.
+
+    \item[\textbf{O5.}] To design a preprocessing process that makes it possible to adapt the original images for the training of supervised models, including format conversion, normalisation, filtering of non-informative slices and dimensional adjustment tasks.
+
+    \item[\textbf{O6.}] To study and apply transfer learning techniques, using weights pretrained on medical imaging, with the aim of improving training in a context of limited annotated data.
+
+    \item[\textbf{O7.}] To design, train and evaluate a first segmentation model based on a U-Net architecture to automatically delimit the brain area in the input images.
+
+    \item[\textbf{O8.}] To design, train and evaluate a second segmentation model based on a U-Net architecture to identify the regions of cerebral ischaemia present in the images.
+
+    \item[\textbf{O9.}] To use brain segmentation as auxiliary information to restrict ischaemia analysis to the relevant anatomical region and reduce detections outside the brain area.
+
+    \item[\textbf{O10.}] To implement quantification mechanisms that make it possible to calculate measurements derived from the segmentations obtained, especially brain volume and the volume of the ischaemic region.
+
+    \item[\textbf{O11.}] To incorporate explainable artificial intelligence techniques that make it possible to visually analyse which regions of the image influence the models' predictions and assess whether these are coherent with the expected anatomical or pathological areas.
+
+    \item[\textbf{O12.}] To evaluate the performance of both models through quantitative segmentation metrics, volumetric analysis and visual review of the generated predictions.
+
+    \item[\textbf{O13.}] To develop a reproducible and accessible prototype, organised in notebooks, which can be executed and reviewed by third parties without requiring complex infrastructure.
+
+    \item[\textbf{O14.}] To assess possible future extension lines, offering a first development of software that makes it possible to adapt training to other organs and pathologies.
+\end{itemize}
+
+\section{Work plan}
+
+The development of this Bachelor's Degree Final Project has been organised progressively, starting from an initial phase of understanding the biomedical problem through to the implementation and evaluation of the proposed system. Given that the project combines aspects of software engineering, medical image processing, machine learning and experimental validation, it was necessary to structure the work into clearly differentiated phases.
+
+Furthermore, as this is a project developed in collaboration with the ICTS BioImagen Complutense centre, the work plan was conditioned by the needs detected during follow-up meetings and visits to the centre. These sessions made it possible to orient technical decisions towards a real use case, define the functional requirements of the tool and adapt the development to the characteristics of the available dataset.
+
+The following sections describe, first, the follow-up process carried out through meeting minutes and, subsequently, the main development phases followed until the final prototype was obtained.
+
+\subsection{Project follow-up and meetings with the supervisors}
+
+Throughout the development of the project, a continuous follow-up process was maintained through periodic meetings with the supervisors, both in person and online. In order to record the evolution of the development and the decisions made, meeting minutes were prepared after each meeting.
+
+These minutes played an especially important role during the early phases of the project, as they made it possible to document the initial definition of the problem, the application context and the needs of the final user. In particular, the meetings with our supervisor David Castejón, as representative of the real use environment at ICTS BioImagen Complutense, made it possible to establish continuous communication between the technical side of the project and the biomedical interpretation of the results. This interaction was key to understanding which outputs were truly useful for researchers, how the segmentations should be presented and which quantitative measurements provided value within the usual workflow.
+
+During the visits to the ICTS BioImagen Complutense centre, the minutes made it possible to collect essential information about the workflow followed by the researchers. Real examples of images were analysed and various applications of the MRIs processed at the centre were studied. In addition, basic notions about the physical operation of magnetic resonance imaging equipment were acquired, learning to distinguish areas of hyperintensity and hypointensity, which are key for the subsequent construction of the dataset and for the interpretation of lesions.
+
+The meetings also made it possible to continuously review design and implementation decisions. In the initial stages, the use of existing models for medical segmentation or general image segmentation was considered. However, after analysing their limitations in the context of preclinical mouse magnetic resonance images, it was decided to orient the work towards the development and training of proprietary models, adapted to the available dataset and to the specific needs of the use case.
+
+As development progressed, decisions were made regarding the structure of the dataset, the removal of low-informative slices, the preparation of the training notebooks and the improvement of the ischaemia segmentation model. In particular, it was decided to use brain segmentation as a preliminary step to restrict the analysis area of the ischaemia model to brain tissue, with the aim of reducing false positives and improving the anatomical coherence of the predictions.
+
+The feedback provided during these meetings also influenced practical aspects of the prototype, such as the need to display the segmentations visually, calculate volumes in interpretable units, document the usage steps and facilitate the execution of the system through notebooks in \textit{Google Colab}. In this way, the follow-up of the project was not limited to academic supervision, but made it possible to progressively adapt the tool to the needs of the final user.
+
+\subsection{Development phases}
+
+The development of the work has been organised into several phases. First, a phase was carried out to understand the biomedical problem and define the functionality of the tool. This phase included meetings with the project directors and visits to the ICTS BioImagen Complutense centre, where the MRI acquisition process, the generation of regions of interest and the way in which researchers currently obtain quantitative measurements from manual segmentations were studied.
+
+Subsequently, a phase of research and analysis of alternatives was addressed. At this stage, existing models for medical segmentation and general image segmentation were reviewed, assessing their possible application to the proposed use case. However, the differences between the human medical images commonly used in many pretrained models and preclinical mouse magnetic resonance images limited their direct applicability. This conclusion motivated the change in approach from the use of an existing model towards the design and training of proprietary models, while maintaining the support of transfer learning as a strategy to take advantage of visual knowledge previously learned in medical imaging.
+
+The next phase consisted of preparing the dataset. The segmentation of cerebral ischaemia lesions was selected as the case study, due both to the availability of data provided by ICTS BioImagen Complutense and to its relevance within the centre's current research lines. At this stage, the organisation of the images, the adaptation of the masks, the conversion of formats and the preprocessing required for the data to be used in model training were carried out.
+
+Next, the automatic segmentation pipeline was designed and implemented, composed of two models: one oriented towards brain segmentation and the other towards ischaemic lesion segmentation. The design of the system was proposed sequentially, so that brain segmentation could be used as a preliminary step to restrict the subsequent analysis of the lesion to the relevant anatomical region. This decision responds both to technical criteria, by reducing possible detections outside the brain, and to biomedical criteria, by making the system output more coherent.
+
+In parallel with the development of the models, a phase for the study and implementation of explainability techniques was incorporated. This phase aimed to analyse whether the regions highlighted by the explanation methods coincided with regions relevant to the model's prediction, especially in the case of ischaemia. The purpose was to complement quantitative evaluation with a visual interpretation of the internal behaviour of the models.
+
+Finally, the results obtained were evaluated through segmentation metrics, volumetric quantification and visual analysis of the generated predictions. This evaluation made it possible to assess both the accuracy of the masks obtained and the practical usefulness of the tool within the workflow proposed by ICTS BioImagen Complutense.
+
+\section{Structure of the report}
+
+The report is organised as follows. Chapter 2 presents the state of the art, including the necessary biomedical concepts, computer vision applied to medical imaging, segmentation architectures, transfer learning and explainable artificial intelligence. Chapter 3 describes the methodology followed, from dataset construction and image preprocessing to the architecture of the models, volumetric quantification and the integration of explainability. Chapter 4 presents and discusses the results obtained for brain segmentation and segmentation of the ischaemic region. Finally, Chapter 5 presents the conclusions of the work and the main lines of future work.
 
 
 

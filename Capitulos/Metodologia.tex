@@ -432,6 +432,27 @@ Además, se incluyen los dos modelos desarrollados, guardados en formato \texttt
 
 Por último, también se adjuntan, como parte de la reproducibilidad del proyecto, los archivos resultantes de la ejecución de los notebooks de cálculo de métricas y explicabilidad, con los datos resultantes en formato CSV y las imágenes generadas en formato PNG.
 
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/Metodologia/outHerramienta.png}
+        \caption{Visualización en plano 2D de la segmentación obtenida.}
+        \label{fig:out_herramienta_2d}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Imagenes/Metodologia/Modelo3D.png}
+        \caption{Reconstrucción tridimensional del cerebro y la lesión isquémica.}
+        \label{fig:modelo_3d}
+    \end{subfigure}
+    \caption{Ejemplo de salida generada por la herramienta, mostrando la segmentación en plano 2D y la reconstrucción 3D a escala real del cerebro y la región isquémica. Fuente: elaboración propia.}
+    \label{fig:salida_herramienta}
+\end{figure}
+
+Como ejemplo de salida del sistema, la Figura~\ref{fig:salida_herramienta} muestra tanto la visualización bidimensional de las máscaras obtenidas como la reconstrucción tridimensional del cerebro y la lesión isquémica tras analizar un caso de uso.
+
 \subsection{Requisitos de ejecución}
 
 Para facilitar la reproducción del trabajo, el código se ha organizado de forma que pueda ejecutarse en un entorno estándar de \textit{Python}, preferiblemente mediante Jupyter Notebook o Google Colab. No se requiere una infraestructura específica ni software propietario para ejecutar la inferencia o el cálculo de métricas, aunque el entrenamiento de los modelos puede beneficiarse del uso de GPU para reducir el tiempo de ejecución.

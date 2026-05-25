@@ -113,7 +113,7 @@ Cortes extremos & 18 & 0,189 & 0,174 \\
 
 Como se observa en la Tabla~\ref{tab:rendimiento_xai_cerebro}, el rendimiento global se ve condicionado por los cortes extremos. Al considerar únicamente los cortes interiores, más representativos de la tarea principal de segmentación cerebral, el modelo alcanza un Dice medio de 0,969 y un IoU medio de 0,940. Esta diferencia indica que la disminución del rendimiento en el conjunto completo se debe principalmente a los cortes de borde, donde la región anatómica objetivo es pequeña o ambigua.
 
-La Figura~\ref{fig:xai_cerebro_ejemplo_bueno} muestra un ejemplo representativo de un corte interior con buena segmentación cerebral. En ella se presenta la imagen original, la máscara de referencia, la máscara predicha, los mapas de relevancia generados mediante Grad-CAM, Grad-CAM++ e Integrated Gradients, y la curva de eliminación normalizada asociada.
+La Figura~\ref{fig:xai_cerebro_ejemplo_bueno} muestra un ejemplo representativo de un corte interior con buena segmentación cerebral. En ella se presenta la imagen original, la máscara de referencia y los mapas de relevancia generados mediante Grad-CAM, Grad-CAM++ e Integrated Gradients.
 
 \begin{figure}[h]
     \centering

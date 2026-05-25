@@ -211,6 +211,28 @@ Por último, tanto las máscaras de entrenamiento como las slices de la IRM se o
     \label{fig:img_mask}
 \end{figure}
 
+\subsection{Estrategia de particionado y control de fuga de datos}
+
+Dado que cada resonancia magnética está formada por una secuencia de cortes bidimensionales pertenecientes al mismo sujeto, la unidad de independencia considerada en este trabajo no es el corte individual, sino el caso completo. Esta decisión es especialmente relevante en imagen médica, ya que los cortes consecutivos de una misma adquisición presentan una alta dependencia espacial y anatómica. Por tanto, si distintos cortes de un mismo caso apareciesen simultáneamente en entrenamiento, validación y prueba, se produciría una fuga de información entre subconjuntos que podría sobreestimar el rendimiento real del modelo.
+
+Para evitar este problema, el particionado del conjunto de datos se realizó a nivel de caso. Es decir, todos los cortes y sus correspondientes máscaras asociados a una misma resonancia se asignaron exclusivamente a uno de los subconjuntos: entrenamiento, validación o prueba. El conjunto de entrenamiento se empleó para ajustar los pesos de los modelos y el conjunto de prueba se reservó para monitorizar el aprendizaje y seleccionar decisiones de configuración, como el umbral de binarización de la salida, y para la evaluación final.
+
+En particular, el conjunto de prueba estuvo formado por tres casos completos que no fueron utilizados durante el entrenamiento ni durante la validación. Esta separación permite evaluar el comportamiento del sistema sobre sujetos no vistos previamente, proporcionando una estimación más realista de su capacidad de generalización. No obstante, debido al reducido número de casos disponibles, los resultados deben interpretarse como una evaluación preliminar del prototipo y no como una validación estadística exhaustiva.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lccc}
+\hline
+Subconjunto & Nº de casos & Uso principal \\
+\hline
+Entrenamiento & 27 & Ajuste de pesos del modelo \\
+Prueba & 3 & Evaluación final sobre casos no vistos \\
+\hline
+\end{tabular}
+\caption{Particionado del conjunto de datos a nivel de caso. Todos los cortes de una misma resonancia se asignan a un único subconjunto para evitar fuga de información entre entrenamiento y prueba.}
+\label{tab:particionado_dataset}
+\end{table}
+
 \section{Arquitectura de los modelos y \textit{Transfer Learning}}
 
 Tras realizar un preprocesamiento de las imágenes para su uso en el entrenamiento, procedemos a definir la arquitectura a alto nivel de la aplicación de segmentación automática. En el caso de estudio que nos presenta ICTS BioImagen Complutense, se requiere la automatización de la medición de volúmenes de la lesión isquémica en el cerebro, además de la afectación en este órgano; por lo que es necesaria la segmentación automática por separado del órgano y de la lesión.

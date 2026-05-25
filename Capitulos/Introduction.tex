@@ -1,9 +1,9 @@
 \chapter*{Introduction}
-\markboth{Introduction}{Introduction}
+\addcontentsline{toc}{chapter}{Introduction}
 
 \label{cap:introduction}
 
-\section{Context, background and motivation}
+\section*{Context, background and motivation}
 
 In the field of biomedical research, the analysis of magnetic resonance images, or Magnetic Resonance Imaging (MRI), constitutes a fundamental tool for the study of anatomical structures and the analysis of their evolution. In particular, in preclinical studies on animal models, such as the mouse brain, magnetic resonance imaging makes it possible to observe the evolution of different pathologies, providing relevant information for neuroscience research and the analysis of treatments. \citep{ucm_imagej_manual,saito2024preclinicalMRI}
 
@@ -23,17 +23,17 @@ This Bachelor's Degree Final Project, in collaboration with the ICTS BioImagen C
 
 The motivation of this work is not limited solely to the implementation of an automatic model, but rather focuses on the development of a tool that can be integrated into the existing workflow, providing value as a support system for biomedical analysis. To this end, automation is combined with expert supervision, so that the user retains control over the final results and can interpret both the generated segmentations and the associated quantitative measurements.
 
-\section{Objectives}
+\section*{Objectives}
 
 The objective of this Bachelor's Degree Final Project is to develop a software tool to support the analysis of preclinical biomedical images obtained by means of MRI. The work developed focuses on two segmentation tasks: the automatic delimitation of the brain and the segmentation of regions corresponding to cerebral ischaemia.
 
 The tool is not intended to replace the judgement of the expert researcher, but rather to reduce the workload associated with manual segmentation and provide reproducible results that can be reviewed, interpreted and used as support within the usual workflow of the ICTS BioImagen Complutense centre.
 
-\subsection{General objective}
+\subsection*{General objective}
 
 To develop and evaluate a prototype based on computer vision and artificial intelligence techniques capable of automatically segmenting, in preclinical magnetic resonance images, the area corresponding to the brain and the regions affected by cerebral ischaemia, while also providing quantitative information associated with these segmentations and incorporating explainability mechanisms that facilitate the interpretation of the results obtained.
 
-\subsection{Specific objectives}
+\subsection*{Specific objectives}
 
 To achieve the general objective, the following specific objectives have been defined:
 
@@ -67,7 +67,7 @@ To achieve the general objective, the following specific objectives have been de
     \item[\textbf{O14.}] To assess possible future extension lines, offering a first development of software that makes it possible to adapt training to other organs and pathologies.
 \end{itemize}
 
-\section{Work plan}
+\section*{Work plan}
 
 The development of this Bachelor's Degree Final Project has been organised progressively, starting from an initial phase of understanding the biomedical problem through to the implementation and evaluation of the proposed system. Given that the project combines aspects of software engineering, medical image processing, machine learning and experimental validation, it was necessary to structure the work into clearly differentiated phases.
 
@@ -75,7 +75,7 @@ Furthermore, as this is a project developed in collaboration with the ICTS BioIm
 
 The following sections describe, first, the follow-up process carried out through meeting minutes and, subsequently, the main development phases followed until the final prototype was obtained.
 
-\subsection{Project follow-up and meetings with the supervisors}
+\subsection*{Project follow-up and meetings with the supervisors}
 
 Throughout the development of the project, a continuous follow-up process was maintained through periodic meetings with the supervisors, both in person and online. In order to record the evolution of the development and the decisions made, meeting minutes were prepared after each meeting.
 
@@ -89,7 +89,7 @@ As development progressed, decisions were made regarding the structure of the da
 
 The feedback provided during these meetings also influenced practical aspects of the prototype, such as the need to display the segmentations visually, calculate volumes in interpretable units, document the usage steps and facilitate the execution of the system through notebooks in \textit{Google Colab}. In this way, the follow-up of the project was not limited to academic supervision, but made it possible to progressively adapt the tool to the needs of the final user.
 
-\subsection{Development phases}
+\subsection*{Development phases}
 
 The development of the work has been organised into several phases. First, a phase was carried out to understand the biomedical problem and define the functionality of the tool. This phase included meetings with the project directors and visits to the ICTS BioImagen Complutense centre, where the MRI acquisition process, the generation of regions of interest and the way in which researchers currently obtain quantitative measurements from manual segmentations were studied.
 
@@ -103,7 +103,7 @@ In parallel with the development of the models, a phase for the study and implem
 
 Finally, the results obtained were evaluated through segmentation metrics, volumetric quantification and visual analysis of the generated predictions. This evaluation made it possible to assess both the accuracy of the masks obtained and the practical usefulness of the tool within the workflow proposed by ICTS BioImagen Complutense.
 
-\section{Structure of the report}
+\section*{Structure of the report}
 
 The report is organised as follows. Chapter 2 presents the state of the art, including the necessary biomedical concepts, computer vision applied to medical imaging, segmentation architectures, transfer learning and explainable artificial intelligence. Chapter 3 describes the methodology followed, from dataset construction and image preprocessing to the architecture of the models, volumetric quantification and the integration of explainability. Chapter 4 presents and discusses the results obtained for brain segmentation and segmentation of the ischaemic region. Finally, Chapter 5 presents the conclusions of the work and the main lines of future work.
 

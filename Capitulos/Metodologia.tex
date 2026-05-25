@@ -103,7 +103,7 @@ El procesamiento de las imágenes, desde la IRM en formato RAW (\texttt{.bruker}
 
 \end{tikzpicture}
 \selectlanguage{spanish}
-\caption{Pipeline de procesamiento desde datos RAW hasta el dataset final}
+\caption{Pipeline de procesamiento desde datos RAW hasta el dataset final. Fuente: elaboración propia.}
 \end{figure}
 
 \subsection{Conversión de datos RAW a formato NIfTI}
@@ -120,7 +120,7 @@ una herramienta de código abierto para la gestión y conversión de datos de re
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{Imagenes/Procesamiento/NiftyExample.png}
-    \caption{Ejemplo de slices de IRM}
+    \caption{Ejemplo de slices de IRM. Fuente: elaboración propia.}
     \label{fig:img_slice}
 \end{figure}
 
@@ -133,7 +133,7 @@ Como consecuencia, las segmentaciones presentan un cierto grado de subjetividad,
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{Imagenes/Procesamiento/SegmentationExaple.png}
-    \caption{Ejemplo de segmentación ROI}
+    \caption{Ejemplo de segmentación ROI. Fuente: elaboración propia.}
     \label{fig:img_roi}
 \end{figure}
 
@@ -148,7 +148,7 @@ Con el objetivo de mejorar la reproducibilidad del proceso, la lógica general d
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{Imagenes/Procesamiento/BinaryExample.png}
-    \caption{Ejemplo de máscara binaria}
+    \caption{Ejemplo de máscara binaria. Fuente: elaboración propia.}
     \label{fig:img_binary}
 \end{figure}
 
@@ -207,7 +207,7 @@ Por último, tanto las máscaras de entrenamiento como las slices de la IRM se o
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{Imagenes/Procesamiento/SuperpositionExample.png}
-    \caption{Visualización de superposición entre la slice de resonancia magnética y su máscara de segmentación correspondiente.}
+    \caption{Visualización de superposición entre la slice de resonancia magnética y su máscara de segmentación correspondiente. Fuente: elaboración propia.}
     \label{fig:img_mask}
 \end{figure}
 
@@ -262,7 +262,7 @@ Como se muestra en la Figura \ref{fig:arquitectura_unet}, ambos modelos comparte
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{Imagenes/Bitmap/arquitectura_unet_es.gv.png}
-    \caption{Esquema de la arquitectura U-Net 2D empleada en este trabajo.}
+    \caption{Esquema de la arquitectura U-Net 2D empleada en este trabajo. Fuente: elaboración propia.}
     \label{fig:arquitectura_unet}
 \end{figure}
 \subsection{Justificación de la arquitectura y uso de \textit{Transfer Learning}}
@@ -362,7 +362,7 @@ La Figura~\ref{fig:calculo_volumen_lesion} resume este procedimiento. Para cada 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{Imagenes/Bitmap/calculo_volumen.png}
-    \caption{Proceso de cálculo del volumen de la lesión a partir de la máscara segmentada.}
+    \caption{Proceso de cálculo del volumen de la lesión a partir de la máscara segmentada. Fuente: elaboración propia.}
     \label{fig:calculo_volumen_lesion}
 \end{figure}
 

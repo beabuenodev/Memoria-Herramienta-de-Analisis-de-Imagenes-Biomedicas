@@ -57,7 +57,7 @@ En la Figura~\ref{fig:dice_paciente_cerebro} se representan los valores medios d
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/dice_paciente_cerebro.png}
-    \caption{Evolución del coeficiente Dice por Caso en el estudio de segmentación del cerebro en modelo control y con ictus isquémico permanente y transitorio.}
+    \caption{Evolución del coeficiente Dice por Caso en el estudio de segmentación del cerebro en modelo control y con ictus isquémico permanente y transitorio. Fuente: elaboración propia.}
     \label{fig:dice_paciente_cerebro}
 \end{figure}
 
@@ -66,7 +66,7 @@ La Figura~\ref{fig:volumen_cerebro} compara el volumen cerebral estimado por el 
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/volumen_cerebro.png}
-    \caption{Comparación del volumen cerebral estimado por el modelo y el volumen obtenido a partir de la segmentación manual.}
+    \caption{Comparación del volumen cerebral estimado por el modelo y el volumen obtenido a partir de la segmentación manual. Fuente: elaboración propia.}
     \label{fig:volumen_cerebro}
 \end{figure}
 
@@ -80,7 +80,7 @@ Con el objetivo de complementar la evaluación cuantitativa, se ha realizado un 
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/cualitativo_cerebro.png}
-    \caption{Ejemplos cualitativos de segmentación del cerebro en distintos escenarios.}
+    \caption{Ejemplos cualitativos de segmentación del cerebro en distintos escenarios. Fuente: elaboración propia.}
     \label{fig:cualitativo_cerebro}
 \end{figure}
 
@@ -118,7 +118,7 @@ La Figura~\ref{fig:xai_cerebro_ejemplo_bueno} muestra un ejemplo representativo 
 \begin{figure}[h]
     \centering
     \includegraphics[width=\textwidth]{Imagenes/XAI_Cerebro/CASE_20_slice_014.png}
-    \caption{Ejemplo cualitativo de explicabilidad aplicado al modelo de segmentación cerebral.}
+    \caption{Ejemplo cualitativo de explicabilidad aplicado al modelo de segmentación cerebral. Fuente: elaboración propia.}
     \label{fig:xai_cerebro_ejemplo_bueno}
 \end{figure}
 
@@ -182,7 +182,7 @@ En la Figura \ref{fig:dice_paciente_isquemia} se representan los valores del coe
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/dice_paciente_isquemia.png}
-    \caption{Evolución del coeficiente Dice por Caso en el estudio de segmentación de lesión isquémica en modelo control y con ictus isquémico permanente y transitorio.}
+    \caption{Evolución del coeficiente Dice por Caso en el estudio de segmentación de lesión isquémica en modelo control y con ictus isquémico permanente y transitorio. Fuente: elaboración propia.}
     \label{fig:dice_paciente_isquemia}
 \end{figure}
 En el caso de control, donde no existe presencia de lesión, el modelo obtiene un valor de Dice igual a 1, lo que indica una coincidencia perfecta entre la predicción y la máscara de referencia al no detectar regiones patológicas. En los casos con presencia de isquemia, los valores de Dice se sitúan en torno a 0.8, lo que refleja un alto grado de solapamiento entre la segmentación automática y la manual, aunque con discrepancias en las zonas de transición y en la delimitación de los bordes.
@@ -216,7 +216,7 @@ Tal y como se observa en la Figura \ref{fig:volumen_isquemia}, las diferencias e
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/volumen_isquemia.png}
-    \caption{Comparación del volumen de lesión isquémica estimado por el modelo y el volumen obtenido a partir de la segmentación manual.}
+    \caption{Comparación del volumen de lesión isquémica estimado por el modelo y el volumen obtenido a partir de la segmentación manual. Fuente: elaboración propia.}
     \label{fig:volumen_isquemia}
 \end{figure}
 
@@ -261,7 +261,7 @@ Con el objetivo de complementar el análisis cuantitativo presentado anteriormen
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/cualitativo_isquemia.png}
-    \caption{Ejemplos cualitativos de segmentación de isquemia en distintos escenarios}
+    \caption{Ejemplos cualitativos de segmentación de isquemia en distintos escenarios. Fuente: elaboración propia.}
     \label{fig:cualitativo_isquemia}
 \end{figure}
 La Figura \ref{fig:cualitativo_isquemia} muestra ejemplos representativos de segmentación correspondientes a los tres casos estudiados. En cada uno de ellos se comparan la máscara manual (GT), y la predicción generada por el modelo.
@@ -301,7 +301,7 @@ La Figura~\ref{fig:xai_isquemia_ejemplo} muestra un ejemplo representativo de ex
 \begin{figure}[h]
     \centering
     \includegraphics[width=\textwidth]{Imagenes/XAI_isquemia/xai_ejemplo.png}
-    \caption{Ejemplo cualitativo de explicabilidad aplicado al modelo de segmentación de isquemia.}
+    \caption{Ejemplo cualitativo de explicabilidad aplicado al modelo de segmentación de isquemia. Fuente: elaboración propia.}
     \label{fig:xai_isquemia_ejemplo}
 \end{figure}
 
@@ -357,20 +357,20 @@ Las Figuras~\ref{fig:bland_altman}, \ref{fig:boxplots_metricas} y \ref{fig:dice_
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/bland_altman.png}
-    \caption{Gráfico de Bland-Altman para analizar la concordancia entre el volumen calculado manualmente y el volumen estimado por el modelo.}
+    \caption{Gráfico de Bland-Altman para analizar la concordancia entre el volumen calculado manualmente y el volumen estimado por el modelo. Fuente: elaboración propia.}
     \label{fig:bland_altman}
 \end{figure}
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/boxplots_metricas.png}
-    \caption{Distribución de las principales métricas de evaluación obtenidas en los casos analizados.}
+    \caption{Distribución de las principales métricas de evaluación obtenidas en los casos analizados. Fuente: elaboración propia.}
     \label{fig:boxplots_metricas}
 \end{figure}
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/dice_pacientes.png}
-    \caption{Comparación del coeficiente Dice medio obtenido para cada paciente evaluado.}
+    \caption{Comparación del coeficiente Dice medio obtenido para cada paciente evaluado. Fuente: elaboración propia.}
     \label{fig:dice_pacientes}
 \end{figure}

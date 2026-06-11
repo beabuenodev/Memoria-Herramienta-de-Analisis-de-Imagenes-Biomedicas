@@ -103,7 +103,7 @@ El procesamiento de las imágenes, desde la IRM en formato RAW (\texttt{.bruker}
 
 \end{tikzpicture}
 \selectlanguage{spanish}
-\caption{Pipeline de procesamiento desde datos RAW hasta el dataset final}
+\caption{Pipeline de procesamiento desde datos RAW hasta el dataset final. Fuente: elaboración propia.}
 \end{figure}
 
 \subsection{Conversión de datos RAW a formato NIfTI}
@@ -120,20 +120,20 @@ una herramienta de código abierto para la gestión y conversión de datos de re
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{Imagenes/Procesamiento/NiftyExample.png}
-    \caption{Ejemplo de slices de IRM}
+    \caption{Ejemplo de slices de IRM. Fuente: elaboración propia.}
     \label{fig:img_slice}
 \end{figure}
 
 \subsection{Segmentación manual mediante ROI}
 
-Una vex transformado el Dataset al formato NIfTI, se procede a la segmentación manual de las estructuras de interés mediante la definición de regiones de interés (ROI). Este proceso ha sido realizado utilizando las herramientas \textit{MRIFIleManager} junto con la libreria \textit{ImageJ}, siguiendo el manual de uso y bajo la supervisión de expertos del centro ICTS BioImagen Complutense.
+Una vez transformado el Dataset al formato NIfTI, se procede a la segmentación manual de las estructuras de interés mediante la definición de regiones de interés (ROI). Este proceso ha sido realizado utilizando las herramientas \textit{MRIFIleManager} junto con la libreria \textit{ImageJ}, siguiendo el manual de uso y bajo la supervisión de expertos del centro ICTS BioImagen Complutense.
 
 Las ROI se definen como contornos sobre cada \textit{slice}, delimitando tanto el cerebro completo como las regiones afectadas por la isquemia. Este proceso requiere una interpretación visual experta, especialmente en el caso de las lesiones isquémicas, donde los bordes no están claramente definidos y existen gradientes de intensidad.
 Como consecuencia, las segmentaciones presentan un cierto grado de subjetividad, lo cual constituye una limitación inherente al problema abordado.
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{Imagenes/Procesamiento/SegmentationExaple.png}
-    \caption{Ejemplo de segmentación ROI}
+    \caption{Ejemplo de segmentación ROI. Fuente: elaboración propia.}
     \label{fig:img_roi}
 \end{figure}
 
@@ -143,36 +143,96 @@ A partir de las anotaciones ROI, se generan máscaras binarias que representan l
 
 Este proceso ha sido implementado mediante un script específico desarrollado en Python, que permite transformar las regiones definidas por contornos en imágenes discretas binarias alineadas con las slices originales. En estas máscaras, cada píxel se etiqueta como fondo (valor 0) o región de interés (valor 255), garantizando la correspondencia espacial con la imagen de entrada.
 
-Adicionalmente, el script realiza las operaciones de adaptación necesarias para el entrenamiento del modelo, incluyendo el redimensionado de las imágenes y máscaras a una resolución uniforme($120 \times 120$ píxeles), así como la interpolación correspondiente. Este paso es crítico para asegurar la coherencia dimensional del dataset y su compatibilidad con la arquitectura de la red neuronal empleada.
+Con el objetivo de mejorar la reproducibilidad del proceso, la lógica general del script se resume en el Algoritmo~\ref{alg:generacion_mascaras}. El procedimiento parte de los ficheros ROI exportados desde ImageJ, almacenados en archivos comprimidos independientes para cada tipo de segmentación. Para cada ROI, se extraen las coordenadas del contorno y se reescalan al tamaño de entrada utilizado por el modelo, fijado en \(120 \times 120\) píxeles. A continuación, se genera una imagen vacía en escala de grises y se rasteriza el polígono correspondiente, asignando valor 255 a los píxeles incluidos dentro de la región de interés y valor 0 al fondo.
 
-El desarrollo de esta herramienta ha permitido automatizar el proceso de generación de \textit{ground truth}, asegurando la consistencia del dataset y reduciendo posibles errores derivados de la intervención manual. Asimismo, facilita la reutilización del pipeline por parte de usuarios con menor experiencia técnica, permitiendo la generación de nuevos conjuntos de entrenamiento y el reentrenamiento de los modelos de forma más accesible.
-
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{Imagenes/Procesamiento/BinaryExample.png}
-    \caption{Ejemplo de máscara binaria}
+    \caption{Ejemplo de máscara binaria. Fuente: elaboración propia.}
     \label{fig:img_binary}
 \end{figure}
 
+
+Una decisión relevante en este proceso es que el ajuste de escala se aplica sobre las coordenadas del contorno antes de generar la máscara, en lugar de redimensionar directamente una máscara binaria ya rasterizada. De este modo, se evita introducir valores intermedios en los bordes de la lesión, algo que podría ocurrir si se aplicasen interpolaciones continuas sobre una imagen binaria. Esta estrategia permite conservar la naturaleza discreta de la segmentación y mantener una correspondencia espacial coherente entre la imagen de entrada y su máscara asociada.
+
+\begin{algorithm}[h]
+\caption{Generación de máscaras binarias a partir de anotaciones ROI}
+\label{alg:generacion_mascaras}
+\begin{algorithmic}[1]
+\Require Carpeta del caso, archivos \texttt{cerebro.zip} e \texttt{isquemia.zip}, tamaño de salida \(W = H = 120\)
+\Ensure Máscaras binarias en formato PNG alineadas con las slices originales
+
+\For{cada archivo ZIP de anotaciones}
+    \State Crear carpeta de salida asociada al tipo de segmentación
+    \State Extraer temporalmente los ficheros \texttt{.roi}
+    \For{cada fichero ROI}
+        \State Leer el ROI y obtener las coordenadas del contorno
+        \State Reescalar cada punto del contorno al tamaño \(120 \times 120\):
+        \[
+            x' = x \cdot \frac{W}{W_{ROI}}, \qquad
+            y' = y \cdot \frac{H}{H_{ROI}}
+        \]
+        \State Crear una máscara vacía de tamaño \(120 \times 120\) con valor 0
+        \State Dibujar y rellenar el polígono reescalado con valor 255
+        \State Guardar la máscara resultante en formato PNG
+    \EndFor
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+Este paso es crítico para asegurar la coherencia dimensional del dataset y su compatibilidad con la arquitectura de la red neuronal empleada. Todas las imágenes y máscaras utilizadas durante el entrenamiento se normalizan a una resolución uniforme de \(120 \times 120\) píxeles, lo que permite trabajar con tensores de entrada homogéneos y simplifica el procesamiento posterior dentro del pipeline de entrenamiento.
+
+El desarrollo de esta herramienta ha permitido automatizar el proceso de generación de \textit{ground truth}, asegurando la consistencia del dataset y reduciendo posibles errores derivados de la intervención manual. Asimismo, facilita la reutilización del pipeline por parte de usuarios con menor experiencia técnica, permitiendo la generación de nuevos conjuntos de entrenamiento y el reentrenamiento de los modelos de forma más accesible.
 
 \subsection{Normalización y adaptación de las imágenes}
 
 Con el objetivo de garantizar la homogeneidad de los datos de entrada, las imágenes y sus máscaras son sometidas a un proceso de adaptación previo al entrenamiento.
 
-En primer lugar, todas las imágenes son redimensionadas a una resolución de $120 \times 120$ píxeles, correspondiente al tamaño de las imágenes disponibles tras su adquisición y exportación. Esta decisión permite adaptar los datos a la arquitectura de la red neuronal empleada y reducir el coste computacional.
+En primer lugar, todas las imágenes son redimensionadas a una resolución de \(120 \times 120\) píxeles, correspondiente al tamaño de entrada definido para la arquitectura de la red neuronal empleada. Esta decisión permite trabajar con tensores de tamaño uniforme y reduce el coste computacional del entrenamiento, aunque también implica una pérdida potencial de detalle espacial en estructuras pequeñas.
 
-Durante este proceso se aplica interpolación, lo que puede introducir suavizado en los bordes y pérdida de detalle en estructuras pequeñas.\citep{lehmann1999survey}
+Durante este proceso se aplica interpolación sobre las imágenes de resonancia, lo que puede introducir suavizado en los bordes y pérdida de detalle en regiones de pequeño tamaño \citep{lehmann1999survey}. En el caso de las máscaras binarias, se evita aplicar interpolación continua, empleando una estrategia de vecino más cercano para preservar la naturaleza discreta de las etiquetas y evitar la aparición de valores intermedios entre fondo y región de interés.
 
-Asimismo, las intensidades de las imágenes, originalmente almacenadas en formato entero (\texttt{int16}), se convierten a formato de coma flotante (\texttt{float32}) y se normalizan para estabilizar el proceso de entrenamiento.
+Asimismo, las intensidades de las imágenes, originalmente almacenadas en formato entero (\texttt{int16}), se convierten a formato de coma flotante (\texttt{float32}) y se normalizan al rango \([0,1]\). En este trabajo se ha aplicado una normalización \textit{Min-Max} por volumen, es decir, cada resonancia se normaliza de forma independiente utilizando sus propios valores mínimo y máximo de intensidad:
 
-Por último, tanto las máscaras de entrenamiento como las slices de la IRM se orientan y se muestra una superposición para asegurar que el entrenamiento va a realizarse de manera correcta, alineando la máscara de entrenamiento con el órgano.
+\[
+I_{\text{norm}} = \frac{I - I_{\min}}{I_{\max} - I_{\min} + \epsilon}
+\]
+
+donde \(I\) representa la intensidad original, \(I_{\min}\) e \(I_{\max}\) son los valores mínimo y máximo del volumen correspondiente, y \(\epsilon\) es un término pequeño añadido para evitar divisiones por cero. Esta estrategia permite reducir la variabilidad de escala entre adquisiciones y facilita la estabilidad numérica durante el entrenamiento.
+
+No obstante, esta normalización no elimina por completo las diferencias asociadas a distintas secuencias o protocolos de adquisición de IRM, ya que las intensidades en resonancia magnética no están estandarizadas de forma absoluta. Por ello, el entrenamiento y la evaluación del modelo deben interpretarse dentro del contexto de las imágenes disponibles y de su modalidad concreta. Técnicas alternativas, como la normalización global del conjunto de datos o la normalización Z-score por paciente, podrían explorarse en trabajos futuros si se amplía el dataset o se incorporan secuencias de IRM más heterogéneas.
+
+Por último, tanto las máscaras de entrenamiento como las slices de la IRM se orientan y se visualizan mediante una superposición para comprobar que existe una alineación correcta entre la imagen anatómica y la región segmentada. Esta comprobación visual permite detectar posibles errores de correspondencia espacial antes del entrenamiento del modelo.
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{Imagenes/Procesamiento/SuperpositionExample.png}
-    \caption{Visualización de superposición de máscaras}
+    \caption{Visualización de superposición entre la slice de resonancia magnética y su máscara de segmentación correspondiente. Fuente: elaboración propia.}
     \label{fig:img_mask}
 \end{figure}
+
+\subsection{Estrategia de particionado y control de fuga de datos}
+
+Dado que cada resonancia magnética está formada por una secuencia de cortes bidimensionales pertenecientes al mismo sujeto, la unidad de independencia considerada en este trabajo no es el corte individual, sino el caso completo. Esta decisión es especialmente relevante en imagen médica, ya que los cortes consecutivos de una misma adquisición presentan una alta dependencia espacial y anatómica. Por tanto, si distintos cortes de un mismo caso apareciesen simultáneamente en entrenamiento, validación y prueba, se produciría una fuga de información entre subconjuntos que podría sobreestimar el rendimiento real del modelo.
+
+Para evitar este problema, el particionado del conjunto de datos se realizó a nivel de caso. Es decir, todos los cortes y sus correspondientes máscaras asociados a una misma resonancia se asignaron exclusivamente a uno de los subconjuntos: entrenamiento, validación o prueba. El conjunto de entrenamiento se empleó para ajustar los pesos de los modelos y el conjunto de prueba se reservó para monitorizar el aprendizaje y seleccionar decisiones de configuración, como el umbral de binarización de la salida, y para la evaluación final.
+
+En particular, el conjunto de prueba estuvo formado por tres casos completos que no fueron utilizados durante el entrenamiento ni durante la validación. Esta separación permite evaluar el comportamiento del sistema sobre sujetos no vistos previamente, proporcionando una estimación más realista de su capacidad de generalización. No obstante, debido al reducido número de casos disponibles, los resultados deben interpretarse como una evaluación preliminar del prototipo y no como una validación estadística exhaustiva.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lccc}
+\hline
+Subconjunto & Nº de casos & Uso principal \\
+\hline
+Entrenamiento & 27 & Ajuste de pesos del modelo \\
+Prueba & 3 & Evaluación final sobre casos no vistos \\
+\hline
+\end{tabular}
+\caption{Particionado del conjunto de datos a nivel de caso. Todos los cortes de una misma resonancia se asignan a un único subconjunto para evitar fuga de información entre entrenamiento y prueba.}
+\label{tab:particionado_dataset}
+\end{table}
+
 \section{Arquitectura de los modelos y \textit{Transfer Learning}}
 
 Tras realizar un preprocesamiento de las imágenes para su uso en el entrenamiento, procedemos a definir la arquitectura a alto nivel de la aplicación de segmentación automática. En el caso de estudio que nos presenta ICTS BioImagen Complutense, se requiere la automatización de la medición de volúmenes de la lesión isquémica en el cerebro, además de la afectación en este órgano; por lo que es necesaria la segmentación automática por separado del órgano y de la lesión.
@@ -202,16 +262,24 @@ Como se muestra en la Figura \ref{fig:arquitectura_unet}, ambos modelos comparte
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{Imagenes/Bitmap/arquitectura_unet_es.gv.png}
-    \caption{Esquema de la arquitectura U-Net 2D empleada en este trabajo.}
+    \caption{Esquema de la arquitectura U-Net 2D empleada en este trabajo. Fuente: elaboración propia.}
     \label{fig:arquitectura_unet}
 \end{figure}
 \subsection{Justificación de la arquitectura y uso de \textit{Transfer Learning}}
 
 Aunque existen variantes más complejas de esta arquitectura, como U-Net++ \citep{zhou2018unetplusplus} o Attention U-Net \citep{oktay2018attentionunet}, se decide utilizar U-Net como estructura base del sistema. Esta elección se toma teniendo en cuenta que, aunque estas variantes introducen mejoras interesantes a nivel arquitectónico, también aumentan la complejidad del modelo y el número de elementos a ajustar durante el entrenamiento. En este caso, al trabajar con un conjunto de datos reducido y dentro del alcance de un TFG, resulta más razonable partir de una arquitectura ya consolidada en segmentación biomédica, suficientemente robusta y más sencilla de controlar experimentalmente \citep{ronneberger2015unet}. De este modo, en lugar de añadir complejidad desde la propia arquitectura, se opta por mantener una U-Net base y reforzarla mediante \textit{Transfer Learning}, buscando así un equilibrio entre capacidad de segmentación, coste computacional y facilidad de implementación.
 
-De esta manera se opta por aplicar \textit{Transfer Learning}: una técnica de \textit{Deep Learning} especialmente útil cuando no se dispone de un conjunto de entrenamiento lo suficientemente grande como para entrenar un modelo profundo desde cero. Para ello, se incorporó un encoder \texttt{ResNet50} preentrenado con pesos de \textit{RadImageNet}, con el objetivo de partir de una base de conocimiento visual ya aprendida en imagen médica, en lugar de comenzar con una inicialización aleatoria de los pesos. Esta decisión está respaldada por el trabajo de \citep{mei2022radimagenet}, donde se muestra que los modelos preentrenados en \textit{RadImageNet} pueden servir como un punto de partida eficaz para tareas posteriores de imagen biomédica. De este modo, la U-Net implementada en este trabajo no parte de un encoder entrenado desde cero, sino de un backbone previamente adaptado al dominio radiológico, lo que refuerza la justificación de esta elección.
+De esta manera se opta por aplicar \textit{Transfer Learning}: una técnica de \textit{Deep Learning} especialmente útil cuando no se dispone de un conjunto de entrenamiento lo suficientemente grande como para entrenar un modelo profundo desde cero. Para ello, se incorporó un encoder \texttt{ResNet50} preentrenado con pesos de \textit{RadImageNet}, con el objetivo de partir de una base de conocimiento visual ya aprendida en imagen médica, en lugar de comenzar con una inicialización aleatoria de los pesos.
 
-En conjunto, ambas decisiones responden a una misma necesidad: disponer de un modelo con suficiente capacidad de representación para segmentar estructuras biomédicas complejas, pero que al mismo tiempo pueda entrenarse de forma estable en un contexto de datos limitados, por lo que el uso de \textit{Transfer Learning} resulta una estrategia adecuada para alcanzar este objetivo.
+La elección de \texttt{ResNet50} responde a un compromiso entre capacidad de representación, coste computacional y estabilidad del entrenamiento. Frente a backbones más ligeros, como \textit{MobileNet}, \texttt{ResNet50} ofrece una mayor capacidad para extraer características jerárquicas complejas, algo relevante en tareas de segmentación biomédica donde las diferencias de intensidad y textura pueden ser sutiles. Por otro lado, se evitó recurrir a arquitecturas más profundas o más complejas, ya que el tamaño reducido del conjunto de datos y la resolución de entrada empleada, de \(120 \times 120\) píxeles, podían aumentar el riesgo de sobreajuste y el coste de entrenamiento sin garantizar una mejora proporcional en el rendimiento.
+
+Además, \texttt{ResNet50} cuenta con una arquitectura residual consolidada, que facilita el entrenamiento de redes profundas mediante conexiones de salto \citep{he2016deep}. En este trabajo, su uso resulta especialmente adecuado porque existen pesos preentrenados en \textit{RadImageNet}, un conjunto de datos radiológico que permite transferir representaciones visuales más cercanas al dominio biomédico que las aprendidas exclusivamente sobre imágenes naturales. Esta decisión está respaldada por el trabajo de \citep{mei2022radimagenet}, donde se muestra que los modelos preentrenados en \textit{RadImageNet} pueden servir como un punto de partida eficaz para tareas posteriores de imagen biomédica. De este modo, la U-Net implementada no parte de un encoder entrenado desde cero, sino de un backbone previamente adaptado al dominio radiológico, lo que refuerza la justificación de esta elección.
+
+En este contexto, se consideró el uso de técnicas de aumento de datos (\textit{data augmentation}) como estrategia para mejorar la capacidad de generalización de los modelos. Entre las transformaciones más relevantes para este tipo de imágenes se encuentran pequeñas rotaciones, desplazamientos espaciales, variaciones moderadas de contraste o intensidad y ligeras transformaciones geométricas que no alteren la coherencia anatómica de la imagen ni la correspondencia con las máscaras de segmentación.
+
+No obstante, en este trabajo se priorizó una estrategia basada en \textit{transfer learning}, manteniendo el aumento de datos como una línea de mejora futura. Esta decisión se tomó para evitar introducir transformaciones que pudieran modificar de forma no controlada la apariencia de estructuras anatómicas pequeñas o de bordes difusos, especialmente en el caso de la lesión isquémica. Por tanto, aunque el \textit{data augmentation} no forma parte de la configuración final, se considera una extensión natural del sistema para futuros entrenamientos con el objetivo de mejorar la robustez del modelo ante variaciones de orientación, intensidad y adquisición.
+
+En conjunto, estas decisiones responden a una misma necesidad: disponer de un modelo con suficiente capacidad de representación para segmentar estructuras biomédicas complejas, pero que al mismo tiempo pueda entrenarse de forma estable en un contexto de datos limitados, por lo que el uso de \textit{Transfer Learning} resulta una estrategia adecuada para alcanzar este objetivo.
 
 \subsection{Estrategia de entrenamiento y ajuste de la salida}
 
@@ -294,7 +362,7 @@ La Figura~\ref{fig:calculo_volumen_lesion} resume este procedimiento. Para cada 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{Imagenes/Bitmap/calculo_volumen.png}
-    \caption{Proceso de cálculo del volumen de la lesión a partir de la máscara segmentada.}
+    \caption{Proceso de cálculo del volumen de la lesión a partir de la máscara segmentada. Fuente: elaboración propia.}
     \label{fig:calculo_volumen_lesion}
 \end{figure}
 
@@ -363,6 +431,18 @@ Los notebooks de XAI para el cerebro y la lesión isquémica implementan el aná
 Además, se incluyen los dos modelos desarrollados, guardados en formato \texttt{.h5}, que pueden ser cargados directamente para realizar el proceso de inferencia sobre nuevos casos de estudio. Estos modelos corresponden a la arquitectura U-Net entrenada para segmentar el cerebro y la lesión isquémica, respectivamente.
 
 Por último, también se adjuntan, como parte de la reproducibilidad del proyecto, los archivos resultantes de la ejecución de los notebooks de cálculo de métricas y explicabilidad, con los datos resultantes en formato CSV y las imágenes generadas en formato PNG.
+
+
+\begin{figure}[h]
+    \centering
+
+    \includegraphics[width=0.64\textwidth]{Imagenes/Metodologia/outHerramienta.png}
+    \hfill
+    \includegraphics[width=0.3\textwidth]{Imagenes/Metodologia/Modelo3D.png}
+
+    \caption{Ejemplo de salida generada por la herramienta, mostrando la segmentación en plano 2D y la reconstrucción 3D a escala real del cerebro y la región isquémica. Fuente: elaboración propia.}
+    \label{fig:salida_herramienta}
+\end{figure}
 
 \subsection{Requisitos de ejecución}
 

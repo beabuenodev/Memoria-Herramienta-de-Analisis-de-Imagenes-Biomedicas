@@ -1,12 +1,12 @@
 \chapter*{Abstract}
 
-\section*{\tituloPortadaVal}
+\section*{\tituloPortadaEngVal}
 
-This Bachelor's thesis addresses the design and development of a computer-vision-based tool for the segmentation of magnetic resonance imaging (MRI) images, with the aim of obtaining volumetric measurements from anatomical and pathological regions within a preclinical research framework.
+This Bachelor's thesis addresses the design and development of a computer-vision-based tool for the segmentation of magnetic resonance imaging (MRI) images, with the objective of obtaining volumetric measurements from anatomical and pathological regions within a preclinical research framework.
 
-In collaboration with ICTS BioImagen Complutense, a functional prototype has been developed, focused on one of the use cases proposed by the centre: the segmentation of ischaemic lesions in mouse brain. The system uses two segmentation models, applied sequentially to each MRI slice: first, to delineate the whole brain and, subsequently, to identify the damaged region. From the segmentation masks obtained, the volumes of the whole brain and the affected area are calculated.
+A functional prototype has been developed, in collaboration with ICTS BioImagen Complutense, focused on one of the use cases proposed by the centre: the segmentation of ischaemic lesions in mouse brain. The system uses two segmentation models, applied sequentially to each MRI slice: first, to delineate the whole brain and, subsequently, to identify the damaged region. The volumes of the whole brain and the affected area are calculated from the obtained segmentation masks.
 
-Due to the scarcity of annotated data, which is common in the biomedical field, the methodology has been based on the use of \textit{transfer learning} on a U-Net architecture. Likewise, to facilitate the qualitative analysis of the predictions and increase the transparency of the prototype, Explainable Artificial Intelligence (XAI) techniques, such as Grad-CAM and \textit{Integrated Gradients}, have been incorporated.
+Due to the scarcity of annotated data, which is a common challenge in biomedical imaging, the proposed methodology relies on \textit{transfer learning} within a U-Net architecture. In addition, Explainable Artificial Intelligence (XAI) techniques, such as Grad-CAM and \textit{Integrated Gradients}, have been incorporated to facilitate the qualitative analysis of the predictions and increase the transparency of the prototype.
 
 \section*{Keywords}
 

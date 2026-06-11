@@ -57,7 +57,7 @@ En la Figura~\ref{fig:dice_paciente_cerebro} se representan los valores medios d
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/dice_paciente_cerebro.png}
-    \caption{Evolución del coeficiente Dice por Caso en el estudio de segmentación del cerebro en modelo control y con ictus isquémico permanente y transitorio.}
+    \caption{Evolución del coeficiente Dice por Caso en el estudio de segmentación del cerebro en modelo control y con ictus isquémico permanente y transitorio. Fuente: elaboración propia.}
     \label{fig:dice_paciente_cerebro}
 \end{figure}
 
@@ -66,7 +66,7 @@ La Figura~\ref{fig:volumen_cerebro} compara el volumen cerebral estimado por el 
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/volumen_cerebro.png}
-    \caption{Comparación del volumen cerebral estimado por el modelo y el volumen obtenido a partir de la segmentación manual.}
+    \caption{Comparación del volumen cerebral estimado por el modelo y el volumen obtenido a partir de la segmentación manual. Fuente: elaboración propia.}
     \label{fig:volumen_cerebro}
 \end{figure}
 
@@ -80,7 +80,7 @@ Con el objetivo de complementar la evaluación cuantitativa, se ha realizado un 
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/cualitativo_cerebro.png}
-    \caption{Ejemplos cualitativos de segmentación del cerebro en distintos escenarios.}
+    \caption{Ejemplos cualitativos de segmentación del cerebro en distintos escenarios. Fuente: elaboración propia.}
     \label{fig:cualitativo_cerebro}
 \end{figure}
 
@@ -113,16 +113,20 @@ Cortes extremos & 18 & 0,189 & 0,174 \\
 
 Como se observa en la Tabla~\ref{tab:rendimiento_xai_cerebro}, el rendimiento global se ve condicionado por los cortes extremos. Al considerar únicamente los cortes interiores, más representativos de la tarea principal de segmentación cerebral, el modelo alcanza un Dice medio de 0,969 y un IoU medio de 0,940. Esta diferencia indica que la disminución del rendimiento en el conjunto completo se debe principalmente a los cortes de borde, donde la región anatómica objetivo es pequeña o ambigua.
 
-La Figura~\ref{fig:xai_cerebro_ejemplo_bueno} muestra un ejemplo representativo de un corte interior con buena segmentación cerebral. En ella se presenta la imagen original, la máscara de referencia, la máscara predicha, los mapas de relevancia generados mediante Grad-CAM, Grad-CAM++ e Integrated Gradients, y la curva de eliminación normalizada asociada.
+La Figura~\ref{fig:xai_cerebro_ejemplo_bueno} muestra un ejemplo representativo de un corte interior con buena segmentación cerebral. En ella se presenta la imagen original, la máscara de referencia y los mapas de relevancia generados mediante Grad-CAM, Grad-CAM++ e Integrated Gradients.
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=\textwidth]{Imagenes/XAI_Cerebro/CASE_20_slice_014.png}
-    \caption{Ejemplo cualitativo de explicabilidad aplicado al modelo de segmentación cerebral.}
+    \caption{Ejemplo cualitativo de explicabilidad aplicado al modelo de segmentación cerebral. Fuente: elaboración propia.}
     \label{fig:xai_cerebro_ejemplo_bueno}
 \end{figure}
 
 En los cortes interiores, la máscara predicha presenta un alto grado de solapamiento con la segmentación manual. Los mapas generados por Grad-CAM y Grad-CAM++ muestran activaciones amplias y continuas sobre la región cerebral, lo que facilita su interpretación visual en una tarea de segmentación anatómica. Integrated Gradients, en cambio, produce mapas más localizados y dispersos, resaltando zonas concretas de la imagen, como bordes o regiones de mayor variación de intensidad.
+
+Desde un punto de vista anatómico, este comportamiento resulta especialmente relevante en la segmentación cerebral. A diferencia de la isquemia, que constituye una región patológica de menor tamaño y límites menos definidos, el cerebro presenta una delimitación anatómica más amplia y relativamente continua frente a los tejidos circundantes. Por ello, las atribuciones generadas por Integrated Gradients pueden interpretarse como una señal de que el modelo está utilizando información localizada en el contorno cerebral y en las transiciones de intensidad entre el tejido cerebral y el fondo o estructuras adyacentes.
+
+Esta observación es coherente con la propia naturaleza de la tarea: para segmentar correctamente el cerebro, el modelo no solo debe identificar la presencia global de tejido cerebral, sino también localizar sus límites espaciales. En este sentido, mientras que Grad-CAM y Grad-CAM++ ofrecen una visión más global de la región anatómica segmentada, Integrated Gradients aporta una explicación más fina sobre qué zonas concretas de la imagen influyen en la delimitación de la máscara. No obstante, esta interpretación debe entenderse como un análisis de coherencia espacial del modelo, y no como una validación anatómica independiente del límite cerebral.
 
 Esta diferencia entre métodos también se refleja en las métricas de fidelidad. La Tabla~\ref{tab:xai_cerebro_metricas} resume los valores medios obtenidos para Grad-CAM, Grad-CAM++ e Integrated Gradients. La sensibilidad por oclusión se empleó como análisis complementario, pero no se incluye en esta tabla al no generar las mismas métricas agregadas que los métodos basados en mapas de relevancia.
 
@@ -151,8 +155,7 @@ El comportamiento observado en las curvas de perturbación refuerza esta interpr
 
 En los cortes extremos, la interpretación de las explicaciones fue menos estable. Esto se debe a que la máscara manual puede contener una región cerebral muy reducida o incluso vacía, mientras que la imagen todavía puede mostrar estructuras anatómicas residuales. En consecuencia, estos cortes deben entenderse como casos límite del volumen, útiles para estudiar el comportamiento del modelo en zonas de transición, pero no como ejemplos representativos de la segmentación cerebral principal.
 
-En conjunto, los resultados muestran que las explicaciones generadas son coherentes con el comportamiento cuantitativo del modelo en los cortes interiores. Grad-CAM y Grad-CAM++ ofrecen visualizaciones más suaves y anatómicamente interpretables, mientras que Integrated Gradients identifica regiones más concretas y con mayor impacto en las métricas de perturbación. Por tanto, la combinación de estos métodos permite analizar la segmentación cerebral desde perspectivas complementarias, sin sustituir la evaluación basada en métricas de segmentación.
-
+En conjunto, los resultados muestran que las explicaciones generadas son coherentes con el comportamiento cuantitativo del modelo en los cortes interiores. Grad-CAM y Grad-CAM++ ofrecen visualizaciones más suaves y anatómicamente interpretables, al activar de forma amplia la región cerebral segmentada. Integrated Gradients, por su parte, identifica regiones más concretas y con mayor impacto en las métricas de perturbación, especialmente en zonas compatibles con bordes anatómicos y transiciones de intensidad relevantes para delimitar el cerebro. Por tanto, la combinación de estos métodos permite analizar la segmentación cerebral desde perspectivas complementarias: una visión global de la región segmentada y una atribución más localizada de los píxeles que influyen en la predicción.
 \section{Resultados en segmentación de isquemia}
 A continuación, se presentan los resultados obtenidos en la tarea de segmentación de las regiones de lesión por isquemia cerebral, la cual, por razones que se describirán en la siguiente sección, supone un problema más complejo que la segmentación del órgano sano. Para ello, al igual que en el modelo de cerebro, se han evaluado varias configuraciones de arquitecturas \textit{U-Net}, utilizando las métricas descritas anteriormente.
 
@@ -179,7 +182,7 @@ En la Figura \ref{fig:dice_paciente_isquemia} se representan los valores del coe
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/dice_paciente_isquemia.png}
-    \caption{Evolución del coeficiente Dice por Caso en el estudio de segmentación de lesión isquémica en modelo control y con ictus isquémico permanente y transitorio.}
+    \caption{Evolución del coeficiente Dice por Caso en el estudio de segmentación de lesión isquémica en modelo control y con ictus isquémico permanente y transitorio. Fuente: elaboración propia.}
     \label{fig:dice_paciente_isquemia}
 \end{figure}
 En el caso de control, donde no existe presencia de lesión, el modelo obtiene un valor de Dice igual a 1, lo que indica una coincidencia perfecta entre la predicción y la máscara de referencia al no detectar regiones patológicas. En los casos con presencia de isquemia, los valores de Dice se sitúan en torno a 0.8, lo que refleja un alto grado de solapamiento entre la segmentación automática y la manual, aunque con discrepancias en las zonas de transición y en la delimitación de los bordes.
@@ -213,7 +216,7 @@ Tal y como se observa en la Figura \ref{fig:volumen_isquemia}, las diferencias e
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/volumen_isquemia.png}
-    \caption{Comparación del volumen de lesión isquémica estimado por el modelo y el volumen obtenido a partir de la segmentación manual.}
+    \caption{Comparación del volumen de lesión isquémica estimado por el modelo y el volumen obtenido a partir de la segmentación manual. Fuente: elaboración propia.}
     \label{fig:volumen_isquemia}
 \end{figure}
 
@@ -258,7 +261,7 @@ Con el objetivo de complementar el análisis cuantitativo presentado anteriormen
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/cualitativo_isquemia.png}
-    \caption{Ejemplos cualitativos de segmentación de isquemia en distintos escenarios}
+    \caption{Ejemplos cualitativos de segmentación de isquemia en distintos escenarios. Fuente: elaboración propia.}
     \label{fig:cualitativo_isquemia}
 \end{figure}
 La Figura \ref{fig:cualitativo_isquemia} muestra ejemplos representativos de segmentación correspondientes a los tres casos estudiados. En cada uno de ellos se comparan la máscara manual (GT), y la predicción generada por el modelo.
@@ -298,7 +301,7 @@ La Figura~\ref{fig:xai_isquemia_ejemplo} muestra un ejemplo representativo de ex
 \begin{figure}[h]
     \centering
     \includegraphics[width=\textwidth]{Imagenes/XAI_isquemia/xai_ejemplo.png}
-    \caption{Ejemplo cualitativo de explicabilidad aplicado al modelo de segmentación de isquemia.}
+    \caption{Ejemplo cualitativo de explicabilidad aplicado al modelo de segmentación de isquemia. Fuente: elaboración propia.}
     \label{fig:xai_isquemia_ejemplo}
 \end{figure}
 
@@ -333,7 +336,13 @@ El \textit{AOPC} normalizado se sitúa en valores cercanos a 1 para los tres mé
 
 El análisis también permite observar el comportamiento del modelo en casos erróneos. En los falsos positivos, las explicaciones muestran activaciones localizadas en las regiones que han originado la predicción incorrecta. Esto evidencia que la explicabilidad no garantiza que la segmentación sea correcta, sino que permite identificar qué información ha utilizado el modelo para producirla. Por tanto, estos casos resultan útiles para estudiar patrones de error y posibles regiones ambiguas de la imagen.
 
-En conjunto, los resultados de explicabilidad muestran que, en los cortes con lesión correctamente detectada, el modelo de isquemia basa sus predicciones en regiones espacialmente coherentes con las máscaras generadas. Grad-CAM y Grad-CAM++ ofrecen explicaciones más compactas y fáciles de interpretar visualmente, mientras que Integrated Gradients presenta una atribución más detallada y sensible a regiones concretas. La combinación de análisis visual y métricas de perturbación aporta una capa adicional de interpretación al modelo, sin sustituir la evaluación cuantitativa de segmentación ni constituir una validación clínica independiente.
+Desde un punto de vista biomédico, estas regiones de alta relevancia deben interpretarse con cautela. En la isquemia cerebral, suele distinguirse entre el núcleo de la lesión, asociado a tejido con daño más establecido, y la penumbra isquémica, entendida como una región periférica funcionalmente alterada pero potencialmente recuperable. Sin embargo, en este trabajo no se dispone de una anotación independiente que diferencie explícitamente entre núcleo y penumbra, ni de una validación experta específica de dichas subregiones. Por tanto, los mapas de Integrated Gradients no permiten afirmar de forma concluyente que el modelo esté separando ambos componentes fisiopatológicos. \citep{astrup1981penumbra}
+
+Aun así, el patrón observado resulta informativo. Mientras que Grad-CAM y Grad-CAM++ tienden a generar activaciones más compactas sobre la región segmentada como lesión, Integrated Gradients produce atribuciones más finas y fragmentadas, incluyendo zonas internas de la lesión y áreas de transición en sus bordes. Esta distribución puede ser coherente con la dificultad de delimitar la isquemia en resonancia magnética, donde los límites entre tejido sano y afectado no siempre son nítidos. En consecuencia, las explicaciones sugieren que el modelo no basa su predicción únicamente en una región puntual, sino también en variaciones locales de intensidad próximas a la zona lesionada. No obstante, esta interpretación debe entenderse como un análisis de plausibilidad espacial del modelo, y no como una identificación clínica de núcleo isquémico o penumbra.
+
+En conjunto, la explicabilidad aporta una lectura complementaria de la segmentación de isquemia al mostrar que las regiones más influyentes para el modelo se sitúan en zonas espacialmente compatibles con la lesión y sus bordes. Sin embargo, dado que no se dispone de etiquetas diferenciadas de núcleo isquémico y penumbra, estos mapas no deben interpretarse como una validación fisiopatológica independiente, sino como una herramienta de apoyo para analizar la coherencia espacial de la predicción.
+
+
 
 \section{Conclusiones del capítulo}
 
@@ -348,20 +357,20 @@ Las Figuras~\ref{fig:bland_altman}, \ref{fig:boxplots_metricas} y \ref{fig:dice_
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/bland_altman.png}
-    \caption{Gráfico de Bland-Altman para analizar la concordancia entre el volumen calculado manualmente y el volumen estimado por el modelo.}
+    \caption{Gráfico de Bland-Altman para analizar la concordancia entre el volumen calculado manualmente y el volumen estimado por el modelo. Fuente: elaboración propia.}
     \label{fig:bland_altman}
 \end{figure}
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/boxplots_metricas.png}
-    \caption{Distribución de las principales métricas de evaluación obtenidas en los casos analizados.}
+    \caption{Distribución de las principales métricas de evaluación obtenidas en los casos analizados. Fuente: elaboración propia.}
     \label{fig:boxplots_metricas}
 \end{figure}
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\textwidth]{Imagenes/Plots/dice_pacientes.png}
-    \caption{Comparación del coeficiente Dice medio obtenido para cada paciente evaluado.}
+    \caption{Comparación del coeficiente Dice medio obtenido para cada paciente evaluado. Fuente: elaboración propia.}
     \label{fig:dice_pacientes}
 \end{figure}
